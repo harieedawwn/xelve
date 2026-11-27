@@ -64,7 +64,7 @@ Done when: [ ] audition page deployed · [ ] all game events mapped to sounds ·
 Model: Sonnet 5.5 · medium
 Deploy: yes · Screenshots: 0
 
-## P5 · Quái chương 1 [TODO]
+## P5 · Quái chương 1 [DONE]
 Read: docs/spec/combat.md#5 #4
 Do: enemy registry, shared procedural locomotion (shuffle/limp, sprint, lunge), 5 types with telegraphs, weakpoints, deaths, nhieu static shader, vo splitting.
 Done when: [ ] each type in Phòng tập debug spawn · [ ] every attack has pose + sound + flash telegraph

@@ -16,6 +16,7 @@ import { UI } from './ui/ui'
 import { startSlice } from './scenes/slice'
 import { startFxTest } from './scenes/fxtest'
 import { startCamTest } from './scenes/camtest'
+import { startEnemyTest } from './scenes/enemytest'
 
 async function boot() {
   await loadSave()
@@ -25,6 +26,7 @@ async function boot() {
   if (location.search.includes('cam')) { renderer.resize('tb'); startCamTest(renderer); return }
   const ui = new UI()
   const audio = new Audio()
+  if (location.search.includes('enemies')) { ui.hideTitle(); startEnemyTest(canvas, renderer, audio); return }
   if (!settings().tier) {
     // 2 s benchmark: a throw-away heavy scene behind the logo
     const sc = new THREE.Scene(), cam = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 50)

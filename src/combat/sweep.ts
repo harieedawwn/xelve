@@ -6,10 +6,11 @@ import type { Weapon } from './weapon'
 import type { Bus } from './bus'
 import type { FX } from '../render/fx'
 
+export interface HitMeta { charge: number; blunt: boolean }
 export interface Target {
-  alive: boolean; hitCooldown: number; blood: number
+  alive: boolean; hittable?: boolean; blocked?: boolean; hitCooldown: number; blood: number
   hitParts(): { a: THREE.Vector3; b: THREE.Vector3; r: number; head: THREE.Vector3; hr: number }
-  takeHit(dmg: number, at: THREE.Vector3, dir: THREE.Vector3, fx: FX, weak: boolean): boolean
+  takeHit(dmg: number, at: THREE.Vector3, dir: THREE.Vector3, fx: FX, weak: boolean, meta?: HitMeta): boolean
 }
 export const SLASH_V = 2.2 // m/s: below this it is not a slash
 const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3()
@@ -18,7 +19,7 @@ export function sweep(weapon: Weapon, targets: Target[], fx: FX, bus: Bus) {
   if (!weapon.touching || weapon.tipSpeed < SLASH_V) return
   const v = weapon.tipSpeed, pr = weapon.profile
   for (const e of targets) {
-    if (!e.alive || e.hitCooldown > 0) continue
+    if (!e.alive || e.hitCooldown > 0 || e.hittable === false) continue
     const P = e.hitParts()
     let hit = false, head = false
     for (let k = 0; k < 4 && !hit; k++) for (let t = 0; t <= 1 && !hit; t += 0.5) {
@@ -34,7 +35,8 @@ export function sweep(weapon: Weapon, targets: Target[], fx: FX, bus: Bus) {
     if (dir.lengthSq() < 1e-8) dir.set(0, 0, -1); dir.normalize()
     const dmg = damage({ mContact: pr.contactMass, v, shape: pr.shape, charge: pr.charged ? weapon.charge : undefined, weak: head })
     const at = C.clone(), d = dir.clone()
-    const killed = e.takeHit(dmg, at, d, fx, head)
+    const killed = e.takeHit(dmg, at, d, fx, head, { charge: weapon.charge, blunt: pr.shape === 'cun' })
+    if (e.blocked) { bus.emit('hit', { dmg: 0, head: false, killed: false, blocked: true, at, dir: d, speed: v, lastOfWave: false, blood: e.blood }); continue }
     weapon.spend()
     bus.emit('hit', { dmg, head, killed, at, dir: d, speed: v, lastOfWave: false, blood: e.blood })
   }

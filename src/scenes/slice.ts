@@ -95,6 +95,7 @@ const motes = new Motes(scene, weapon.pivot, () => bus.emit('mote', { n: 1 }))
 bus.on('mote', () => weapon.spring.v.y += 0.25)
 bus.on('hurt', (e) => { rig.hitTaken(e.side); audio.playerHurt() })
 bus.on('hit', (e) => {
+  if (e.blocked) { audio.play('hit.metal'); rig.addTrauma(0.1); time.freeze(0.04); return }
   audio.hit(e.dmg / 10, e.head); rig.addTrauma(e.killed ? 0.35 : 0.18)
   rig.slashKick(weapon.slashDir.x, weapon.slashDir.y, e.killed ? 1 : 0.7)
   time.freeze(e.killed || e.head ? 0.09 : 0.07)

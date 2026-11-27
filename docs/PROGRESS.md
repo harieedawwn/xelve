@@ -74,3 +74,14 @@ Next: P4
 - Gotchas: needs `npm ci` first; global `Audio` is shadowed by our class only in files that import engine.
 
 Next: P5
+
+## P5 · Quái chương 1 — DONE
+- src/enemies/base.ts: shared `Enemy` (procedural rig, shuffle/limp + sprint gait, wind-up → lunge → recover, telegraph = pose + `<sound>.telegraph` + crack-colour flash of the arms in the last 150 ms, debris death). Types = `EnemyDef` + small hooks (`filter`, `tick`, `onDie`). `Bong` is now a thin subclass (slice unchanged in behaviour).
+- bong, chay (sprint on all fours, crouch, leap with arc; grounded hits ×0.3, only airborne hits stagger), nhieu (static shader, solid 2.2 s / out 1 s / gone / in 1.4 s, click on solid, never phases mid-attack, chest core ×1.5), khien (road sign; guard up only while walking; blocked hits = sparks + `hit.metal`; breaks on Lực ≥ .9, cùn weapon or hit on sign hand; guard open during its own attack), vo (40 → 2×12 → 4×4 each, children inherit sound/spawn hooks). `registry.ts` = 1 line per type.
+- sweep.ts: `HitMeta {charge, blunt}` passed to takeHit, `hittable`/`blocked` on Target; HitEvent.blocked (slice plays metal hit, no damage/motes).
+- Phòng tập `?enemies` (scenes/enemytest.ts): spawn buttons per type, ×5 bong, ×6 vo, clear; stats line. Dev labels only.
+- Checked: tsc, 34 vitest (9 new: registry, vo split chain, khien block/break/open guard, chay glance/air, chay leap, nhieu phasing, bong strike), build OK; headless 640x360 `?enemies`: all five spawn, chay windup→lunge→recover seen, nhieu phases, no console errors; 1 screenshot.
+- Left: real-phone feel; all types share Bóng sound recipes (own recipes later); ASCII dissolve on death (Trung bình/Cao) not wired yet (ascii.ts ready); nhieu blood/deaths use the shared debris; sound for khien block uses `hit.metal`; slice still spawns only Bóng.
+- Gotchas: `Enemy.update` must run before `sweep`; `hittable` is a getter (nhieu). Vo children need `onSpawn` wired by the owner to join the enemy list.
+
+Next: P6
