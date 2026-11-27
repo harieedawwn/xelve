@@ -19,7 +19,7 @@ Done when:
 Model: Sonnet 5.5 · medium — drafts + numbers already written; raise to Opus medium only if the feel is wrong after the user tests
 Deploy: yes · Screenshots: ≤4
 
-## P0b · Nền móng [TODO]
+## P0b · Nền móng [PARTIAL]
 Read: CLAUDE.md, docs/spec/tech.md (all), prototype/ (skim structure)
 Do:
 - Move the approved prototype code into the src/ layout from tech.md (keep behaviour identical; prototype/ stays as reference, excluded from build). Apply the user's feedback on the slice from docs/INBOX.md first.

@@ -1,0 +1,7 @@
+{
+  "appId": "vn.xelve.game",
+  "appName": "XELVE",
+  "webDir": "dist",
+  "backgroundColor": "#16161A",
+  "android": { "allowMixedContent": false }
+}

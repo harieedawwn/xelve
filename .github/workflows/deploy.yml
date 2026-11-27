@@ -3,11 +3,11 @@ on:
   push:
     branches: [main]
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: true
 jobs:
   web:
@@ -21,8 +21,45 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npm test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  apk:
+    if: contains(github.event.head_commit.message, '[deploy]') && contains(github.event.head_commit.message, '[apk]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Build APK (signed release if keystore secrets exist, else debug-signed)
+        working-directory: android
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASS }}
+        run: |
+          if [ -n "$KS" ]; then
+            echo "$KS" | base64 -d > "$RUNNER_TEMP/xelve.keystore"
+            export KEYSTORE_PATH="$RUNNER_TEMP/xelve.keystore"
+            ./gradlew --no-daemon assembleRelease
+            cp app/build/outputs/apk/release/app-release.apk ../xelve.apk
+          else
+            echo "::warning::Chưa có keystore secrets: build APK ký debug (cài được, nhưng không cập nhật đè bản ký sau)."
+            ./gradlew --no-daemon assembleDebug
+            cp app/build/outputs/apk/debug/app-debug.apk ../xelve.apk
+          fi
+      - name: Publish release `latest`
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          gh release view latest >/dev/null 2>&1 || gh release create latest --title "XELVE (mới nhất)" --notes "Bản APK mới nhất" --latest=false
+          gh release upload latest xelve.apk --clobber
