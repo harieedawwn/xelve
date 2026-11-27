@@ -214,3 +214,15 @@ Next: none (Chương 1 complete)
 - User playtest feedback turned into P15–P21 (PHASES.md "Round 2"). story.md rewritten (v2: mystery, family drama removed). DESIGN.md UI section rewritten (v2: game UI concept "Vết chém trên giấy kỹ thuật"); one-line tutorial prompts now allowed.
 
 Next: P15
+
+## P15 · Nhịp chơi & camera chiến đấu — DONE
+- Pace: enemy speeds ×1.7 (bong 1.0, khien 0.8, nhieu 1.15, vo 0.96/1.44/2.08; chay unchanged); walk speed 2.6 m/s in L1–L7; emerge walk-in ≥ 1.8 m/s. Numbers in src/levels/entry.ts (`ENTRY`, `PACE`).
+- Flow (chapter.ts): a wave starts spawning `PACE.lead` 3 m before the stop (walks in while the player slows), spawns 0.35 s apart; with ≤ 1 left and more encounters ahead the walk resumes at 0.6 m/s (straggler keeps fighting, next wave overlaps); clear beat 0.8 s (+0.4 s slow-mo); pickups play while walking at 0.7 m/s; nothing story-side starts while enemies are alive.
+- Entries: `Spawn.entry: 'door'|'left'|'right'|'drop'|'phase'` (+ `door` index). 'far' is gone; far/behind doors in L1–L7 swapped for near doors or side entries; nhieu uses 'phase'. Side entries start 2.6 m out, 0.3 m behind the eye; `Enemy` x-clamp waits until emerge brings it inside. Vô tận uses the same entries.
+- Look: src/camera/threat.ts (pure, 6 tests): closeness² + attack ×3 + low-and-near ×2 + off-screen ×0.25 (never for an attacker within 1.5 m), hysteresis ×1.25; switching to a closer threat → look half-life 90 ms for 0.45 s (`rig.snapLook`); pitch clamp −40°.
+- View: EYE 1.62→1.72 (all scenes), `rig.fight` springs FOV 78→84 and pitch −6°; weapon rest (0.21, −0.12, −0.42), forearm reduced to a short wrist stub.
+- Checked: tsc, 146 vitest (new: spawn frustum test over 3 aspects × yaw × pitch, threat tests, fight FOV test), build. `node scripts/pace.mjs 1`: L1 83 s → 22 s (26%), longest stand with no enemy near 0.9 s (clear beat); L2 25 s, L3 26 s, L4 42 s, L6 42 s, L7 40 s, all to the end, no page errors (bot kills within 1.5 m; khien guard/nhieu phase make it slower). `node scripts/feet.mjs`: chay/bong lunging at the feet with 2 Bóng further away → on screen in every windup/lunge frame (worst |ndc| 0.94). 3 screenshots.
+- Left: real-phone feel (speeds, 2.6 m/s walk may feel like a jog with bob amplitude); straggler creep backs the enemy slightly (it keeps its 1.05 m gap); drop entry is supported but unused in data; boss scenes keep their own look logic (only EYE changed).
+- Gotchas: headless swiftshader fps drops with nhieu/many enemies → wall-clock times in pace.mjs are pessimistic. `__xelve.spawn/kill/cam` are test helpers. Encounter index advances at the stop; `waveIdx` = last spawned wave (death respawns it).
+
+Next: P16

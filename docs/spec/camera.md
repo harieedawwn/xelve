@@ -36,6 +36,6 @@ final = Rail(body position, s) ∘ Shot(look target / roll / fov, authored) ∘ 
 - `cinematicCut(shots[])`: used only for chapter intros/outros (cuts allowed).
 
 ## 4. Rules
-- FOV 78 default (landscape phones). Never change FOV by more than 14° except `leap`.
+- FOV 78 default (landscape phones); fights spring to 84 with the head pitched −6° (P15, `rig.fight`). Fight look = threat score (src/camera/threat.ts), never more than 40° down. Never change FOV by more than 14° except `leap`.
 - Never more than one authored move at once; layers keep running underneath.
 - Everything runs on scaled game time except UI and shake decay (real time) so hitstop freezes motion but shake still settles.

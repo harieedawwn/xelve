@@ -14,7 +14,7 @@ export interface EnemyDef {
   lungeMove: boolean; arc: number; lean: number; hipY: number; capLo: number; capHi: number
 }
 export const BASE_DEF: EnemyDef = {
-  id: 'bong', hp: 30, blood: PAL.bloodTim, scale: 1, gait: 'shuffle', speed: 0.6, reach: 0.12,
+  id: 'bong', hp: 30, blood: PAL.bloodTim, scale: 1, gait: 'shuffle', speed: 1.0, reach: 0.12,
   windup: 0.7, lungeT: 0.3, strikeT: 0.13, recover: 0.9, lungeMove: false, arc: 0, lean: 0.28, hipY: 0.92, capLo: 0.9, capHi: 1.5,
 }
 export type EState = 'emerge' | 'approach' | 'windup' | 'lunge' | 'recover' | 'stagger' | 'dead'
@@ -161,7 +161,7 @@ export class Enemy {
     const dist = to.length()
     let speed = 0, armRaise = 0, push = 0, crouch = 0
     switch (this.state) {
-      case 'emerge': speed = Math.max(0.9, d.speed * 0.6); if (this.st > 0.9) this.setState('approach'); break
+      case 'emerge': speed = Math.max(1.8, d.speed); if (this.st > 0.5 && Math.abs(p.x) <= 1.2) this.setState('approach'); break
       case 'approach':
         speed = sprint ? d.speed : d.speed * (0.55 + 0.45 * Math.max(0, Math.sin(this.phase * 0.5)))
         if (dist < d.reach && this.attackAllowed()) { this.setState('windup'); this.onSound(this.sound + '.telegraph') }
@@ -188,7 +188,7 @@ export class Enemy {
     if (this.state !== 'lunge') p.y *= Math.exp(-14 * dt)
     if (dist > 0.01 && speed > 0) p.addScaledVector(to.normalize(), Math.min(dist, speed * dt))
     p.addScaledVector(this.vel, dt); this.vel.multiplyScalar(Math.exp(-6 * dt))
-    p.x = clamp(p.x, -1.2, 1.2)
+    if (this.state !== 'emerge') p.x = clamp(p.x, -1.2, 1.2) // side entries walk in from beyond the edge first
     this.root.rotation.y = Math.atan2(player.x - p.x, player.z - p.z)
     this.tick(dt)
     this.animate(dt, speed, armRaise, push, crouch, sprint)

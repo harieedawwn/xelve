@@ -6,7 +6,7 @@ import type { HitMeta } from '../combat/sweep'
 import { PAL } from '../render/palette'
 import type { FX } from '../render/fx'
 
-export const KHIEN_DEF: EnemyDef = { ...BASE_DEF, id: 'khien', hp: 50, blood: PAL.bloodDat, speed: 0.45, windup: 0.8, lungeT: 0.35, recover: 1.1 }
+export const KHIEN_DEF: EnemyDef = { ...BASE_DEF, id: 'khien', hp: 50, blood: PAL.bloodDat, speed: 0.8, windup: 0.8, lungeT: 0.35, recover: 1.1 }
 const signMat = new THREE.MeshLambertMaterial({ color: PAL.paper2, flatShading: true })
 const rimMat = new THREE.MeshLambertMaterial({ color: PAL.ve, flatShading: true })
 export class Khien extends Enemy {

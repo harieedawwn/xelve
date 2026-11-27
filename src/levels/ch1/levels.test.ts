@@ -5,6 +5,31 @@ import { vi } from '../../i18n/vi'
 import { completeLevel, pickupName } from '../../story/progress'
 import { khoiSize } from '../../weapon/economy'
 import { defaults } from '../../core/save'
+import * as THREE from 'three'
+import { spawnPoint, visibleEntry } from '../entry'
+import { EYE, FIGHT_FOV, FIGHT_PITCH } from '../../camera/consts'
+
+// P15: no enemy may appear inside the view (door/phase entries excepted), for phone and tablet aspects and a turned head
+describe('spawn entries', () => {
+  const cams: THREE.PerspectiveCamera[] = []
+  for (const aspect of [20 / 9, 16 / 9, 4 / 3]) for (const yaw of [-0.3, 0, 0.3]) for (const pitch of [FIGHT_PITCH, -0.5]) {
+    const c = new THREE.PerspectiveCamera(FIGHT_FOV, aspect, 0.03, 80); c.rotation.order = 'YXZ'; c.rotation.set(pitch, yaw, 0); cams.push(c)
+  }
+  const fr = new THREE.Frustum(), m = new THREE.Matrix4(), doors = Array.from({ length: 6 }, () => new THREE.Vector3())
+  it('left/right/drop spawns start outside the camera frustum', () => {
+    let n = 0
+    for (const l of CH1) for (const e of l.encounters) e.wave.forEach((w, i) => {
+      if (visibleEntry(w)) return
+      const z = -(e.atS - 0.5), p = spawnPoint(w, i, z, doors)
+      for (const c of cams) {
+        c.position.set(0, EYE, z); c.updateMatrixWorld(); m.multiplyMatrices(c.projectionMatrix, c.matrixWorldInverse); fr.setFromProjectionMatrix(m)
+        for (const h of [0, 0.9, 1.75]) expect(fr.containsPoint(p.clone().setY(p.y + h)), `L${l.id}@${e.atS} ${w.type} ${w.entry}`).toBe(false)
+      }
+      n++
+    })
+    expect(n).toBeGreaterThan(10)
+  })
+})
 
 describe('chapter 1 level data', () => {
   it('ids are 1..n, in order, and found by level()', () => { CH1.forEach((l, i) => { expect(l.id).toBe(i + 1); expect(level(l.id)).toBe(l) }) })
@@ -13,7 +38,7 @@ describe('chapter 1 level data', () => {
       let last = 0
       for (const e of l.encounters) {
         expect(e.atS).toBeGreaterThan(last); last = e.atS; expect(e.atS).toBeLessThan(l.length - 1)
-        for (const w of e.wave) { expect(ENEMIES[w.type]).toBeDefined(); if (w.door !== 'far') { expect(w.door).toBeGreaterThanOrEqual(0); expect(w.door).toBeLessThan(6) } }
+        for (const w of e.wave) { expect(ENEMIES[w.type]).toBeDefined(); if (w.entry === 'door') { expect(w.door).toBeGreaterThanOrEqual(0); expect(w.door).toBeLessThan(6) } if (w.entry === 'phase') expect(w.type).toBe('nhieu') }
       }
     }
   })

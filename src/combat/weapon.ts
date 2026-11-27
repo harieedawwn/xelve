@@ -73,7 +73,7 @@ export class Weapon {
   samplesLocal: THREE.Vector3[] = []
   prev: THREE.Vector3[] = []; cur: THREE.Vector3[] = []
   inner = new THREE.Vector3(); tip = new THREE.Vector3()
-  private rest = new THREE.Vector3(0.23, -0.25, -0.48)
+  private rest = new THREE.Vector3(0.21, -0.12, -0.42) // P15: higher and forward — hand + weapon in frame, not the arm
   private target = new THREE.Vector3()
   private lastTip = new THREE.Vector3(); private hasLast = false
   private rot = new THREE.Vector2()
@@ -90,11 +90,11 @@ export class Weapon {
     const body = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }))
     const line = new THREE.Mesh(outlineGeometry(geo, 0.004), new THREE.MeshBasicMaterial({ color: PAL.ink, side: THREE.BackSide }))
     this.mesh.add(line, body); this.blade = [line, body]
-    // hand: ink fist + forearm leaving the frame (body awareness)
+    // hand: ink fist + a short wrist stub that leaves the frame at once (the player sees hand + weapon, not the arm)
     const ink = new THREE.MeshLambertMaterial({ color: 0x2a2a2f, flatShading: true })
     const fist = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.09, 0.08), ink); fist.position.set(0, 0, 0)
-    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.42, 6), ink)
-    arm.position.set(0.05, -0.12, 0.2); arm.rotation.set(1.1, 0, -0.35)
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.036, 0.09, 6), ink)
+    arm.position.set(0.01, -0.06, 0.035); arm.rotation.set(0.6, 0, -0.2)
     this.mesh.add(fist, arm)
     this.pivot.add(this.mesh)
     this.spring.x.copy(this.rest)

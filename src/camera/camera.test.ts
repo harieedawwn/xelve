@@ -60,6 +60,11 @@ describe('rig', () => {
     run(rig, 2); expect(Math.abs(rig.cam.fov - 78)).toBeLessThan(0.5)
   })
 
+  it('fight framing widens FOV to 84 and back', () => {
+    const rig = new CameraRig(16 / 9); rig.fight = true; run(rig, 2); expect(Math.abs(rig.cam.fov - 84)).toBeLessThan(0.5)
+    rig.fight = false; run(rig, 2); expect(Math.abs(rig.cam.fov - 78)).toBeLessThan(0.5)
+  })
+
   it('reduce motion scales bob', () => {
     const bob = (rm: boolean) => { const r = new CameraRig(1); r.reduceMotion = rm; r.targetSpeed = 4; let lo = 9, hi = -9; run(r, 4, 1, () => { lo = Math.min(lo, r.cam.position.y); hi = Math.max(hi, r.cam.position.y) }); return hi - lo }
     expect(bob(true)).toBeLessThan(bob(false) * 0.5)

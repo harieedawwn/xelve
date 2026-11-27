@@ -4,7 +4,7 @@ import { Enemy, BASE_DEF, EnemyDef } from './base'
 import { PAL } from '../render/palette'
 import type { FX } from '../render/fx'
 
-export const NHIEU_DEF: EnemyDef = { ...BASE_DEF, id: 'nhieu', hp: 35, blood: PAL.bloodLam, speed: 0.7, windup: 0.6 }
+export const NHIEU_DEF: EnemyDef = { ...BASE_DEF, id: 'nhieu', hp: 35, blood: PAL.bloodLam, speed: 1.15, windup: 0.6 }
 const SOLID = 2.2, OUT = 1.0, IN = 1.4
 const vert = 'void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }'
 const frag = `uniform vec3 ink, paper; uniform float solid, time;

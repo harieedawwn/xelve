@@ -5,7 +5,7 @@ import { PAL } from '../render/palette'
 import type { FX } from '../render/fx'
 
 const SIZES: { hp: number; scale: number; kids: number; speed: number }[] = [
-  { hp: 40, scale: 1, kids: 2, speed: 0.6 }, { hp: 12, scale: 0.62, kids: 4, speed: 0.9 }, { hp: 4, scale: 0.4, kids: 0, speed: 1.3 },
+  { hp: 40, scale: 1, kids: 2, speed: 0.96 }, { hp: 12, scale: 0.62, kids: 4, speed: 1.44 }, { hp: 4, scale: 0.4, kids: 0, speed: 2.08 },
 ]
 export class Vo extends Enemy {
   constructor(scene: THREE.Scene, from: THREE.Vector3, public size = 0) {

@@ -138,7 +138,7 @@ Deploy: yes · APK: yes · Screenshots: ≤3
 ---
 # Round 2 — user playtest feedback (2026-11-28)
 
-## P15 · Nhịp chơi & camera chiến đấu [TODO]
+## P15 · Nhịp chơi & camera chiến đấu [DONE]
 Feedback: too much waiting, enemies too slow; camera looks at far enemies while one is attacking at the feet; view too low/"chill", arm shows too much.
 Read: docs/spec/camera.md#2 #4, docs/spec/combat.md#3 #5, src/scenes/chapter.ts, src/enemies/base.ts, src/levels/ch1/*.ts (grep encounter data)
 Do:

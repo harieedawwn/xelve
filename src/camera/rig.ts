@@ -4,7 +4,7 @@ import { Spring3, springFrom, noise1, clamp, lerp, smooth } from './springs'
 import { Rail } from './rail'
 import { ShotTrack, ShotKey, halfLifeToSpring } from './shots'
 import { Move, Out, makeOut, resetOut, wake } from './moves'
-import { EYE, FOV } from './consts'
+import { EYE, FOV, FIGHT_FOV, FIGHT_PITCH } from './consts'
 
 export { EYE, FOV }
 const RM = 0.35 // "Giảm rung camera" scale for bob, shake, lean
@@ -25,6 +25,9 @@ export class CameraRig {
   fovS = springFrom(3, 1)
   shotRoll = springFrom(2, 1); shotRollT = 0; shotFov = FOV
   trauma = 0
+  /** fight framing (P15): FOV → FIGHT_FOV and the head pitched down FIGHT_PITCH, both sprung */
+  fight = false; private fightS = springFrom(2.2, 1)
+  private lookK: number; private lookC: number; private fastT = 0
   reduceMotion = false
   lowHp = 0                              // 0..1 → slow fov pulse
   eyelid = 0
@@ -43,6 +46,7 @@ export class CameraRig {
   constructor(aspect: number) {
     this.cam = new THREE.PerspectiveCamera(FOV, aspect, 0.03, 80)
     this.look.x.copy(this.lookWant); this.fovS.x = FOV
+    this.lookK = this.look.k; this.lookC = this.look.c
     this.syncBody()
   }
 
@@ -57,6 +61,8 @@ export class CameraRig {
   }
   setShots(track: ShotTrack | null) { this.shots = track; track?.reset() }
   glance(target: THREE.Vector3, ms = 600) { this.glanceP.copy(target); this.glanceT = this.glanceDur = ms / 1000 }
+  /** look spring half-life for a while (fight target switched to a closer threat), then back to normal */
+  snapLook(ms: number, secs: number) { const { k, c } = halfLifeToSpring(ms); this.look.k = k; this.look.c = c; this.fastT = secs }
   addTrauma(a: number) { this.trauma = clamp(this.trauma + a, 0, 1) }
   noteCombat() { this.combatT = 3 }
   jump() { if (this.jumpT < 0) { this.jumpT = 0; this.jyT = -0.06 } }
@@ -163,10 +169,12 @@ export class CameraRig {
       this.tgt.lerp(this.glanceP, this.glanceW)
     }
     if (o.look && o.lookW > 0) this.tgt.lerp(o.look, o.lookW)
+    if (this.fastT > 0 && (this.fastT -= dt) <= 0) { this.look.k = this.lookK; this.look.c = this.lookC }
     if (cut) { this.look.x.copy(this.tgt); this.look.v.set(0, 0, 0) } else this.look.step(this.tgt, dt)
 
     // fov: ±14° limit from base except leap; low-HP pulse −1°
-    const base = this.shotFov
+    const fb = this.fightS.step(this.fight ? 1 : 0, dt)
+    const base = lerp(this.shotFov, FIGHT_FOV, fb)
     let fovT = o.fov ?? base
     if (!o.wide) fovT = clamp(fovT, base - 14, base + 14)
     fovT -= this.lowHp * (0.5 + 0.5 * Math.sin(this.rt * 2 * Math.PI * 1.1))
@@ -179,7 +187,7 @@ export class CameraRig {
     else c.position.copy(this.bodyPos).addScaledVector(this.right, side).addScaledVector(UP, up).addScaledVector(this.fwd, fw)
     c.position.x += tr * 0.01 * noise1(st, 21); c.position.y += tr * 0.01 * noise1(st, 27)
     c.lookAt(this.look.x)
-    c.rotateX(p + ap + breathP + sp + o.pitch)
+    c.rotateX(p + ap + breathP + sp + o.pitch + fb * FIGHT_PITCH)
     c.rotateY(y + sy)
     c.rotateZ(r + bobRoll + sr + o.roll + lean + sr0)
   }
@@ -187,7 +195,7 @@ export class CameraRig {
   private shotKey: ShotKey | null = null
   private applyKey(k: ShotKey) {
     this.shotKey = k
-    const { k: kk, c } = halfLifeToSpring(k.halfLifeMs ?? 180); this.look.k = kk; this.look.c = c
+    const { k: kk, c } = halfLifeToSpring(k.halfLifeMs ?? 180); this.look.k = this.lookK = kk; this.look.c = this.lookC = c
     if (k.fov !== undefined) this.shotFov = k.fov
     if (k.roll !== undefined) this.shotRollT = k.roll
   }

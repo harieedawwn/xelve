@@ -17,6 +17,7 @@ import { CombatPad } from '../ui/combatPad'
 import { Audio } from '../audio/engine'
 import { UI } from '../ui/ui'
 import { ENEMIES } from '../enemies/registry'
+import { spawnPoint } from '../levels/entry'
 import type { Enemy } from '../enemies/base'
 import { startLoop } from '../core/loop'
 import { bindFinger } from '../core/input'
@@ -80,7 +81,7 @@ export function startEndless(canvas: HTMLCanvasElement, renderer: Renderer, ui: 
     const { ids, boss } = waveOf(wave, save())
     const list = boss ? [boss, ...ids] : ids
     list.forEach((id, i) => {
-      const e = ENEMIES[id](scene, new THREE.Vector3((i % 3 - 1) * 1.2, 0, -8 - i * 0.8)); e.slotX = (i % 3 - 1) * 0.45
+      const e = ENEMIES[id](scene, spawnPoint({ type: id, entry: id === 'nhieu' ? 'phase' : i % 2 ? 'right' : 'left' }, i, player.z, [])); e.slotX = (i % 3 - 1) * 0.45
       if (boss && i === 0) { e.root.scale.multiplyScalar(ENDLESS.bossScale); e.maxHp = e.hp = e.maxHp * ENDLESS.bossHpMult }
       wire(e); enemies.push(e); audio.play('bong.appear')
     })
