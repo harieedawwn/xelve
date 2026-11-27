@@ -7,6 +7,11 @@ import { buildCorridor } from '../levels/corridor'
 import { FX } from '../render/fx'
 import { Bong } from '../enemies/bong'
 import { Weapon } from '../combat/weapon'
+import { PROFILES } from '../combat/profiles'
+import { sweep } from '../combat/sweep'
+import { Bus } from '../combat/bus'
+import { Motes } from '../combat/motes'
+import { PlayerHP, MAX_HP } from '../combat/player'
 import { Audio } from '../audio/engine'
 import { UI } from '../ui/ui'
 import { clamp, lerp, smooth } from '../camera/springs'
@@ -17,7 +22,7 @@ import { settings, onSettings } from '../core/settings'
 import { wipe } from '../ui/wipe'
 
 type State = 'title' | 'wake' | 'walk' | 'fight' | 'clear' | 'end'
-const MAX_HP = 6, END_S = 31
+const END_S = 31
 const ENCOUNTERS: { s: number; doors: (number | 'far')[] }[] = [
   { s: 8.5, doors: [0, 1, 5] },
   { s: 19, doors: [2, 3, 'far'] },
@@ -35,7 +40,9 @@ const time = new Time()
 rig.onStep = () => audio.step()
 
 let state: State = 'title'
-let encIdx = 0, hp = MAX_HP, enemies: Bong[] = []
+const php = new PlayerHP(), bus = new Bus()
+let hp = MAX_HP
+let encIdx = 0, enemies: Bong[] = []
 let desat = 0, vigT = 0, clearT = 0, deadT = 0, impactQ = 0, lastImpact = -9
 const prevQ = new THREE.Quaternion()
 const player = new THREE.Vector3()
@@ -83,43 +90,23 @@ function impactFrame() {
   lastImpact = time.real; impactQ = 2
 }
 
-function onPlayerStruck(e: Bong) {
-  if (hp <= 0) return
-  hp--; ui.setHP(hp); vigT = 1
-  rig.hitTaken(clamp(e.root.position.x - player.x, -1, 1) || 1); audio.playerHurt()
-  if (hp <= 0) { deadT = 1.6 }
-}
+{ const w = new URLSearchParams(location.search).get('weapon'); if (w && PROFILES[w]) weapon.setProfile(PROFILES[w]) }
+const motes = new Motes(scene, weapon.pivot, () => bus.emit('mote', { n: 1 }))
+bus.on('mote', () => weapon.spring.v.y += 0.25)
+bus.on('hurt', (e) => { rig.hitTaken(e.side); audio.playerHurt() })
+bus.on('hit', (e) => {
+  audio.hit(e.dmg / 10, e.head); rig.addTrauma(e.killed ? 0.35 : 0.18)
+  rig.slashKick(weapon.slashDir.x, weapon.slashDir.y, e.killed ? 1 : 0.7)
+  time.freeze(e.killed || e.head ? 0.09 : 0.07)
+  if (e.killed) { audio.kill(); impactFrame(); motes.burst(e.at, 6) } else if (e.head && e.speed > 5) impactFrame()
+  if (e.killed && alive().length === 0) { time.slowmo(0.55); audio.slowIn(); state = 'clear'; clearT = 1.9 }
+})
 
-// ---- hit sweep: sample points along prev→cur of 4 blade samples vs capsule + head sphere
-function sweep() {
-  if (!weapon.touching || weapon.tipSpeed < 2) return
-  const v = weapon.tipSpeed
-  for (const e of enemies) {
-    if (!e.alive || e.hitCooldown > 0) continue
-    const P = e.hitParts()
-    let hit = false, head = false
-    const at = tmpC
-    for (let k = 0; k < 4 && !hit; k++) for (let t = 0; t <= 1 && !hit; t += 0.5) {
-      const p = tmpA.copy(weapon.prev[k]).lerp(weapon.cur[k], t)
-      if (p.distanceTo(P.head) < P.hr + 0.04) { hit = head = true; at.copy(p) }
-      else {
-        const ab = tmpB.copy(P.b).sub(P.a), u = clamp(tmpA.clone().sub(P.a).dot(ab) / ab.lengthSq(), 0, 1)
-        if (p.distanceTo(ab.multiplyScalar(u).add(P.a)) < P.r + 0.04) { hit = true; at.copy(p) }
-      }
-    }
-    if (!hit) continue
-    const dir = tmpB.copy(weapon.cur[3]).sub(weapon.prev[3])
-    if (dir.lengthSq() < 1e-8) dir.set(0, 0, -1); dir.normalize()
-    const dmg = (4 + 9 * clamp(v / 5, 0.2, 2.2)) * (head ? 2 : 1)
-    const killed = e.takeHit(dmg, at.clone(), dir.clone(), fx, head)
-    audio.hit(dmg / 10, head); rig.addTrauma(killed ? 0.35 : 0.18)
-    rig.slashKick(weapon.slashDir.x, weapon.slashDir.y, killed ? 1 : 0.7)
-    time.freeze(killed || head ? 0.09 : 0.07)
-    if (killed) { audio.kill(); impactFrame() } else if (head && v > 5) impactFrame()
-    if (killed && alive().length === 0) {
-      time.slowmo(0.55); audio.slowIn(); state = 'clear'; clearT = 1.9
-    }
-  }
+function onPlayerStruck(e: Bong) {
+  if (php.dead) return
+  const dead = php.hit(1); hp = php.hp; ui.setHP(hp); vigT = 1
+  bus.emit('hurt', { side: clamp(e.root.position.x - player.x, -1, 1) || 1, dead })
+  if (dead) deadT = 1.6
 }
 
 function lookAt(dt: number) {
@@ -157,14 +144,16 @@ function step(realDt: number) {
   if (state === 'clear' && time.slow <= 0 && (clearT -= realDt) <= 0) { encIdx++; state = 'walk' }
   if (deadT > 0) {
     deadT -= realDt
-    if (deadT <= 0) { clearEnemies(); hp = MAX_HP; ui.setHP(hp); spawnWave() }
+    if (deadT <= 0) { clearEnemies(); php.reset(); hp = php.hp; ui.setHP(hp); spawnWave() }
   }
 
+  if (php.update(dt, alive().length > 0)) { hp = php.hp; ui.setHP(hp) }
+  motes.update(realDt)
   lookAt(dt)
   rig.update(dt, realDt)
   weapon.update(time.hitstop > 0 ? 0 : realDt, now)
   for (const e of enemies) e.update(dt, player, onPlayerStruck)
-  if (deadT <= 0) sweep()
+  if (deadT <= 0) sweep(weapon, enemies, fx, bus)
   audio.swing(weapon.touching ? weapon.tipSpeed : 0, scale)
   if (weapon.tipSpeed > 3 && weapon.touching && dt > 0) fx.smearPush(weapon.inner, weapon.tip, now)
   fx.update(dt, now)
@@ -187,6 +176,6 @@ function render(_a: number, realDt: number) {
   renderer.render(scene, rig.cam)
 }
 startLoop({ step: (h) => step(h), render, fpsCap: () => QUALITY[tier].fps });
-(window as any).__xelve = { get state() { return state }, get hp() { return hp }, rig, enemies: () => enemies, skip: (s: number) => { rig.s = s } }
+(window as any).__xelve = { weapon, get state() { return state }, get hp() { return hp }, rig, enemies: () => enemies, skip: (s: number) => { rig.s = s } }
 
 }

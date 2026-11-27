@@ -2,6 +2,8 @@
 import * as THREE from 'three'
 import { Spring3, clamp } from '../camera/springs'
 import { PAL } from '../render/palette'
+import { swingSpring, speedCap, chargeTime } from './damage'
+import { PROFILES, Profile } from './profiles'
 
 const V = 0.04 // Khối voxel size (4 cm)
 // A crude cleaver someone drew on the 5×5→ grid: o = Voxel thô (orange), c = Chì, . = empty. Row 0 = top.
@@ -53,7 +55,9 @@ function outlineGeometry(src: THREE.BufferGeometry, w: number) {
 export class Weapon {
   pivot = new THREE.Group()       // in camera space
   mesh: THREE.Group
-  spring = Spring3.from(7.5, 0.72) // light weapon: sticks to the finger
+  spring = new Spring3()           // k from inertia (damage.swingSpring)
+  profile: Profile = PROFILES.nhe
+  charge = 1                       // lực charge 0..1 (vừa/nặng only); refills in chargeTime(I)
   touching = false
   finger = new THREE.Vector2()     // NDC
   tipSpeed = 0
@@ -83,6 +87,7 @@ export class Weapon {
     this.mesh.add(fist, arm)
     this.pivot.add(this.mesh)
     this.spring.x.copy(this.rest)
+    this.setProfile(PROFILES.nhe)
     const top = (GRIP[1]) * V + 0.5 * V
     for (let i = 0; i < 4; i++) {
       this.samplesLocal.push(new THREE.Vector3(0.5 * V, (0.25 + 0.75 * i / 3) * top, 0))
@@ -90,12 +95,23 @@ export class Weapon {
     }
   }
 
+  setProfile(p: Profile) {
+    this.profile = p
+    const sp = swingSpring(p.inertia); this.spring.k = sp.k; this.spring.c = sp.c
+    this.mesh.scale.setScalar(p.scale); this.charge = 1
+  }
+  /** swing ended / a hit landed: a charged weapon starts refilling from 0 */
+  spend() { if (this.profile.charged) this.charge = 0 }
+
   update(dt: number, now: number) {
+    if (this.profile.charged && this.charge < 1) this.charge = Math.min(1, this.charge + dt / chargeTime(this.profile.inertia, 1) / 4)
     this.raise += ((this.touching ? 1 : 0) - this.raise) * (1 - Math.exp(-14 * dt))
     const speedN = clamp(this.tipSpeed / 7, 0, 1)
     if (this.touching) this.target.set(this.finger.x * 0.36, this.finger.y * 0.21 - 0.03, -0.5 - speedN * 0.28)
     else this.target.copy(this.rest)
     const p = this.spring.step(this.target, dt)
+    const cap = speedCap(this.profile.inertia), sv = this.spring.v.length()
+    if (sv > cap) this.spring.v.multiplyScalar(cap / sv)
     this.mesh.position.copy(p)
     // orientation: tip leans into the motion, tilts away from camera when raised
     const v = this.spring.v

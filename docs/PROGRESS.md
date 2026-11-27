@@ -53,3 +53,13 @@ Next: P2
 - Gotchas: a look target at the camera's own position makes lookAt flip (≥150° snap) — keep targets away from the body; moves with `abs` must end near the rail or they ease back via the spring.
 
 Next: P3
+
+## P3 · Combat lõi — DONE
+- src/combat: damage.ts (pure: damage = BASE·√m·clamp(v/VREF,.2,2)·shape·lực·mat·weak, swingSpring k=K0/(I+I0) damping 0.8 critical, speedCap, chargeTime), profiles.ts (nhe/nang/khoi test profiles, registry), sweep.ts (swept hit test extracted from slice, 2.2 m/s slash threshold, 80 ms cooldown on enemy), bus.ts (typed feedback bus: hit/hurt/mote), motes.ts (Màu motes: pooled cubes burst → home to the weapon in hand), player.ts (6 HP, regen 1/6 s out of combat, checkpoint = wave restart).
+- weapon.ts: spring from profile inertia, tip speed cap, lực charge (spends on hit, refills), mesh scale per profile. Dev: `?weapon=nhe|nang|khoi`.
+- slice.ts wires bus → hitstop/impact/camera/sound/motes; HP via PlayerHP.
+- Checked: tsc clean, 24 vitest (damage, swing, HP), build OK. Headless 640x360: heavy lags the finger more (0.149 vs 0.105 NDC·m) and kills fewer in the same swing time; no errors; motes visible.
+- Left: real-phone feel; Màu counter is in-memory (`motes.collected`), persisting/spending comes with economy (P7+); profiles are stand-ins until analyze() (P7); Đỡ/Né P8; blood per enemy colour already via `Target.blood`.
+- Gotchas: needs `npm ci` in fresh sessions; `__xelve.weapon` exposed for tests.
+
+Next: P4

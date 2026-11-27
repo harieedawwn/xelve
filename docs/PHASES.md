@@ -50,7 +50,7 @@ Done when: [ ] all moves play in the debug scene · [ ] no snaps except `cut:tru
 Model: Sonnet 5.5 · medium — base rig already in the slice, spec has numbers
 Deploy: yes · Screenshots: ≤3
 
-## P3 · Combat lõi [TODO]
+## P3 · Combat lõi [DONE]
 Read: docs/spec/weapon.md#5, docs/spec/combat.md#1-#4
 Do: weapon runtime (finger→tip spring by inertia), swept voxel hit test, damage formula, feedback bus (hitstop/impact/smear/sound/camera), blood per enemy colour, Màu motes, player HP + checkpoint death, Khối rubbing.
 Done when: [ ] heavy test weapon visibly lags the finger, light one sticks · [ ] unit tests for damage · [ ] slash feel matches the approved slice or better
