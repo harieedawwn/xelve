@@ -16,4 +16,6 @@ export interface LevelData {
   unlocks: string[]
   /** Xưởng opens at the end of the level with this khoi size (L2: 3, L4: 5) */
   forge?: number
+  /** set on boss levels: run that boss scene instead of the rail runner */
+  boss?: 'nguoigac' | 'dong'
 }

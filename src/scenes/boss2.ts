@@ -27,6 +27,8 @@ import { QUALITY, type Tier } from '../core/quality'
 import { settings } from '../core/settings'
 import { save, persist } from '../core/save'
 import { grant } from '../story/drops'
+import { completeLevel } from '../story/progress'
+import { level } from '../levels/ch1'
 import { lerp, clamp } from '../camera/springs'
 import { bossHud, endingUi, noteMesh } from './boss2ui'
 
@@ -157,7 +159,7 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
   function win() {
     won = 0; stats.won = true; time.slowmo(1.2, 0.3); audio.play('dong.fall'); rig.addTrauma(0.9)
     body.collapse(ARENA.boss.clone().add(new THREE.Vector3(0, 0.02, 5)))
-    stats.gained = grant(save(), 'dong'); persist()
+    stats.gained = grant(save(), 'dong'); completeLevel(save(), level(8)!); persist()
     hud.hide(); def.release(); weapon.guarding = false; weapon.touching = false; context()
   }
   const family = () => body.family.position

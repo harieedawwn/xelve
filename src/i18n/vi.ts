@@ -98,11 +98,17 @@ export const vi = {
   'level.2': 'Văn phòng',
   'level.3': 'Cầu thang',
   'level.4': 'Con hẻm',
+  'level.5': 'Sảnh',
+  'level.6': 'Đường cái',
+  'level.7': 'Bãi đỗ xe',
+  'level.8': 'Mái bãi đỗ xe',
   'note.l2': 'bắt đầu từ một ô',
   'pick.page': 'Trang vẽ của Ve',
   'drop.got': 'Nhặt được',
   'drop.grid3': 'Xưởng 3×3',
   'drop.grid5': 'Lưới 5×5',
+  'drop.grid8': 'Lưới 8×8',
+  'drop.bua': 'Bản vẽ Búa',
 } as const
 
 export type Key = keyof typeof vi

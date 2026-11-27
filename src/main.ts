@@ -56,6 +56,8 @@ async function boot() {
   ui.setReady()
   const q = new URLSearchParams(location.search)
   const want = Number(q.get('level')) || Math.min(save().progress.level + 1, CH1.length)
-  startChapter(canvas, renderer, ui, audio, settings().tier!, level(want) ?? CH1[0], q.get('go') === '1')
+  const lv = level(want) ?? CH1[0]
+  if (lv.boss) { ui.hideTitle(); addEventListener('pointerdown', () => audio.unlock(), { once: true }); if (lv.boss === 'nguoigac') startBoss1(canvas, renderer, audio); else startBoss2(canvas, renderer, audio); return }
+  startChapter(canvas, renderer, ui, audio, settings().tier!, lv, q.get('go') === '1')
 }
 boot()

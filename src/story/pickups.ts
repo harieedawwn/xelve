@@ -4,7 +4,7 @@ import { t } from '../i18n'
 
 const COLOR: Record<string, number> = { chi: 0x55555c, nhom: 0xc4c3bd, magie: 0xe8590c, thuytinh: 0xdfe6e8, caosu: 0x16161a, dakho: 0xcfd8dc }
 export function pickupMesh(gives: string): THREE.Object3D {
-  if (gives.startsWith('grid')) { // sketchbook page: 3×3 grid, orange middle, "bắt đầu từ một ô"
+  if (gives.startsWith('grid') || gives === 'bua') { // sketchbook page: 3×3 grid, orange middle, "bắt đầu từ một ô"
     const cv = document.createElement('canvas'); cv.width = cv.height = 96; const g = cv.getContext('2d')!
     g.fillStyle = '#ECEBE6'; g.fillRect(0, 0, 96, 96); g.strokeStyle = '#16161A'; g.lineWidth = 2
     g.strokeRect(14, 10, 68, 60); for (const k of [1, 2]) { g.beginPath(); g.moveTo(14 + k * 22.7, 10); g.lineTo(14 + k * 22.7, 70); g.moveTo(14, 10 + k * 20); g.lineTo(82, 10 + k * 20); g.stroke() }

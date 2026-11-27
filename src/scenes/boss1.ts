@@ -20,6 +20,9 @@ import { Time } from '../core/time'
 import { lerp, clamp } from '../camera/springs'
 import { save, persist } from '../core/save'
 import { grant } from '../story/drops'
+import { completeLevel } from '../story/progress'
+import { level } from '../levels/ch1'
+import { wipe } from '../ui/wipe'
 import { el } from '../ui/dom'
 import { t } from '../i18n'
 
@@ -73,7 +76,9 @@ export function startBoss1(canvas: HTMLCanvasElement, renderer: Renderer, audio:
   boss.onDefeat = () => {
     won = true; stats.won = true; over = 0
     time.slowmo(0.8, 0.25)
-    stats.gained = grant(save(), 'nguoigac'); persist()
+    stats.gained = grant(save(), 'nguoigac'); completeLevel(save(), level(5)!); persist()
+    // inside the chapter (?level=5) the next level follows the radio line
+    if (new URLSearchParams(location.search).has('level')) setTimeout(() => wipe(1, () => { location.href = `${location.pathname}?level=6&go=1` }), 7000)
     setTimeout(() => { audio.play('radio.crackle'); say('radio.l5', 4) }, 1400)
   }
   boss.onEvent = (e, m) => {

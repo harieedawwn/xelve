@@ -3,12 +3,15 @@ import * as THREE from 'three'
 import { PAL } from '../render/palette'
 import { gritTex } from './corridor'
 import type { RoomId } from './ch1/types'
+import { addVehicleRoom } from './rooms2'
 
 export interface Room { doors: THREE.Vector3[]; halfW: number; height: number; zEnd: number; objects: Record<string, THREE.Vector3>; statics: THREE.Mesh[]; tick(t: number): void }
 interface Theme { halfW: number; height: number; length: number; wall: number; floor: number; fog: [number, number]; doors: [number, number][] }
 const THEMES: Partial<Record<RoomId, Theme>> = {
   office: { halfW: 3.2, height: 3, length: 40, wall: 232, floor: 196, fog: [12, 32], doors: [[-1, -8], [1, -12], [-1, -17], [1, -22], [-1, -27], [1, -31]] },
   stairwell: { halfW: 1.9, height: 3.4, length: 44, wall: 214, floor: 170, fog: [9, 24], doors: [[-1, -6], [1, -10], [-1, -16], [1, -22], [-1, -28], [1, -34]] },
+  road: { halfW: 4.6, height: 9, length: 46, wall: 222, floor: 150, fog: [12, 34], doors: [[-1, -8], [1, -13], [-1, -19], [1, -25], [-1, -31], [1, -37]] },
+  carpark: { halfW: 5, height: 3.4, length: 46, wall: 210, floor: 160, fog: [11, 30], doors: [[-1, -8], [1, -13], [-1, -19], [1, -25], [-1, -31], [1, -37]] },
   alley: { halfW: 2.6, height: 6, length: 44, wall: 204, floor: 164, fog: [10, 30], doors: [[-1, -7], [1, -12], [-1, -18], [1, -23], [-1, -29], [1, -35]] },
 }
 const staticTex = (seed: number) => {
@@ -54,13 +57,13 @@ export function buildRoom(scene: THREE.Scene, id: RoomId): Room {
   }
   const draw = (tex: THREE.Texture, w: number, h: number, side: number, y: number, z: number) => plane(w, h, new THREE.MeshBasicMaterial({ map: tex }), side * (halfW - 0.015), y, z, -side * Math.PI / 2)
   plane(halfW * 2, len, floorMat, 0, 0, midZ, 0, -Math.PI / 2)
-  if (id !== 'alley') plane(halfW * 2, len, ceilMat, 0, height, midZ, 0, Math.PI / 2)
+  if (id !== 'alley' && id !== 'road') plane(halfW * 2, len, ceilMat, 0, height, midZ, 0, Math.PI / 2)
   plane(len, height, wallMat, -halfW, height / 2, midZ, Math.PI / 2); plane(len, height, wallMat, halfW, height / 2, midZ, -Math.PI / 2)
   plane(halfW * 2, height, wallMat, 0, height / 2, zEnd)
   const doors: THREE.Vector3[] = [], objects: Record<string, THREE.Vector3> = {}, statics: THREE.Mesh[] = []
   const paper2 = new THREE.MeshLambertMaterial({ color: PAL.paper2 }), stone = PAL.stone
   const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffff })
-  if (id !== 'alley') for (let z = 0; z > zEnd + 2; z -= id === 'office' ? 5 : 4) box(0.9, 0.02, 0.5, 0, height - 0.01, z, lightMat)
+  if (id === 'office' || id === 'stairwell') for (let z = 0; z > zEnd + 2; z -= id === 'office' ? 5 : 4) box(0.9, 0.02, 0.5, 0, height - 0.01, z, lightMat)
   // dark door recesses = where enemies come out
   for (const [side, z] of T.doors) { box(0.04, 2.1, 1.0, side * (halfW - 0.02), 1.05, z, 0x2a2a2e); doors.push(new THREE.Vector3(side * (halfW - 0.3), 0, z)) }
 
@@ -97,6 +100,7 @@ export function buildRoom(scene: THREE.Scene, id: RoomId): Room {
     box(0.1, 2.2, 2.4, halfW - 0.06, 1.1, -15, 0xb8b7b1); draw(stickerTex(), 0.22, 0.22, 1, 1.0, -15)
     for (const z of [-6, -20, -33]) box(0.1, 0.5, 1.2, -halfW + 0.05, 3.0, z, 0x2a2a2e)
   }
+  else if (id === 'road' || id === 'carpark') addVehicleRoom(id, { scene, box, draw, objects, halfW, height, zEnd, doors })
   const hemi = new THREE.HemisphereLight(0xffffff, 0x8e8c86, 1.6), key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(0.6, 3, 1)
   scene.add(hemi, key); scene.background = new THREE.Color(PAL.paper); scene.fog = new THREE.Fog(PAL.paper, ...T.fog)
   let flick = 0

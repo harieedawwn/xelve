@@ -170,3 +170,14 @@ Next: P12
 - Gotchas: scenes read `lv.pickups` in order — keep `atS` sorted and not inside an encounter's stop; message waits until no encounter is pending before its atS.
 
 Next: P12b (finish P12: L5–L8)
+
+## P12b · Chương 1: L5–L8 — DONE (polish left)
+- Data: src/levels/ch1/L5..L8.ts + index (8 levels). `LevelData.boss` ('nguoigac' | 'dong') = boss levels; main.ts runs boss1/boss2 scene for them (`?level=5`, `?level=8`). Dev routes `?boss` / `?dong` unchanged.
+- L5: boss1 completes level 5 (drops Dao/Kiếm/Lõi) and, when entered via `?level=`, wipes to L6 7 s after defeat. L8: boss2 `win()` calls completeLevel(8); the end card already follows.
+- L6 Đường cái (road room: kerb cars, crashed van, signs, hoarding with hammer page, tyres, bus stop 8×8 page): Bóng khiên/vỡ/chạy/nhiễu, pickups Bản vẽ Búa (`bua`), Cao su, Lưới 8×8 (`grid8`), message 5, Xưởng opens 8×8. L7 Bãi đỗ xe (pillars, bays, parked cars, cooler box): Bóng vỡ + khiên, Đá khô.
+- src/levels/rooms2.ts = road + carpark furniture (called from buildRoom, themes in rooms.ts). i18n: level.5–8, drop.grid8, drop.bua. pickups.ts: `bua` uses the page mesh.
+- Checked: tsc, 127 vitest (level data: messages 1–6, boss levels, forge 3/5/8, new pickup names), build; headless 640×360 loads L5–L8 without page errors; L6/L7 bot swipes (see gotchas). 1 screenshot checked.
+- Left (polish, → P14/P13): (1) L1 ghost-finger tutorial + Ve's 3-frame doodle only in corridor.ts; (2) boss2ui.voice still local, should use story/voice.ts (ending=true); (3) Xưởng does not enforce Màu/stock yet (P13); (4) 'run' encounter mode unused, stairwell flat; (5) balance of L6/L7 waves is a first guess; (6) boss1 in chapter mode: death restarts the duel (no checkpoint); boss2 death reloads page (back to L8 start via ?level=8).
+- Gotchas: bosses' camera/tier fixed at 'tb'; L5/L8 need `?level=` in the URL to chain (finishLevel in chapter.ts sets it). Page mesh for `bua` shows note.l2 text.
+
+Next: P13
