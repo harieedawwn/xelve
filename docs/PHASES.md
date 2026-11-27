@@ -134,3 +134,93 @@ Do: perf on 240p tier, balance pass, bug sweep, release notes.
 Done when: [ ] Thấp 30 fps steady in L8 headless profile · [ ] no open INBOX bugs
 Model: Sonnet 5.5 · medium
 Deploy: yes · APK: yes · Screenshots: ≤3
+
+---
+# Round 2 — user playtest feedback (2026-11-28)
+
+## P15 · Nhịp chơi & camera chiến đấu [TODO]
+Feedback: too much waiting, enemies too slow; camera looks at far enemies while one is attacking at the feet; view too low/"chill", arm shows too much.
+Read: docs/spec/camera.md#2 #4, docs/spec/combat.md#3 #5, src/scenes/chapter.ts, src/enemies/base.ts, src/levels/ch1/*.ts (grep encounter data)
+Do:
+- **Pace:** enemy speeds ×1.7 (Bóng 0.6→1.0, khien 0.45→0.8, nhieu 0.7→1.15, vo sizes ×1.6; chay unchanged). Walk speed between encounters 1.6→2.6 m/s. Encounters overlap: next wave starts spawning when the current wave has ≤1 alive (not 0). Clear beat ≤ 0.8 s. No scripted wait > 1.2 s anywhere except story beats (signals play while walking, not standing). Spawn delays inside a wave ≤ 0.6 s apart.
+- **Entries:** no enemy may appear inside the view. Every spawn enters from: a door/opening already in view (walks out), or from off-screen left/right edge (walk in sideways 1.5–3 m), or drops from above (only nhieu may "phase in"). Add `entry: 'door'|'left'|'right'|'drop'|'phase'` to wave data; validate in a test that spawn points are outside the camera frustum at spawn time unless entry is door/phase.
+- **Look priority:** replace "nearest/centroid" with a threat score per enemy: closeness (strong), state windup/lunge (×3), below eye level & within 1.6 m (×2, pitch the head down to it, max −40°), off-screen penalty. Look target = highest score, spring half-life 90 ms when the target changes to a closer threat. A lunging enemy within 1.5 m must always be in view.
+- **View:** eye height 1.62→1.72, default pitch −6° in fights; weapon rest pose higher and more forward (hand at ~y −0.12, z −0.42), forearm mesh mostly out of frame — the player sees hand + weapon, not the arm. FOV 78→84 in fights only (spring).
+Done when:
+- [ ] L1 start→end takes ≤ 60% of the old time (log it); no standing wait > 1.2 s outside story beats
+- [ ] frustum test passes; enemies visibly walk in from sides/doors
+- [ ] headless check: an enemy lunging at the feet is on screen in every frame of its windup
+Model: Opus 5.5 · medium — game feel + camera judgment
+Deploy: yes · Screenshots: ≤4
+
+## P16 · Tầm chém & độ nhạy [TODO]
+Feedback: reach tiny; a long slash needs a whole-screen swipe; normal swipes short and weak; boss 2 leap slashes clip through the body.
+Read: docs/spec/weapon.md#5, src/combat/weapon.ts, src/combat/sweep.ts, src/scenes/boss2.ts (leap/seam parts only)
+Do:
+- **Mapping:** finger→weapon target is no longer 1:1. Use a gain curve: target offset = finger delta × gain, gain grows with finger speed (slow 1.6, fast 3.2, smooth curve), plus a swing arc: horizontal motion also rotates the weapon around the hand (yaw/roll up to 70°) so a short flick produces a wide arc. Range of target: x ±0.55, y −0.2..+0.35.
+- **Reach:** arm extension on fast swings up to 0.45 m forward; enemy hit capsules +15% radius; add a 0.25 m "reach forgiveness" along the slash direction for the tip sample only. Encounter stop distance 1.05→1.35 m so enemies fight at weapon range.
+- **Force feel:** a 6 cm flick at normal speed must produce tip speed > 4 m/s with Khối and Dao. Heavy weapons keep their lag (spring stiffness from inertia unchanged), only the gain changes.
+- **Smear:** length follows the arc (more samples), so wide swings show a wide crescent.
+- **Boss 2 contact:** Đống's body gets real colliders (boxes per car chunk + seam capsules). Weapon samples that enter a body collider stop at the surface: weapon pose is pushed back (no clipping), hit registers on contact, spawns sparks (hard-edged unlit quads, white + orange) and a scratch decal on the car surface along the slash path; seams bleed. Same rule for khien's sign and any metal prop (sparks + scratch, no blood).
+- Expose all numbers in one data file `src/combat/feel.ts`.
+Done when:
+- [ ] unit test: 6 cm flick at 0.08 s → tip speed > 4 m/s (Khối); full-screen swipe no longer needed for a long arc
+- [ ] boss 2 leap: weapon never passes inside the body (debug overlay check), sparks + scratches visible
+Model: Opus 5.5 · medium — touch feel
+Deploy: yes · Screenshots: ≤3
+
+## P17 · Cốt truyện v2 (bí ẩn) [TODO]
+Read: docs/spec/story.md (v2, whole file — the "Removed from v1" list is mandatory)
+Do: replace all story content in code: signals msg.1–6 (header = source · time instead of only time), L2 wristbands prop, L4 watching TV frame, L5 radio line, L6 billboards countdown, L7 broadcast tower (replace hospital), L8 phase 3 tally wall + chapter end card with XEL · VE signatures, Chương 2 title "Đài phát". Remove every v1 family item and word (grep: Ve as sister, mẹ, chị, em, bệnh viện, xe gia đình, Chú Bảy). VE marks = orange doodles/arrows signed VE along every level.
+Done when: [ ] grep for removed words in src/ returns nothing · [ ] every setup/payoff row exists in its level
+Model: Sonnet 5.5 · medium
+Deploy: no · Screenshots: ≤2
+
+## P18 · Hướng dẫn có chữ [TODO]
+Read: docs/DESIGN.md#ui (Tutorial prompts), docs/spec/levels.md#tutorial-beats
+Do: a `tutorial` module: one-line prompt slab + icon, shown the first time each mechanic appears, hidden after the player performs it twice, stored in save. Prompts (i18n): Vuốt để chém · Vuốt nhanh để chém mạnh · Chém vào đầu để gây thêm sát thương · Mở Xưởng để vẽ vũ khí · Giữ để nạp Lực · Giữ Đỡ ngay khi nó đánh · Bấm ‹ › để né theo hướng nó vung · Bấm ‹ › để đổi chỗ nấp · Bấm ↑ để nhảy lên chém. Xưởng first open: 3 prompts in sequence (Vẽ vào lưới · Bật đối xứng · Bấm Thử). Keep Ve's doodles and ghost finger.
+Done when: [ ] every prompt appears once at the right moment in a headless run · [ ] shots pass
+Model: Sonnet 5.5 · medium
+Deploy: no · Screenshots: ≤3
+
+## P19 · Texture cho từng loại Voxel [TODO]
+Read: docs/spec/weapon.md#6 #8, src/weapon/mesh.ts, src/weapon/materials/*
+Do: each material gets its own texture (procedural canvas, 16–32 px, nearest, generated once and cached), mapped per voxel face. Two families:
+- **2D phẳng** (flat graphic, 2–3 tones, hard pixel shapes): Voxel thô (orange with one darker pixel corner), Cao su (black with tread chevrons), Lõi Người gác (ink with blue crack lines).
+- **2D realistic** (photo-like low-res noise, highlights, scratches): Chì (dull grey, soft dents), Nhôm (bright brushed streaks), Thuỷ tinh (pale cyan, white diagonal glints, slight transparency), Magie (silver-white with fine speckle), Đá khô (frosty white-blue, mist pixels), Đồng (copper with green oxide spots), Lõi Đống (rusted steel, paint flakes).
+Texture id lives in each material file (registry rule). Xưởng palette swatches show the texture too.
+Done when: [ ] a test weapon using all materials renders distinct and readable at Thấp (240p) and Cao · [ ] no per-frame texture creation
+Model: Sonnet 5.5 · medium
+Deploy: yes · Screenshots: ≤3
+
+## P20 · UI kiểu game (thiết kế lại) [TODO]
+Feedback: UI looks like generic AI web UI; must look like a game.
+Read: docs/DESIGN.md#ui (v2 — whole section) and #bans, src/ui/*, src/scenes/menu*.ts
+Do: implement the v2 concept on: tokens/base components (slab, skewed button, paper strip, voxel selector), "chém màn" transition, main screen, chapter map, HUD (HP, Lực, boss bar, contextual buttons), end/game-over cards, settings, Thuật ngữ. Keep layout anchoring and safe areas. Xưởng is P20b.
+Done when:
+- [ ] `npm run shots` passes on every screen at all 6 viewports
+- [ ] no rectangle-with-border cards left; every screen uses slabs/strips; transition works and is interruptible
+Model: Opus 5.5 · medium — first-time aesthetics, expensive if wrong
+Deploy: yes · Screenshots: ≤4
+
+## P20b · UI kiểu game: Xưởng & màn phụ [TODO]
+Read: docs/DESIGN.md#ui, P20's components (src/ui/)
+Do: apply the P20 components to Xưởng (grid frame as a technical drawing sheet, tool bar as skewed slabs, stat bars skewed), Vô tận HUD/cards, Phòng tập, signals UI, tutorial slab. Reuse only; no new styles.
+Done when: [ ] shots pass · [ ] no leftover v1 styles (grep old class names)
+Model: Sonnet 5.5 · medium
+Deploy: yes · Screenshots: ≤3
+
+## P21 · Icon app 3D (người chơi chọn 1 trong 3) [TODO]
+Read: docs/DESIGN.md (palette, concept, bans), src/weapon/mesh.ts (reuse voxel mesh)
+Do:
+1. `scripts/icons/render.ts` (headless three.js via the existing playwright-core setup): render 3 icon concepts at 1024×1024, real 3D, good composition, readable at 48 px:
+   - **1 · Vũ khí:** a voxel cleaver (Voxel thô + Chì) at a hero 3/4 angle, slight low camera, ink outline, on a paper background cut by one diagonal ink slab; one splash of purple blood pixels.
+   - **2 · Voxel cam:** the single orange voxel, large, bevelled, floating, hard key light + ink shadow shape below, a diagonal slash cut across the background (black/paper halves).
+   - **3 · Bóng:** a charcoal Bóng head and shoulders, low-poly, a slash cut across with purple blood pixels flying, paper background, orange voxel small in a corner.
+   Each: no text (or at most "X" pixel glyph), no gradients/glow, strong silhouette.
+2. Make `icons-preview.html` (contact sheet: each concept at 512, 192, 96, 48 px, on light and dark launcher backgrounds, plus a round-mask version) → deploy to Pages.
+3. **Stop and ask the user in Vietnamese:** "Chọn icon 1, 2 hay 3?" with the Pages link. Wait for the reply in this same session.
+4. When the user answers: generate Android adaptive icons (foreground/background layers, all mipmap densities, round), Play-store 512, favicon set + PWA icons from the chosen one; set the app name "XELVE"; build APK.
+Done when: [ ] user picked; [ ] installed APK shows the new icon on the launcher (adaptive mask looks right)
+Model: Opus 5.5 · medium — visual quality is the whole point
+Deploy: yes · APK: yes · Screenshots: ≤4

@@ -38,18 +38,21 @@ Not Superhot: no red glass people, no shattering-glass deaths, no "SUPER HOT" st
 | blood-dat | #6B4A06 | Bóng khiên |
 Materials: chì #59606C, nhôm #C8D0D8, thuỷ tinh #A6DCE8 (alpha .6), magie #D8D8CF, cao su #24242A, đá khô #C4E9FF, đồng #B5672C.
 
-## UI
-- Style: paper + ink. Square corners (radius 2px), solid 2px ink borders, hard offset shadow (3px, ink, no blur). Pressed = translate 2px + shadow gone + scale .97 + sound.
-- Font: Be Vietnam Pro (@fontsource, latin+vietnamese subsets): 900 for display (tight tracking −2%), 600 for buttons, 400 body. Numbers tabular. Line-height ≥1.15 display, ≥1.4 buttons.
-- Icons: own SVG set, 24 grid, 2px stroke, square caps, stepped corners (pixel feel). Based on Lucide/Tabler shapes, redrawn. No emoji.
-- Minimal text: icons first; labels only where an icon is ambiguous.
-- HUD: HP = segmented pixel bar top-left; charge meter = thin arc near the right thumb zone; Đỡ bottom-left; < > ↑ slide in only in duel/boss arenas; pause top-right. Everything anchored to safe-area corners.
-- Locked features: lock icon + "Sắp ra mắt".
-- Transitions: scene change = voxel wipe (screen fills with squares in the tap direction, 450 ms); menus = paper sheet slide with slight rotation settle.
-- Loading never switches to a separate screen: the current view gets the voxel wipe, a small cube in the corner fills as progress; boot = XELVE logo assembling from voxels.
+## UI (v2 — game UI, not web UI; user: v1 looked like generic AI web UI)
+Concept: **"Vết chém trên giấy kỹ thuật."** Every UI surface is a black ink slab or a strip of technical drawing paper, cut on a diagonal as if sliced by the weapon. Selection = the orange voxel. Transitions = the screen gets slashed.
+- **Shapes:** no rectangles-with-borders cards. Panels are parallelograms / slabs with one or two 12–18° diagonal cuts (clip-path polygons). Buttons are ink slabs skewed −12°, text un-skewed inside. Corners sharp.
+- **Layering:** big decorative-free typography as structure: chapter/mode titles in Be Vietnam Pro 900 at 12–22vh, tight tracking, cropped by the screen edge or by a slab. Small labels set rotated 90° along slab edges like drawing annotations (measurement ticks, "XEL-07", level numbers).
+- **Paper:** technical-drawing strip = paper colour with thin stone hairline ruler ticks on one edge only (the only "pattern" allowed; no grid backgrounds).
+- **Selection:** the orange voxel square snaps next to the focused item (FLIP, 160 ms); focused slab shifts 6px along its skew.
+- **Signature transition:** "chém màn": a diagonal ink slash wipes across (220 ms), the screen splits along it and the halves slide apart (380 ms) revealing the next screen. Back = reverse. Reduced motion: crossfade 150 ms.
+- **HUD:** HP = 6 short skewed ink bars with a paper hairline; Lực = a skewed bar that fills from the weapon side; boss bar = full-width ink slab at the top with the boss name rotated small at its left end; contextual buttons (Đỡ, ‹ › ↑) = skewed ink slabs with white glyphs, press = slab drops 3px + white flash frame 1 frame.
+- **Cards (end of level, game over):** huge number/word + one slab of actions; enters with "chém màn".
+- **Tutorial prompts (allowed now):** one short line, ≤ 8 words, in a skewed ink slab at bottom-centre with the relevant icon ("Vuốt để chém", "Giữ Đỡ khi nó đánh"). Shows the first time a mechanic appears, hides after the player does it twice. No paragraphs, no "Mẹo" boxes.
+- Font, icons, sound rules unchanged: Be Vietnam Pro (900/600/400), own SVG icons 2px square caps, no emoji.
+- Text still minimal: icons first.
 
 ## Bans (name these in every spec)
-Gradients, neon, glow, soft bloom, coloured/blurred shadows, frosted glass/backdrop-filter, emoji, decorative blobs/dots/noise backgrounds in UI, pill buttons, centred hero with slogan, a column of buttons in the middle of the main menu, hint/"Mẹo" boxes, monospace ALL CAPS as decoration, arcade/8-bit sounds, high bright UI sounds, cringe/try-hard words.
+Gradients, neon, glow, soft bloom, coloured/blurred shadows, frosted glass/backdrop-filter, emoji, decorative blobs/dots/noise backgrounds in UI, pill buttons, centred hero with slogan, a column of buttons in the middle of the main menu, "Mẹo" boxes or explanatory paragraphs (one-line tutorial prompts are allowed, see UI), monospace ALL CAPS as decoration, arcade/8-bit sounds, high bright UI sounds, cringe/try-hard words.
 
 ## Sound direction
 Realistic and heavy. Swing whoosh tracks tip speed. Impacts layered transient/body/low per material (metal ring, flesh thud, glass shatter, rubber bounce). Heavy charged hit adds a sub-bass drop + short silence before (anticipation). Slow-mo: lowpass + pitch down world, heartbeat. UI: low "cộc" body + dry "tách" transient, no high chimes. Music: slot only (assets/music/*.mp3 picked up automatically; volume slider exists).

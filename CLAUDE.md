@@ -29,7 +29,7 @@ TypeScript + Vite + three.js → Capacitor Android APK; web preview on GitHub Pa
 
 ## Hard rules
 - Every player-facing string lives in src/i18n/vi.ts. Use the lexicon in DESIGN.md. No invented words, no slang, no emoji.
-- Bans: gradients, neon, glow/soft bloom, blurred or coloured shadows, backdrop-filter, pill buttons, hint boxes, arcade/8-bit sounds.
+- Bans: gradients, neon, glow/soft bloom, blurred or coloured shadows, backdrop-filter, pill buttons, explanatory paragraphs (one-line tutorial prompts are OK), arcade/8-bit sounds.
 - The player never controls look direction; all looks are authored shots + spring layers (camera.md).
 - Gameplay values live in data/registry files, not inline. New enemy/material/blueprint = 1 file + 1 registry line.
 - Files ≤ ~300 lines. Pure logic (analyze, damage) has unit tests.

@@ -209,3 +209,8 @@ Next: P14
 - Gotchas: playwright is not a project dependency here; use playwright-core as scripts/shots.mjs does.
 
 Next: none (Chương 1 complete)
+
+## Manager — round 2 (2026-11-28)
+- User playtest feedback turned into P15–P21 (PHASES.md "Round 2"). story.md rewritten (v2: mystery, family drama removed). DESIGN.md UI section rewritten (v2: game UI concept "Vết chém trên giấy kỹ thuật"); one-line tutorial prompts now allowed.
+
+Next: P15
