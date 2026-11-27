@@ -3,7 +3,7 @@
 Each phase = one session. Status: [TODO] / [DONE] / [PARTIAL]. Every UI/look phase restates the bans from DESIGN.md.
 APK only where it says `APK: yes`. `Deploy: yes` = Pages preview (web link, no install).
 
-## P0a · Bản chơi thử 30 giây [TODO]
+## P0a · Bản chơi thử 30 giây [DONE]
 Read: CLAUDE.md, docs/DESIGN.md#effects, docs/spec/camera.md#2, prototype/*.ts (drafts, typecheck them first)
 Do:
 - Write prototype/main.ts wiring the drafts: title (tap → fullscreen + orientation lock + audio unlock) → `wake` → walk the corridor (glance at Ve's doodle at s 2.2–4) → encounter 1 at s=8.5 (3 Bóng from doors −9, −11.5, −15) → clear beat → encounter 2 at s=19 (doors −21, −23, far end) → stop at s=31, look at lift, end card.

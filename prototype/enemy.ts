@@ -15,7 +15,7 @@ function limb(len: number, r0: number, r1: number) {
 export class Bong {
   root = new THREE.Group(); hips = new THREE.Group(); torso: THREE.Mesh; head: THREE.Mesh
   armL = new THREE.Group(); armR = new THREE.Group(); legL = new THREE.Group(); legR = new THREE.Group()
-  foreL: THREE.Mesh; foreR: THREE.Mesh; shinL: THREE.Mesh; shinR: THREE.Mesh
+  foreL!: THREE.Mesh; foreR!: THREE.Mesh; shinL!: THREE.Mesh; shinR!: THREE.Mesh
   hp = 30; state: State = 'emerge'; st = 0
   blood = PAL.bloodTim
   vel = new THREE.Vector3(); phase = Math.random() * 6; slotX = 0
