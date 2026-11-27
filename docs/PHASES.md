@@ -113,7 +113,8 @@ Done when: [ ] full fight playable start→end · [ ] 30+ fps at Thấp on 240p
 Model: Opus 5.5 · medium — biggest set piece
 Deploy: yes · APK: yes · Screenshots: ≤4
 
-## P12 · Chương 1: màn chơi & cốt truyện [TODO]
+## P12 · Chương 1: màn chơi & cốt truyện [PARTIAL]
+Done: L1–L4 (chapter runner, rooms, voice 1–4, pickups, Xưởng 3×3/5×5). Left → P12b: L5 wiring, L6, L7, L8 wiring + messages 5–6, remaining rooms (road), Ve's doodles/tutorial beats for L5/L8, end card.
 Read: docs/spec/levels.md, docs/spec/story.md, docs/spec/camera.md#3
 Do: room builders (corridor, office, stairwell, alley, lobby, road, carpark), L1–L8 data, voice messages, pickups, Ve's doodles, tutorial beats, chapter end card. If too big: L1–L4 first, mark PARTIAL.
 Done when: [ ] Chapter 1 playable start→end · [ ] every setup/payoff in story.md present

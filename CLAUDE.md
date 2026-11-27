@@ -25,7 +25,7 @@ TypeScript + Vite + three.js → Capacitor Android APK; web preview on GitHub Pa
 - src/story/ — voice messages, pickups, chapter cards
 - src/audio/ — engine, synth recipes, reverb, music slot
 - src/ui/ — HUD, menus, icons, tokens.css · src/i18n/vi.ts — ALL player-facing text
-- (prototype/ folder is gone: moved into src/ in P0b; slice lives in src/scenes/slice.ts)
+- src/scenes/chapter.ts — Chapter 1 runner for every rail level (data in src/levels/ch1/Lx.ts; slice.ts is gone, P12)
 
 ## Hard rules
 - Every player-facing string lives in src/i18n/vi.ts. Use the lexicon in DESIGN.md. No invented words, no slang, no emoji.

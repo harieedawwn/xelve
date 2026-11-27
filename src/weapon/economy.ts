@@ -35,3 +35,6 @@ export const affordable = (owned: Wallet, d: WeaponDesign) => { const c = cost(d
 // ---- the saved wallet: save().materials holds stock per material id, plus Màu under 'mau'
 export const wallet = (): Wallet => { const { [MAU]: mau = 0, ...stock } = save().materials; return { mau, stock } }
 export function earn(id: 'mau' | string, n: number) { const m = save().materials; m[id] = Math.max(0, (m[id] ?? 0) + n); persist() }
+
+/** Xưởng grid side from the unlock flags (levels.md: L2 3×3, L4 5×5, L6 8×8) */
+export function khoiSize(s: { unlocked: string[] }) { return s.unlocked.includes('grid8') ? 8 : s.unlocked.includes('grid5') ? 5 : s.unlocked.includes('grid3') ? 3 : 1 }

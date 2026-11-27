@@ -7,13 +7,14 @@ import '@fontsource/be-vietnam-pro/vietnamese-600.css'
 import '@fontsource/be-vietnam-pro/latin-900.css'
 import '@fontsource/be-vietnam-pro/vietnamese-900.css'
 import * as THREE from 'three'
-import { loadSave } from './core/save'
+import { loadSave, save } from './core/save'
 import { settings, setSetting } from './core/settings'
 import { benchmark } from './core/quality'
 import { Renderer } from './render/pipeline'
 import { Audio } from './audio/engine'
 import { UI } from './ui/ui'
-import { startSlice } from './scenes/slice'
+import { startChapter } from './scenes/chapter'
+import { level, CH1 } from './levels/ch1'
 import { startFxTest } from './scenes/fxtest'
 import { startCamTest } from './scenes/camtest'
 import { startEnemyTest } from './scenes/enemytest'
@@ -53,6 +54,8 @@ async function boot() {
     setSetting('tier', tier)
   } else await new Promise(r => setTimeout(r, 900)) // logo finishes assembling
   ui.setReady()
-  startSlice(canvas, renderer, ui, audio, settings().tier!)
+  const q = new URLSearchParams(location.search)
+  const want = Number(q.get('level')) || Math.min(save().progress.level + 1, CH1.length)
+  startChapter(canvas, renderer, ui, audio, settings().tier!, level(want) ?? CH1[0], q.get('go') === '1')
 }
 boot()

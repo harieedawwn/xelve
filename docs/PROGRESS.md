@@ -159,3 +159,14 @@ Next: P11
 - Gotchas: `rig.rail` is swapped to a tiny 2-point rail at each cover (and at the family car) so endMove absorbs no offset. Seam targets are only swept while `assault` is true. `__dong` exposed for tests (dash, leap, brain, body…).
 
 Next: P12
+
+## P12 · Chương 1: màn chơi & cốt truyện — PARTIAL (L1–L4 done)
+- Data: src/levels/ch1/{types,L1..L4,index}.ts (id, room, length, speed, encounters, pickups, message, doodles, unlocks, forge). New level = 1 file + 1 line.
+- Rooms: src/levels/rooms.ts `buildRoom(scene, 'office'|'stairwell'|'alley')` (+ existing corridor.ts, lobby.ts, carpark.ts). Office: desks, glass partitions, Ve's wall of rubbed-out faces, taped sketchbook page, framed silver-car drawing. Stairwell: steps, rail, pipes, window frames. Alley: shopfronts, TV shop with animated static screens, welding crate, Ve's sticker on a shutter.
+- Runner: src/scenes/chapter.ts replaces slice.ts (deleted). `?level=N[&go=1]` (go=1 skips the title); default = save.progress.level+1. Flow: walk → encounters → pickup (stop, look, object 2 s in front of the eyes + caption) → voice message → level end: unlocks saved, Xưởng opens (L2 3×3, L4 5×5), then the next level by page load.
+- Story: src/story/voice.ts (shared messages 1–5; tap = finish text, hold 0.6 s = skip ring), progress.ts (completeLevel, pickup names), pickups.ts (page / material lump). `khoiSize(save)` in economy.ts from flags grid3/grid5/grid8. i18n: msg.1–5, level.1–4, note.l2, drop.grid3/5.
+- Checked: tsc, 133 vitest (7 new level-data tests), build; headless 640×360 bot ran L2 start→end (3 waves, page pickup, message 2, Xưởng opens, unlocks saved), no page errors. L3 and L4 bots also ran start→end with no page errors (pickups Chì+Nhôm, Magie; unlocks l3/l4, grid5 saved).
+- Left (P12b): (1) L5 (lobby + boss1 → needs routing into the chapter flow + Bản vẽ gating), L6 road room + Bóng khiên + Bản vẽ Búa pickup + message 5 + Cao su, L7 car park + Bóng vỡ + Đá khô, L8 = boss2 + message 6 + end card; chain `?level=` through them; (2) tutorial beats (ghost finger in L1, Ve's 3-frame doodle exists only in corridor.ts; L5/L8 pulses exist in boss scenes); (3) boss2ui.voice should use story/voice.ts; (4) material pickups give stock but Xưởng does not enforce Màu yet (P13); (5) death inside a level restarts the current wave only; (6) 'run' encounter mode unused; (7) stairwell is flat (no descent), Ve's doodles list unused.
+- Gotchas: scenes read `lv.pickups` in order — keep `atS` sorted and not inside an encounter's stop; message waits until no encounter is pending before its atS.
+
+Next: P12b (finish P12: L5–L8)

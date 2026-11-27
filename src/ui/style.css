@@ -118,3 +118,11 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 .chcard.show { opacity: 1; transform: none; }
 .chcard h2 { font: 900 clamp(26px, 7vmin, 56px)/1.1 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; color: var(--ink); }
 .chcard p { font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; color: var(--stone); }
+
+/* voice message skip ring (P12): hold 0.6 s */
+.voice { position: fixed; }
+.voice .ring { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--ve); transform: scaleX(0); transform-origin: left; }
+
+/* pickup caption (P12): ink label, bottom-centre, no box chrome beyond the flat ink block */
+.pickcap { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 8vmin); transform: translate(-50%, 8px); background: var(--ink); color: var(--paper); padding: 1.2vmin 2.4vmin; font: 600 clamp(13px, 2.6vmin, 18px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; opacity: 0; transition: opacity 200ms, transform 300ms var(--ease-in); pointer-events: none; }
+.pickcap.show { opacity: 1; transform: translate(-50%, 0); }

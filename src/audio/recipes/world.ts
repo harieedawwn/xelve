@@ -20,7 +20,10 @@ const heartbeat: Recipe = (s, t) => {
 const slowIn: Recipe = (s, t) => s.tone(t, 'sine', 70, 38, 0.9, 0.45)
 const slowOut: Recipe = (s, t) => s.hit(t, 0.25, 'bandpass', 500, 0.9, 0.25, 2400)
 
+const pickup: Recipe = (s, t) => { s.tone(t, 'sine', 392, 392, 0.25, 0.18); s.tone(t + 0.09, 'sine', 523, 523, 0.4, 0.16); s.hit(t, 0.12, 'bandpass', 2400, 2, 0.06, 1800) }
+
 export const world: Record<string, Def> = {
+  'pickup': { fn: pickup, gap: 300 },
   'step.concrete': { fn: step(900, 95), gap: 180, variants: 3 },
   'step.metal': { fn: step(1400, 110, 520), gap: 180, variants: 3 },
   'step.wood': { fn: step(700, 130, 240), gap: 180, variants: 3 },
