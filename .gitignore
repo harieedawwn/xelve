@@ -1,0 +1,7 @@
+node_modules
+dist
+dist-single
+*.keystore
+*.jks
+.env
+shots/
