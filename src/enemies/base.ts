@@ -5,6 +5,7 @@ import { PAL } from '../render/palette'
 import type { FX } from '../render/fx'
 import type { HitMeta } from '../combat/sweep'
 import { clamp, lerp, smooth } from '../camera/springs'
+import { Status } from '../combat/status'
 
 export interface EnemyDef {
   id: string; hp: number; blood: number; scale: number
@@ -32,6 +33,8 @@ export class Enemy {
   onSpawn: (e: Enemy) => void = () => {}
   vel = new THREE.Vector3(); phase = Math.random() * 6; slotX = 0
   hitCooldown = 0; struckPlayer = false; sound = 'bong'
+  status = new Status()
+  private lastFx: FX | null = null; private tinted: number | null = null; private dotT = 0
   protected seed = Math.random() * 10
   protected wounds: THREE.Mesh[] = []
   protected lean = 0; protected flinch = 0; protected flinchV = 0
@@ -92,10 +95,13 @@ export class Enemy {
   takeHit(dmg: number, at: THREE.Vector3, dir: THREE.Vector3, fx: FX, weak: boolean, meta?: HitMeta) {
     this.blocked = false
     dmg = this.filter(dmg, at, dir, fx, weak, meta)
-    this.hitCooldown = 0.08
+    this.hitCooldown = 0.08; this.lastFx = fx
     if (dmg <= 0) { this.blocked = true; return false }
+    const m = meta?.fx
+    dmg *= this.status.shatter(meta?.charge ?? 0, !!meta?.blunt)
     this.hp -= dmg
-    this.vel.addScaledVector(new THREE.Vector3(dir.x, 0, dir.z).normalize(), 1.4 + dmg * 0.05)
+    this.vel.addScaledVector(new THREE.Vector3(dir.x, 0, dir.z).normalize(), (1.4 + dmg * 0.05) * (m?.knock ?? 1))
+    if (m) for (const x of m.statuses) { this.status.apply(x.kind, x.secs, x.power); if (x.kind === 'chaymau' && x.power > 1) fx.blood(at, dir, this.blood, 16) }
     this.flinchV += (weak ? 9 : 6) * (Math.random() < 0.5 ? -1 : 1)
     const w = new THREE.Mesh(new THREE.BoxGeometry(0.06 + Math.random() * 0.05, 0.02, 0.02), new THREE.MeshBasicMaterial({ color: this.blood }))
     const host = weak ? this.head : this.torso
@@ -110,7 +116,15 @@ export class Enemy {
   }
 
   protected setState(s: EState) { this.state = s; this.st = 0 }
+  /** solid tint (Đóng băng / Bỏng); null = back to the body material */
+  private setTint(c: number | null) {
+    if (c === this.tinted) return; this.tinted = c
+    const m = c === null ? (this.flashing ? flashMat(this.blood) : this.mat) : flashMat(c)
+    for (const p of this.parts) p.material = m
+    this.head.material = this.torso.material = m
+  }
   protected flash(on: boolean) {
+    if (this.tinted !== null) { this.flashing = on; return }
     if (on === this.flashing) return; this.flashing = on
     const m = on ? flashMat(this.blood) : this.mat
     for (const p of this.parts) p.material = m
@@ -135,6 +149,10 @@ export class Enemy {
 
   update(dt: number, player: THREE.Vector3, onStrike: (e: Enemy) => void) {
     if (!this.alive) return
+    const dot = this.status.tick(dt)
+    if (dot > 0) { this.hp -= dot; this.dotT += dt; if (this.hp <= 0 && this.lastFx) { this.setTint(null); this.die(new THREE.Vector3(0, 0, -1), this.lastFx); return } }
+    this.setTint(this.status.frozen ? 0xc4e9ff : this.status.burning && Math.sin(this.dotT * 40) > 0 ? PAL.ve : null)
+    if (this.status.frozen) return
     const d = this.def, sprint = d.gait === 'sprint'
     this.st += dt; this.hitCooldown -= dt
     const p = this.root.position
@@ -165,6 +183,8 @@ export class Enemy {
         if (this.st > d.recover) this.setState('approach'); break
       case 'stagger': if (this.st > 0.4) this.setState('approach'); break
     }
+    if (this.status.stunned && this.state !== 'stagger' && this.state !== 'emerge') this.setState('stagger')
+    if (this.status.stunned) this.st = 0
     if (this.state !== 'lunge') p.y *= Math.exp(-14 * dt)
     if (dist > 0.01 && speed > 0) p.addScaledVector(to.normalize(), Math.min(dist, speed * dt))
     p.addScaledVector(this.vel, dt); this.vel.multiplyScalar(Math.exp(-6 * dt))

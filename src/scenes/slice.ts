@@ -9,7 +9,7 @@ import { Bong } from '../enemies/bong'
 import { Weapon } from '../combat/weapon'
 import { equippedDesign } from '../weapon/store'
 import { PROFILES } from '../combat/profiles'
-import { sweep } from '../combat/sweep'
+import { sweep, spreadBurn } from '../combat/sweep'
 import { Bus } from '../combat/bus'
 import { Motes } from '../combat/motes'
 import { PlayerHP, MAX_HP } from '../combat/player'
@@ -155,7 +155,7 @@ function step(realDt: number) {
   rig.update(dt, realDt)
   weapon.update(time.hitstop > 0 ? 0 : realDt, now)
   for (const e of enemies) e.update(dt, player, onPlayerStruck)
-  if (deadT <= 0) sweep(weapon, enemies, fx, bus)
+  if (deadT <= 0) { sweep(weapon, enemies, fx, bus); spreadBurn(enemies) }
   audio.swing(weapon.touching ? weapon.tipSpeed : 0, scale)
   if (weapon.tipSpeed > 3 && weapon.touching && dt > 0) fx.smearPush(weapon.inner, weapon.tip, now)
   fx.update(dt, now)

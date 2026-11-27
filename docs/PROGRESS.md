@@ -97,3 +97,16 @@ Next: P6
 - Gotchas: `assemble()` anchors are integer cells (Búa cán sits at x=3 under a 10-wide head). Bản vẽ grids are shown rotated: view col = h−1−y, view row = x. `__forge` is exposed on window for tests.
 
 Next: P7
+
+## P7 · Phân tích vũ khí & vật liệu — DONE
+- src/weapon/regions.ts (pure): thickness runs → sắc/vừa/cùn, tips (mũi), necks (BFS layers from grip; narrowest, outermost cut where mass beyond / width > NECK_LIMIT 40, min mass 4), region tags cạnh/mũi/lõi/đầu. analyze.ts: `analyze` + `analyzeVoxels(a, connected, loose)`; Stats gained tips, neck, cls (nhẹ ≤ 6 < vừa ≤ 60 < nặng, inertia Σρd², tuned so filled Dao=nhẹ, Kiếm=vừa, Búa=nặng), tags.
+- Materials: `MaterialDef.effect {region, weak, minCharge, dmg, knock, status, noCut, chip, bounce, spread}` + `speed` (nhôm −30 % inertia by mass share). chì ×1.3 dmg ×1.5 knock; thuỷ tinh cạnh Chảy máu ×1.6 + chips on armour; magie cạnh/mũi + Điểm yếu → Bỏng 3 s, spreads 1.2 m (`spreadBurn`); cao su no cut, Đẩy lùi ×2.5, bounce; đá khô lực ≥ .9 → Đóng băng 2 s (heavy/cùn hit shatters ×3).
+- src/combat/effects.ts `resolveEffects(contacts, ctx)` (pure; every sharp cạnh contact = base Chảy máu), status.ts (`Status`: chaymau/bong DoT, dongbang freezes time, choang), sweep.ts picks the contact per blade sample and passes `HitMeta.fx`; Enemy has `status` (DoT kills, tint blue/ember, frozen = no update, stunned = held in stagger, Đẩy lùi multiplies knockback).
+- Weapon: `contacts[4]` per sample, `current` stats, `breakNeck()` (once, on a full-lực hit of a charged weapon; bus event `break`), `chip(k)`, `restore()` (end of level regrows). Class from analyze() sets Lực (`charged = cls ≠ nhẹ`).
+- Economy: src/weapon/economy.ts (pure cost/left/canPaint/affordable; wallet in save.materials, Màu under `mau`, `earn()`). i18n keys for status/class/"Dễ gãy" added.
+- Phòng tập `?enemies`: buttons `mat:<id>` (src/weapon/demo.ts), `bua gãy`, `restore`; status letters in the info line.
+- Checked: tsc, 83 vitest (34 new: tips/thickness/tags/necks/class/economy/effects/status/weapon break+chip+restore), build OK. Headless 640×360: thuỷ tinh → Chảy máu, magie → Bỏng on both enemies (spread), cao su → no bleed, đá khô → frozen; no console errors.
+- Left: (1) Xưởng UI: show class, "Dễ gãy" crack mark on the neck region, loose voxels etc. (keys exist); (2) forge does NOT enforce Màu/stock yet (no income until P12 — enforcing now would soft-lock); wire `canPaint` + earn from blood/objects in P12/P13; (3) Choáng/Đẩy lùi have no material source yet (Phản đòn P8 uses Choáng); (4) real-phone feel; thresholds NECK_LIMIT/CLASS are first guesses; (5) Thuỷ tinh alpha render, dong/gac/dong_core boss materials (Ch2/P10/P11).
+- Gotchas: Khối weapons are always nhẹ (no Lực, no neck break); `Enemy.update` returns early while frozen; tint overrides the telegraph flash until thawed.
+
+Next: P8

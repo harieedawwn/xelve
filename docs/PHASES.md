@@ -78,7 +78,7 @@ Done when: [ ] drawing on a 360-px-tall phone viewport is comfortable (cells ≥
 Model: Opus 5.5 · medium — touch UX is easy to get wrong
 Deploy: yes · Screenshots: ≤4
 
-## P7 · Phân tích vũ khí & vật liệu [TODO]
+## P7 · Phân tích vũ khí & vật liệu [DONE]
 Read: docs/spec/weapon.md#4 #6 #7
 Do: analyze() (connectivity, mass, reach, inertia, thickness, tips, necks, class, regions) with unit tests; material registry with effects per region; status effects (Bỏng, Chảy máu, Đóng băng, Choáng, Đẩy lùi); breakable necks; economy (Màu, stock).
 Done when: [ ] tests cover each rule · [ ] each material demonstrable in Phòng tập

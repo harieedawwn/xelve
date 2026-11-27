@@ -5,8 +5,10 @@ import { PAL } from '../render/palette'
 import { swingSpring, speedCap, chargeTime } from './damage'
 import { PROFILES, Profile } from './profiles'
 import type { WeaponDesign } from '../weapon/model'
-import { assemble } from '../weapon/model'
-import { analyze } from '../weapon/analyze'
+import { assemble, Assembled, Voxel } from '../weapon/model'
+import { analyze, analyzeVoxels, connectivity, Stats } from '../weapon/analyze'
+import { keyOf } from '../weapon/regions'
+import type { Contact } from './effects'
 import { weaponMesh } from '../weapon/mesh'
 import { designProfile } from '../weapon/runtime'
 
@@ -101,20 +103,64 @@ export class Weapon {
     }
   }
 
+  /** per blade sample: what material/regions the sample touches (weapon.md#6: effects need the region to make contact) */
+  contacts: Contact[][] = [[], [], [], []]
+  private design: WeaponDesign | null = null; private asm: Assembled | null = null
+  private neckBroken = false
+
   /** swap in a Xưởng design: new mesh, samples from grip to the farthest connected voxel, profile from analyze() */
   setDesign(d: WeaponDesign) {
     const st = analyze(d)
     if (!st.connected.length) return
-    const a = assemble(d), s = a.voxel
+    this.design = d; this.asm = assemble(d); this.neckBroken = false
+    this.build(st)
+  }
+
+  private build(st: Stats) {
+    const a = this.asm!, s = a.voxel
     for (const o of this.blade) this.mesh.remove(o)
     const g = weaponMesh(st.connected, a.grip, s, PAL.ink)
     this.blade = [...g.children]; for (const o of this.blade) this.mesh.add(o)
     let far = st.connected[0], best = -1
     for (const v of st.connected) { const dd = (v.x - a.grip[0]) ** 2 + (v.y - a.grip[1]) ** 2; if (dd > best) { best = dd; far = v } }
     const tx = (far.x - a.grip[0]) * s, ty = (a.grip[1] - far.y) * s + (best === 0 ? s : 0)
-    for (let i = 0; i < 4; i++) this.samplesLocal[i].set(tx * (0.25 + 0.75 * i / 3), ty * (0.25 + 0.75 * i / 3), 0)
+    for (let i = 0; i < 4; i++) {
+      const sx = tx * (0.25 + 0.75 * i / 3), sy = ty * (0.25 + 0.75 * i / 3)
+      this.samplesLocal[i].set(sx, sy, 0)
+      // every voxel within ~2 cells of the sample, nearest first (a sample on empty space still touches the closest voxel)
+      const near: { v: Voxel; d: number }[] = []
+      for (const v of st.connected) near.push({ v, d: Math.hypot((v.x - a.grip[0]) * s - sx, (a.grip[1] - v.y) * s - sy) })
+      near.sort((p, q) => p.d - q.d)
+      this.contacts[i] = near.filter((n, j) => j === 0 || n.d <= 2 * s).map(n => ({ mat: n.v.mat, tags: st.tags.get(keyOf(n.v))?.tags ?? [] }))
+    }
+    this.current = st
     this.setProfile(designProfile(st))
   }
+  current: Stats | null = null
+
+  /** a heavy charged hit snaps the weakest neck once per level (weapon.md#4.5); the part beyond falls off. */
+  breakNeck(): boolean {
+    const st = this.current
+    if (!st?.neck || this.neckBroken || !this.asm) return false
+    this.neckBroken = true
+    this.reshape(st.connected.filter(v => !st.neck!.keys.has(keyOf(v))))
+    return true
+  }
+  /** glass chips one voxel off the contact point when it hits armour (restored after the level) */
+  chip(k: number): boolean {
+    const st = this.current, c = this.contacts[k]
+    if (!st || !this.asm || st.connected.length < 2) return false
+    const m = c.find(x => x.mat === 'thuytinh'); if (!m) return false
+    const v = [...st.connected].filter(v => v.mat === 'thuytinh').sort((p, q) => (q.x - this.asm!.grip[0]) ** 2 + (q.y - this.asm!.grip[1]) ** 2 - (p.x - this.asm!.grip[0]) ** 2 - (p.y - this.asm!.grip[1]) ** 2)[0]
+    if (!v) return false
+    this.reshape(st.connected.filter(o => o !== v)); return true
+  }
+  private reshape(vs: Voxel[]) {
+    const a = this.asm!, kept = connectivity({ ...a, voxels: vs }).connected
+    if (kept.length) this.build(analyzeVoxels(a, kept, []))
+  }
+  /** end of level: broken necks regrow, chipped glass is back */
+  restore() { if (this.design) this.setDesign(this.design) }
 
   setProfile(p: Profile) {
     this.profile = p

@@ -6,7 +6,9 @@ import { buildCorridor } from '../levels/corridor'
 import { Weapon } from '../combat/weapon'
 import { PROFILES } from '../combat/profiles'
 import { equippedDesign } from '../weapon/store'
-import { sweep } from '../combat/sweep'
+import { sweep, spreadBurn } from '../combat/sweep'
+import { materialDemo, neckDemo } from '../weapon/demo'
+import { MATERIALS } from '../weapon/materials/registry'
 import { Bus } from '../combat/bus'
 import { Audio } from '../audio/engine'
 import { ENEMIES } from '../enemies/registry'
@@ -33,6 +35,7 @@ export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, au
     time.freeze(e.killed ? 0.09 : 0.06)
   })
 
+  bus.on('break', () => { audio.play('hit.heavy'); time.freeze(0.12) })
   const wire = (e: Enemy) => { e.onSound = (n) => audio.play(n); e.onSpawn = (k) => { wire(k); enemies.push(k) } }
   const spawn = (id: string, n = 1) => {
     for (let i = 0; i < n; i++) {
@@ -51,6 +54,9 @@ export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, au
   }
   Object.keys(ENEMIES).forEach(id => btn(id, () => spawn(id)))
   btn('x5 bong', () => spawn('bong', 5)); btn('x6 vo', () => spawn('vo', 6)); btn('clear', () => { enemies.forEach(e => e.alive && scene.remove(e.root)); enemies = [] })
+  // material demos (dev labels): each pole carries one material in its effect region; "bua" = heavy head on a thin handle (snaps once)
+  Object.keys(MATERIALS).forEach(id => btn('mat:' + id, () => weapon.setDesign(materialDemo(id))))
+  btn('bua gãy', () => weapon.setDesign(neckDemo())); btn('restore', () => weapon.restore())
   addEventListener('resize', () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); renderer.resize('tb') })
 
   const strike = () => { hp = hp <= 1 ? 6 : hp - 1; audio.playerHurt() }
@@ -59,13 +65,13 @@ export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, au
       const dt = time.tick(h, () => {}), now = time.now
       weapon.update(time.hitstop > 0 ? 0 : h, now)
       for (const e of enemies) e.update(dt, player, strike)
-      sweep(weapon, enemies, fx, bus)
+      sweep(weapon, enemies, fx, bus); spreadBurn(enemies)
       audio.swing(weapon.touching ? weapon.tipSpeed : 0, time.scale)
       fx.update(dt, now)
     },
     render: () => {
       renderer.render(scene, cam)
-      info.textContent = `alive ${enemies.filter(e => e.alive).length} · hits ${hits} · kills ${kills} · hp ${hp}`
+      info.textContent = `alive ${enemies.filter(e => e.alive).length} · hits ${hits} · kills ${kills} · hp ${hp} · ${enemies.filter(e => e.alive).map(e => (e.status.bleeding ? 'M' : '') + (e.status.burning ? 'B' : '') + (e.status.frozen ? 'Đ' : '') + (e.status.stunned ? 'C' : '')).filter(Boolean).join(' ')}`
     },
     fpsCap: () => 60,
   })
