@@ -43,3 +43,13 @@ Next: P1 (after user checks APK/Pages)
 - Gotchas: Chromium-only heap counter (performance.memory); `?fx` skips UI/benchmark.
 
 Next: P2
+
+## P2 · Camera — DONE
+- src/camera: rail.ts (Catmull-Rom, arc-length table, tangent, curvature), shots.ts (ShotTrack keys by rail distance, half-life spring 120–250 ms, `cut:true` only snap), moves.ts (wake, peek, coverDash, leap, dodge(side|'low'), pickup, cinematicCut), consts.ts. rig.ts rewritten: rail + shots + one authored move at a time (`rig.play`) + layers (gait bob, breathing 0.22/0.45 Hz after combat, accel sway, turn lean, jump/landing underdamped, attack coupling, hit kick, low-HP fov pulse, FOV ±14° clamp except leap) + trauma shake (decays and noise run on real time → hitstop freezes body, shake still settles). "Giảm rung camera" = ×0.35 on bob/shake/lean via `rig.reduceMotion` (slice updated; `shakeScale` removed).
+- Moves that move the body in world space (coverDash, leap) hand the leftover offset to the `off` spring at the end, so the body eases back onto the rail (no snap). Leap stops 1.6 m short of the target, calls `rig.onSlowmo(1.6, 0.25)` at apex and `rig.land(9)`.
+- Debug scene `?cam` (camtest.ts): curved rail, plays every move in sequence, buttons hitstop/hit/jump/lowHp/reduce; dev-only labels.
+- Checked: tsc clean, 15 vitest (rail, curvature sign, no look snaps, hitstop freeze vs shake decay, single move, leap slow-mo/landing, FOV clamp, reduce motion), build OK. Headless 640x360 `?cam`: all moves played, worst look speed ≤3.2°/frame outside cut (found + fixed a degenerate look target in the leap/debug track).
+- Left: feel on a real phone; footstep/landing sounds not wired (hooks `onStep`, `onLand` exist); slice still uses its own lookWant and `startWake`, shot tracks come with levels (P6+).
+- Gotchas: a look target at the camera's own position makes lookAt flip (≥150° snap) — keep targets away from the body; moves with `abs` must end near the rail or they ease back via the spring.
+
+Next: P3

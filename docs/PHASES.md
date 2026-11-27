@@ -43,7 +43,7 @@ Done when: [ ] effect test scene toggles every effect at all 3 tiers · [ ] 60 f
 Model: Sonnet 5.5 · medium — look locked by the slice
 Deploy: no · Screenshots: ≤4
 
-## P2 · Camera [TODO]
+## P2 · Camera [DONE]
 Read: docs/spec/camera.md (all), docs/spec/notes.md#first-person-camera
 Do: rail + speed profile, shot track with spring-blended look, all body layers from the table, trauma shake, moves library (wake, peek, coverDash, leap, dodge, pickup, cinematicCut), "Giảm rung camera". A debug scene that plays every move in sequence.
 Done when: [ ] all moves play in the debug scene · [ ] no snaps except `cut:true` · [ ] hitstop freezes body layers but shake decays

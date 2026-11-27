@@ -15,12 +15,14 @@ import { Audio } from './audio/engine'
 import { UI } from './ui/ui'
 import { startSlice } from './scenes/slice'
 import { startFxTest } from './scenes/fxtest'
+import { startCamTest } from './scenes/camtest'
 
 async function boot() {
   await loadSave()
   const canvas = document.getElementById('c') as HTMLCanvasElement
   const renderer = new Renderer(canvas)
   if (location.search.includes('fx')) { renderer.resize('tb'); startFxTest(renderer); return }
+  if (location.search.includes('cam')) { renderer.resize('tb'); startCamTest(renderer); return }
   const ui = new UI()
   const audio = new Audio()
   if (!settings().tier) {

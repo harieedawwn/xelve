@@ -49,7 +49,7 @@ applyTier(tier)
 const applySettings = () => {
   const st = settings()
   if (st.tier && st.tier !== tier) applyTier(st.tier)
-  audio.setMuted(!st.sound); audio.setLevel(1); rig.shakeScale = st.reduceShake ? 0.25 : 1
+  audio.setMuted(!st.sound); audio.setLevel(1); rig.reduceMotion = !!st.reduceShake
 }
 onSettings(applySettings); applySettings()
 addEventListener('resize', () => { rig.cam.aspect = innerWidth / innerHeight; rig.cam.updateProjectionMatrix(); applyTier(tier) })
