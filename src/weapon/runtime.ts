@@ -11,7 +11,7 @@ export function designProfile(st: Stats, id = 'design'): Profile {
   let fast = 0; for (const v of st.connected) fast += (mat(v.mat).speed ?? 0) * mat(v.mat).density * v.depth
   const inertia = Math.min(R.iMax, Math.max(R.iMin, Math.sqrt(st.inertia) * R.inertiaK * (1 - (st.mass ? fast / st.mass : 0))))
   return {
-    id, inertia, scale: 1, charged: st.cls !== 'nhe',
+    id, inertia, scale: 1, charged: st.cls !== 'nhe', cls: st.connected.length <= 1 ? undefined : st.cls,
     contactMass: Math.min(R.mMax, Math.max(R.mMin, st.mass * R.massK)),
     shape: st.connected.length <= 1 ? 'khoi' : st.sharp > 0.5 ? 'sac' : 'cun',
   }

@@ -79,6 +79,9 @@ export class Weapon {
   private rot = new THREE.Vector2()
   private tmpL = new THREE.Vector3()
   raise = 0
+  /** Đỡ held: the weapon goes crosswise in front of the face (0..1 eased) */
+  guarding = false; guard = 0
+  private guardPose = new THREE.Vector3(-0.12, -0.07, -0.42)
 
   constructor(camera: THREE.Camera) {
     camera.add(this.pivot)
@@ -176,6 +179,8 @@ export class Weapon {
     const speedN = clamp(this.tipSpeed / 7, 0, 1)
     if (this.touching) this.target.set(this.finger.x * 0.36, this.finger.y * 0.21 - 0.03, -0.5 - speedN * 0.28)
     else this.target.copy(this.rest)
+    this.guard += ((this.guarding ? 1 : 0) - this.guard) * (1 - Math.exp(-22 * dt))
+    if (this.guard > 0.001) this.target.lerp(this.guardPose, this.guard)
     const p = this.spring.step(this.target, dt)
     const cap = speedCap(this.profile.inertia), sv = this.spring.v.length()
     if (sv > cap) this.spring.v.multiplyScalar(cap / sv)
@@ -184,7 +189,7 @@ export class Weapon {
     const v = this.spring.v
     this.rot.x += ((-0.35 - this.raise * 0.75 - clamp(v.y, -4, 4) * 0.12) - this.rot.x) * (1 - Math.exp(-18 * dt))
     this.rot.y += ((-clamp(v.x, -5, 5) * 0.32 - (this.touching ? this.finger.x * 0.5 : 0.25)) - this.rot.y) * (1 - Math.exp(-18 * dt))
-    this.mesh.rotation.set(this.rot.x, 0, this.rot.y)
+    this.mesh.rotation.set(this.rot.x * (1 - this.guard) - 0.15 * this.guard, 0, this.rot.y * (1 - this.guard) - 1.45 * this.guard)
     this.mesh.updateMatrixWorld(true)
     for (let i = 0; i < 4; i++) { this.prev[i].copy(this.cur[i]); this.cur[i].copy(this.samplesLocal[i]).applyMatrix4(this.mesh.matrixWorld) }
     this.inner.copy(this.cur[1]); this.tip.copy(this.cur[3])

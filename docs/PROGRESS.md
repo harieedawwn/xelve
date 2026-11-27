@@ -110,3 +110,19 @@ Next: P7
 - Gotchas: Khối weapons are always nhẹ (no Lực, no neck break); `Enemy.update` returns early while frozen; tint overrides the telegraph flash until thawed.
 
 Next: P8
+
+## P8 · Vũ khí nặng, Đỡ, Né — DONE
+- src/combat/defense.ts (pure, data `DEFENSE`): `Defense` press/release (Đỡ), dodge(side) (Né, 0.4 s + 0.25 s cooldown), `resolve(attack, now)` → parry/block/dodge/hit + damage; Phản đòn = Đỡ pressed ≤150 ms before impact (no perfect window if pressed again within 0.35 s = no mashing; one parry per press); Đỡ soaks 1 dmg (slam 2 → 1); counter window 0.5 s after Né, = Choáng 1.2 s after Phản đòn, `counterMult` ×1.5. `canBlockWith(cls, duel)`: nặng always, vừa only in duels.
+- src/combat/duel.ts (pure): `MOVES` registry (overhead/sweepL/sweepR/thrust/feint/slam: pose, windup, recover, dmg, dodge side or null, feint switch at 200 ms) + `DuelScript` (telegraph → switch → slow 300 ms before impact → impact → recover; `stagger(secs)`). Người gác (P10) reuses it with its own order.
+- Profile has `cls` (nhe/vua/nang, Khối none); test profile `vua` added; designProfile passes analyze() class.
+- Weapon: `guarding` → crosswise guard pose (eased). Đỡ that blocks spends Lực; Phản đòn refills it to full (counter at full Lực).
+- UI: src/ui/combatPad.ts — left-thumb cluster (↑ / ‹ Đỡ › grid, ≥64 px, inside left 40 %, square + hard ink shadow, fires on pointerdown, Đỡ releases on up/cancel; hidden buttons keep their slot) + Lực bar under HP (fill = scaleX, full = vệ colour). i18n keys act.* / hud.luc.
+- Sounds (recipes/duel.ts): parry (50 ms silence → bright ring + sub + tail, distinct from all hits), block, dodge, guard.up, duel.telegraph, duel.whoosh.
+- Phòng tập đấu `?duel` (scenes/dueltest.ts, `&weapon=nhe|vua|nang|khoi`): DuelDummy (enemies/dummy.ts: Bóng body + baton, poses readable — baton high / out left / out right / pointed at camera, crack flash last 150 ms) loops all 6 moves; slow-mo 0.3× from 300 ms before each impact (≤0.6 s real) with colour drain; Né = authored body sidestep on a spring + roll; Phản đòn = hitstop 160 ms + 3-frame impact frame + parry sound + 0.4 s slow-mo + dummy reels; dummy's baton blocks hits outside counter windows. Dev top bar swaps weapon class; info line counts answers.
+- Slice: pad with Đỡ when the weapon is nặng; Bóng strikes go through `Defense` (Phản đòn → Choáng 1.2 s + push back); Lực bar for charged weapons.
+- shots.mjs: duel room on all 6 viewports — pad inside left 40 %, ≥64 px, no overlap/outside. All ok.
+- Checked: tsc, 95 vitest (12 new: Đỡ class rule, perfect window, mashing, counter windows, Né sides/thrust/cooldown, script order/slow timing/feint/stagger), build, `npm run shots` ok. Headless 640×360 `?duel&weapon=vua` bot answering via real pad buttons: all 6 moves seen, 3 Phản đòn, 3 Né, 1 Đỡ, 0 hits taken, 25 counter hits landed; slice `?weapon=nang` holding Đỡ → hp stays 6, default weapon → no Đỡ button. No page errors.
+- Left: (1) real-phone feel of the windows (150 ms perfect, 0.4 s Né) and of the parry hit; (2) ↑ leap is wired as a hidden slot only (boss arena P11); ‹ › strafing the ring = P10; (3) holding Đỡ forever in the slice blocks all Bóng hits (only cost: Lực) — tune in P12 if it is too safe (e.g. Đỡ slows walking or chips HP every 3rd block); (4) a 404 in the duel room is the empty music slot (no files yet).
+- Gotchas: defence uses game time (`time.now`), so slow-mo widens the real-time windows on purpose. DuelDummy never dies (hp reset each tick); `__duel` exposed for tests. Pad buttons call `setPointerCapture` in try (synthetic events in tests).
+
+Next: P9

@@ -85,10 +85,10 @@ Done when: [ ] tests cover each rule · [ ] each material demonstrable in Phòng
 Model: Sonnet 5.5 · medium
 Deploy: no · Screenshots: ≤2
 
-## P8 · Vũ khí nặng, Đỡ, Né [TODO]
+## P8 · Vũ khí nặng, Đỡ, Né [DONE]
 Read: docs/spec/combat.md#1 #6, docs/spec/weapon.md#5
 Do: Lực bar + charge timing, Đỡ, Phản đòn window, duel Né with slow-mo, counter windows, contextual left buttons.
-Done when: [ ] a test duel dummy exercises every move · [ ] perfect parry feels distinct (hitstop+impact frame+sound)
+Done when: [x] a test duel dummy exercises every move · [x] perfect parry feels distinct (hitstop+impact frame+sound)
 Model: Opus 5.5 · medium — timing feel
 Deploy: yes · Screenshots: ≤3
 

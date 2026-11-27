@@ -80,3 +80,19 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 .wipe { position: fixed; inset: 0; display: grid; z-index: 20; pointer-events: none; }
 .wipe i { background: var(--ink); transform: scale(0); transition: transform 220ms var(--ease-in); margin: -.5px; }
 .wipe.in i { transform: scale(1.02); }
+
+/* combat pad: left-thumb cluster (combat.md#1) — square, ink, hard offset shadow; never over the right 60% */
+.pad { position: fixed; left: calc(var(--safe-l) + var(--u) * 1.5); bottom: calc(var(--safe-b) + var(--u) * 1.5); display: grid; grid-template-columns: repeat(3, clamp(64px, 11vmin, 84px)); grid-template-rows: repeat(2, clamp(64px, 11vmin, 84px)); gap: calc(var(--u) * .8); max-width: 40vw; }
+.pb { border: 2px solid var(--ink); background: var(--paper); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); display: grid; place-items: center; cursor: pointer; touch-action: none; transition: transform 90ms var(--ease-in), opacity 160ms; }
+.pb svg { width: 30px; height: 30px; stroke: var(--ink); stroke-width: 2.5; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
+.pb span { font: 900 clamp(18px, 3.6vmin, 24px)/1 'Be Vietnam Pro', system-ui, sans-serif; }
+.pb.up { grid-column: 2; grid-row: 1; } .pb.l { grid-column: 1; grid-row: 2; } .pb.blk { grid-column: 2; grid-row: 2; } .pb.r { grid-column: 3; grid-row: 2; }
+.pb.on { transform: translate(2px, 2px); box-shadow: none; background: var(--ink); color: var(--paper); }
+.pb.on svg { stroke: var(--paper); }
+.pb.hide { visibility: hidden; opacity: 0; }
+.pb.hitp { animation: hitp 220ms var(--ease-in); }
+@keyframes hitp { 0% { transform: translate(3px, 3px) scale(.92); } 100% { transform: none; } }
+.luc { position: fixed; top: calc(var(--safe-t) + var(--u) * 3.2); left: calc(var(--safe-l) + var(--u) * 1.5); width: calc(var(--u) * 8.4 + 20px); height: 8px; border: 2px solid var(--paper); background: transparent; pointer-events: none !important; overflow: hidden; }
+.luc i { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transform: scaleX(0); }
+.luc.full { border-color: var(--ink); }
+.luc.full i { background: var(--ve); }

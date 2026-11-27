@@ -21,6 +21,8 @@ import { startLoop } from '../core/loop'
 import { bindFinger } from '../core/input'
 import { settings, onSettings } from '../core/settings'
 import { wipe } from '../ui/wipe'
+import { Defense, DEFENSE, canBlockWith } from '../combat/defense'
+import { CombatPad } from '../ui/combatPad'
 
 type State = 'title' | 'wake' | 'walk' | 'fight' | 'clear' | 'end'
 const END_S = 31
@@ -69,11 +71,25 @@ ui.title.onclick = () => {
   if (!ui.ready) return
   document.documentElement.requestFullscreen?.().catch(() => {})
   ;(screen.orientation as any)?.lock?.('landscape')?.catch?.(() => {})
-  audio.unlock(); audio.ui(); audio.music.play('slice'); ui.hideTitle(); ui.hud(true)
+  audio.unlock(); audio.ui(); audio.music.play('slice'); ui.hideTitle(); ui.hud(true); padContext(true)
   rig.startWake(); state = 'wake'
 }
 
 bindFinger(canvas, weapon.finger, (d) => { weapon.touching = d })
+
+// ---- Đỡ / Phản đòn (nặng weapons; no Né outside duels) + Lực bar
+const def = new Defense()
+const pad = new CombatPad({
+  block: (d) => { if (d) { def.press(time.now); if (def.guarding) audio.play('guard.up') } else def.release(); weapon.guarding = def.guarding },
+  dodge: () => {}, leap: () => {},
+})
+ui.root.append(pad.root, pad.luc)
+let padOn = false
+const padContext = (on: boolean) => {
+  padOn = on; def.canBlock = on && canBlockWith(weapon.profile.cls, false)
+  if (!def.canBlock) { def.release(); weapon.guarding = false }
+  pad.set({ block: def.canBlock, dodge: false, leap: false, luc: on && weapon.profile.charged })
+}
 
 // ---- encounters
 function spawnWave() {
@@ -106,7 +122,14 @@ bus.on('hit', (e) => {
 
 function onPlayerStruck(e: Bong) {
   if (php.dead) return
-  const dead = php.hit(1); hp = php.hp; ui.setHP(hp); vigT = 1
+  const r = def.resolve({ dmg: 1, dodge: null, blockable: true }, time.now)
+  if (r.answer === 'parry') {
+    time.freeze(DEFENSE.parryHitstop); impactQ = 2; audio.play('parry', 1.2); pad.pulse('block'); rig.addTrauma(0.3)
+    time.slowmo(DEFENSE.parrySlow, DEFENSE.parrySlowScale); e.status.apply('choang', DEFENSE.parryStun); weapon.charge = 1
+    e.vel.set(0, 0, -2.4); return
+  }
+  if (r.answer === 'block') { audio.play('block'); time.freeze(0.06); weapon.spend(); rig.addTrauma(0.2); if (!r.dmg) return }
+  const dead = php.hit(r.dmg); hp = php.hp; ui.setHP(hp); vigT = 1
   bus.emit('hurt', { side: clamp(e.root.position.x - player.x, -1, 1) || 1, dead })
   if (dead) deadT = 1.6
 }
@@ -141,7 +164,7 @@ function step(realDt: number) {
     const enc = ENCOUNTERS[encIdx]
     rig.targetSpeed = 1.8
     if (enc && rig.s >= enc.s - 0.5) { rig.targetSpeed = 0; state = 'fight'; spawnWave() }
-    else if (!enc && rig.s >= END_S - 0.5) { rig.targetSpeed = 0; if (rig.speed < 0.05) { state = 'end'; ui.showCard(true) } }
+    else if (!enc && rig.s >= END_S - 0.5) { rig.targetSpeed = 0; if (rig.speed < 0.05) { state = 'end'; ui.showCard(true); padContext(false) } }
   } else if (state === 'fight' || state === 'clear') rig.targetSpeed = 0
   if (state === 'clear' && time.slow <= 0 && (clearT -= realDt) <= 0) { encIdx++; state = 'walk' }
   if (deadT > 0) {
@@ -174,6 +197,7 @@ function render(_a: number, realDt: number) {
   const sp = clamp((ang / Math.max(realDt, 1e-3) - 1.5) / 8, 0, 0.45) * 0.06
   renderer.blur.set(sp, 0)
   renderer.mode = impactQ > 0 ? impactQ-- : 0
+  if (padOn) pad.setLuc(weapon.charge)
   ui.setLid(state === 'title' ? 1 : rig.eyelid)
   renderer.render(scene, rig.cam)
 }

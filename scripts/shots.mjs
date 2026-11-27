@@ -67,6 +67,19 @@ for (const [w, h] of VIEWPORTS) {
   console.log(`forge ${w}x${h}: ${fprob.length ? 'FAIL\n  ' + [...new Set(fprob)].join('\n  ') : 'ok'}`)
   fail += fprob.length
   await fp.close()
+  // combat pad (Đỡ ‹ › + Lực bar) in the duel room: inside the left 40 %, ≥ 64 px, in safe areas; dev buttons removed first
+  const dp = await browser.newPage({ viewport: { width: w, height: h } })
+  await dp.goto('http://localhost:4177/?duel&weapon=nang')
+  await dp.waitForSelector('.pad .pb.blk', { timeout: 20000 }); await dp.waitForTimeout(300)
+  await dp.evaluate(() => { document.querySelectorAll('[data-en]').forEach(b => b.remove()); document.querySelectorAll('.pb.hide').forEach(b => b.classList.remove('hide')) })
+  const dprob = await dp.evaluate(check)
+  dprob.push(...await dp.evaluate(() => [...document.querySelectorAll('.pb, .luc')].flatMap(b => { const r = b.getBoundingClientRect(), n = b.getAttribute('aria-label')
+    return [...(b.classList.contains('pb') && r.right > innerWidth * 0.4 + 0.5 ? [`pad past 40%: ${n}`] : []), ...(b.classList.contains('pb') && (r.width < 63.5 || r.height < 63.5) ? [`pad < 64px: ${n}`] : []),
+      ...(r.left < 0 || r.bottom > innerHeight || r.top < 0 ? [`outside: ${n}`] : [])] })))
+  if (w === 640) await dp.screenshot({ path: `shots/duel-${w}x${h}.png` })
+  console.log(`duel ${w}x${h}: ${dprob.length ? 'FAIL\n  ' + dprob.join('\n  ') : 'ok'}`)
+  fail += dprob.length
+  await dp.close()
 }
 await browser.close(); process.kill(-srv.pid)
 process.exit(fail ? 1 : 0)
