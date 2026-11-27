@@ -80,6 +80,17 @@ for (const [w, h] of VIEWPORTS) {
   console.log(`duel ${w}x${h}: ${dprob.length ? 'FAIL\n  ' + dprob.join('\n  ') : 'ok'}`)
   fail += dprob.length
   await dp.close()
+  // Đống arena: boss bar, HP, ‹ › (+ Đỡ with nặng) and ↑ all inside safe areas; pad inside the left 40 %
+  const bp = await browser.newPage({ viewport: { width: w, height: h } })
+  await bp.goto('http://localhost:4177/?dong&weapon=nang')
+  await bp.waitForSelector('.pad .pb.l', { timeout: 20000 }); await bp.waitForTimeout(300)
+  await bp.evaluate(() => document.querySelectorAll('.pb.hide').forEach(b => b.classList.remove('hide')))
+  const bprob = await bp.evaluate(check)
+  bprob.push(...await bp.evaluate(() => [...document.querySelectorAll('.pb, .luc, .bossbar, .hp')].flatMap(b => { const r = b.getBoundingClientRect(), n = b.getAttribute('aria-label') ?? b.className
+    return [...(b.classList.contains('pb') && r.right > innerWidth * 0.4 + 0.5 ? [`pad past 40%: ${n}`] : []), ...(r.left < 0 || r.right > innerWidth || r.bottom > innerHeight || r.top < 0 ? [`outside: ${n}`] : [])] })))
+  console.log(`dong ${w}x${h}: ${bprob.length ? 'FAIL\n  ' + bprob.join('\n  ') : 'ok'}`)
+  fail += bprob.length
+  await bp.close()
 }
 await browser.close(); process.kill(-srv.pid)
 process.exit(fail ? 1 : 0)

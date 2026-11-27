@@ -105,3 +105,16 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 .bossbar .ticks { position: relative; height: 0; } .bossbar .ticks i { position: absolute; top: -10px; width: 2px; height: 10px; background: var(--paper); }
 .caption { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 6vmin); transform: translateX(-50%); max-width: 70vw; background: var(--ink); color: var(--paper); font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; padding: 1.2vmin 2.4vmin; text-align: center; pointer-events: none; opacity: 0; transition: opacity 200ms; }
 .caption.show { opacity: 1; }
+/* Đống arena (P11): voice message 6, white-out, chapter card */
+.voice { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 6vmin); transform: translate(-50%, 8px); width: min(72vw, 640px); background: var(--ink); color: var(--paper); padding: 1.4vmin 2.4vmin 1.6vmin; opacity: 0; transition: opacity 200ms, transform 300ms var(--ease-in); pointer-events: auto; }
+.voice.show { opacity: 1; transform: translate(-50%, 0); }
+.voice .vh { display: flex; align-items: center; gap: 1vmin; font: 600 clamp(11px, 2vmin, 14px)/1 'Be Vietnam Pro', system-ui, sans-serif; color: var(--paper-2); margin-bottom: 0.8vmin; }
+.voice .vh svg { width: 18px; height: 18px; stroke: var(--ve); stroke-width: 2; fill: none; stroke-linecap: square; }
+.voice.static .vh svg { stroke: var(--paper-2); transform: scaleY(0.25); }
+.voice p { font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; min-height: 1.4em; max-height: 2.8em; overflow: hidden; }
+.whiteout { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none !important; transition: opacity 1.2s linear; }
+.whiteout.show { opacity: 1; }
+.chcard { position: fixed; left: calc(var(--safe-l) + 8vmin); bottom: calc(var(--safe-b) + 10vmin); display: grid; gap: 2vmin; opacity: 0; transform: translateY(14px) rotate(-1.5deg); transition: transform 420ms var(--ease-in), opacity 200ms; }
+.chcard.show { opacity: 1; transform: none; }
+.chcard h2 { font: 900 clamp(26px, 7vmin, 56px)/1.1 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; color: var(--ink); }
+.chcard p { font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; color: var(--stone); }

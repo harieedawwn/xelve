@@ -106,7 +106,7 @@ Done when: [ ] beatable with only Né, and with Phản đòn · [ ] every attack
 Model: Sonnet 5.5 · medium (raise to high only if it fails twice)
 Deploy: yes · APK: no · Screenshots: ≤3
 
-## P11 · Boss 2 — Đống [TODO]
+## P11 · Boss 2 — Đống [DONE]
 Read: docs/spec/combat.md#7, docs/spec/camera.md#3, docs/spec/story.md (L8)
 Do: car-park arena, giant built from car meshes, 6 covers + destruction, throws/sweep/slam, leap + arm run + apex slow-mo, seams, phase 3 family car reveal.
 Done when: [ ] full fight playable start→end · [ ] 30+ fps at Thấp on 240p

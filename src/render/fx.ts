@@ -41,7 +41,8 @@ export class FX {
   get particleCount() { return this.pn }
   get decalCount() { return this.dm.count }
 
-  constructor(private scene: THREE.Scene) {
+  /** room bounds for droplet landing (corridor by default; open arenas pass a wide box) */
+  constructor(private scene: THREE.Scene, private halfW = HALF_W, private height = HEIGHT) {
     this.pm = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial(), MAXP)
     this.pm.instanceMatrix.setUsage(THREE.DynamicDrawUsage); this.pm.count = 0; this.pm.frustumCulled = false
     for (let i = 0; i < MAXP; i++) { this.pc.push(new THREE.Color()); this.pm.setColorAt(i, this.pc[i]) }
@@ -109,12 +110,12 @@ export class FX {
       this.pp[j] += this.pv[j] * dt; this.pp[j + 1] += this.pv[j + 1] * dt; this.pp[j + 2] += this.pv[j + 2] * dt
       this.pl[i] -= dt
       const x = this.pp[j], y = this.pp[j + 1]
-      const landed = y < 0.002 || y > HEIGHT || Math.abs(x) > HALF_W
+      const landed = y < 0.002 || y > this.height || Math.abs(x) > this.halfW
       if (landed || this.pl[i] <= 0) {
         if (landed && Math.random() < 0.35) {
-          const n = y < 0.01 ? this.up : y > HEIGHT ? this.dn : this.wn.set(-Math.sign(x), 0, 0)
-          const p = this.sn.set(Math.max(-HALF_W, Math.min(HALF_W, ox)), Math.max(0, Math.min(HEIGHT, oy)), oz)
-          if (n.y > 0) p.y = 0; if (n.x !== 0) p.x = -n.x * HALF_W
+          const n = y < 0.01 ? this.up : y > this.height ? this.dn : this.wn.set(-Math.sign(x), 0, 0)
+          const p = this.sn.set(Math.max(-this.halfW, Math.min(this.halfW, ox)), Math.max(0, Math.min(this.height, oy)), oz)
+          if (n.y > 0) p.y = 0; if (n.x !== 0) p.x = -n.x * this.halfW
           this.decal(p, n, this.pc[i].getHex(), 0.03 + Math.random() * 0.07)
         }
         // swap-remove
@@ -155,7 +156,7 @@ export class FX {
       d.v.y -= 9.8 * dt; d.o.position.addScaledVector(d.v, dt)
       d.o.rotation.x += d.w.x * dt; d.o.rotation.y += d.w.y * dt; d.o.rotation.z += d.w.z * dt
       if (d.o.position.y < 0.06) { d.o.position.y = 0.06; d.v.y *= -0.3; d.v.x *= 0.6; d.v.z *= 0.6; d.w.multiplyScalar(0.6) }
-      if (Math.abs(d.o.position.x) > HALF_W - 0.1) { d.v.x *= -0.4; d.o.position.x = Math.sign(d.o.position.x) * (HALF_W - 0.1) }
+      if (Math.abs(d.o.position.x) > this.halfW - 0.1) { d.v.x *= -0.4; d.o.position.x = Math.sign(d.o.position.x) * (this.halfW - 0.1) }
       d.life -= dt
       if (d.life < 1) d.o.position.y -= dt * 0.15 // sink into the floor, no fade
       if (d.life <= 0) { this.scene.remove(d.o); this.debris.splice(i, 1) }

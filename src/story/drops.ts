@@ -3,6 +3,7 @@ import type { SaveData } from '../core/save'
 export interface Drop { id: string; item: string; blueprints: string[] }
 export const DROPS: Record<string, Drop> = {
   nguoigac: { id: 'nguoigac', item: 'loi_nguoigac', blueprints: ['dao', 'kiem'] },
+  dong: { id: 'dong', item: 'loi_dong', blueprints: [] },
 }
 /** apply once; returns the newly gained blueprint ids ([] if already collected) */
 export function grant(s: SaveData, id: string): string[] {

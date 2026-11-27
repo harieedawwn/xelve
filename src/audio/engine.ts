@@ -8,8 +8,9 @@ import { world } from './recipes/world'
 import { ui } from './recipes/ui'
 import { bong } from './recipes/bong'
 import { duel } from './recipes/duel'
+import { dong } from './recipes/dong'
 
-export const RECIPES: Record<string, Def> = { ...impacts, ...world, ...ui, ...bong, ...duel }
+export const RECIPES: Record<string, Def> = { ...impacts, ...world, ...ui, ...bong, ...duel, ...dong }
 
 export class Audio {
   ctx: AudioContext | null = null

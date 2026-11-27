@@ -19,6 +19,7 @@ import { startCamTest } from './scenes/camtest'
 import { startEnemyTest } from './scenes/enemytest'
 import { startDuelTest } from './scenes/dueltest'
 import { startBoss1 } from './scenes/boss1'
+import { startBoss2 } from './scenes/boss2'
 import { Forge } from './forge/forge'
 import { BLUEPRINTS } from './weapon/blueprints/registry'
 
@@ -36,6 +37,7 @@ async function boot() {
     const f = new Forge({ khoiSize: [1, 3, 5, 8].includes(g) ? g : 8, unlocked: Object.keys(BLUEPRINTS), onBack: () => { location.href = location.pathname }, onSound: (n, p) => audio.play(n, p) })
     document.getElementById('ui')!.appendChild(f.root); (window as any).__forge = f; return
   }
+  if (location.search.includes('dong')) { ui.hideTitle(); startBoss2(canvas, renderer, audio); return }
   if (location.search.includes('boss')) { ui.hideTitle(); startBoss1(canvas, renderer, audio); return }
   if (location.search.includes('duel')) { ui.hideTitle(); startDuelTest(canvas, renderer, audio); return }
   if (location.search.includes('enemies')) { ui.hideTitle(); startEnemyTest(canvas, renderer, audio); return }

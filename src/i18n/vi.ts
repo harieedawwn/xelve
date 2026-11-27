@@ -78,6 +78,12 @@ export const vi = {
   'drop.title': 'Nhặt được',
   'drop.loi': 'Lõi Người gác',
   'drop.bp': 'Bản vẽ',
+  'boss.dong': 'Đống',
+  'drop.loiDong': 'Lõi Đống',
+  'note.l8': 'Mẹ ơi, con lái chậm thôi mà',
+  'msg.6': 'Xel. Nếu em thấy mọi thứ trắng đi thì đừng —',
+  'msg.6.time': '05:46',
+  'chapter.2': 'Chương 2 · Ve',
 } as const
 
 export type Key = keyof typeof vi

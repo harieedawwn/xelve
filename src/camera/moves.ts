@@ -121,3 +121,36 @@ export function cinematicCut(shots: CutShot[]): Move {
     },
   }
 }
+
+export interface ArmRunPts { hand: THREE.Vector3; up: THREE.Vector3; apex: THREE.Vector3; seam: THREE.Vector3; back: THREE.Vector3 }
+/** boss arena opening (combat.md#7): crouch → leap onto the lowered arm → run up it → jump to the face, slow-mo at apex
+ *  (0.25×, ≤1.6 s real) while the seams are in reach → fall back to the nearest cover with a landing impulse. Feet positions in. */
+export function armRun(p: ArmRunPts, hold = 0.5): Move {
+  const crouch = 0.25, hop = 0.7, run = 1.0, jump = 0.55, fall = 1.0
+  const t1 = crouch + hop, t2 = t1 + run, t3 = t2 + jump, t4 = t3 + hold, dur = t4 + fall + 0.3
+  const start = new THREE.Vector3(); let apex = false, landed = false
+  const arc = (a: THREE.Vector3, b: THREE.Vector3, u: number, h: number) => absBuf.copy(a).lerp(b, u).setY(lerp(a.y, b.y, u) + h * 4 * u * (1 - u))
+  return {
+    name: 'armRun', dur,
+    begin(rig) { start.copy(rig.bodyPos) },
+    update(t, o, rig) {
+      o.wide = true; o.look = p.seam; o.lookW = 1
+      if (t < crouch) { o.local.y = -0.18 * smooth(t / crouch); o.pitch = 3 * deg * smooth(t / crouch); o.abs = absBuf.copy(start); return }
+      if (t < t1) { const u = (t - crouch) / hop; o.abs = arc(start, p.hand, u, 1.6); o.fov = FOV + 8 * Math.sin(Math.PI * u); return }
+      if (t < t2) { // run along the arm: quick gait bob, slight lean in
+        const u = (t - t1) / run; o.abs = absBuf.copy(p.hand).lerp(p.up, u)
+        o.local.y = -Math.abs(Math.sin(u * Math.PI * 5)) * 0.05; o.pitch = 4 * deg; return
+      }
+      if (t < t3) {
+        const u = (t - t2) / jump; o.abs = arc(p.up, p.apex, u, 1.2); o.fov = FOV + 14 * smooth(u)
+        if (u > 0.85 && !apex) { apex = true; o.slowmo = [1.6, 0.25] }
+        return
+      }
+      if (t < t4) { o.abs = absBuf.copy(p.apex); o.abs.y += 0.15 * Math.sin((t - t3) / hold * Math.PI); o.fov = FOV + 14; return }
+      const u = clamp((t - t4) / fall, 0, 1)
+      o.abs = arc(p.apex, p.back, u, 0.8); o.abs.y = lerp(p.apex.y, p.back.y, u * u) + 0.8 * 4 * u * (1 - u)
+      o.fov = FOV + 14 * (1 - smooth(u)); o.lookW = 1 - smooth(u * 1.4)
+      if (u >= 1 && !landed) { landed = true; rig.land(11) }
+    },
+  }
+}
