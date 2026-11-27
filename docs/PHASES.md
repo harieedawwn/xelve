@@ -128,7 +128,7 @@ Done when: [ ] shots pass on all screens · [ ] no text where an icon works
 Model: Sonnet 5.5 · medium
 Deploy: yes · APK: yes · Screenshots: ≤4
 
-## P14 · Hoàn thiện chương 1 [TODO]
+## P14 · Hoàn thiện chương 1 [DONE]
 Read: docs/INBOX.md, docs/PROGRESS.md
 Do: perf on 240p tier, balance pass, bug sweep, release notes.
 Done when: [ ] Thấp 30 fps steady in L8 headless profile · [ ] no open INBOX bugs

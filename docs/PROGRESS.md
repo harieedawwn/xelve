@@ -201,3 +201,11 @@ Next: P13b (Vô tận + Phòng tập polish), then P14
 - Gotchas: backdrops are built into a temp Scene and their non-light children moved into a Group; lights/background/fog come from the first room built. `__endless.kill()` is a test helper.
 
 Next: P14
+
+## P14 · Hoàn thiện chương 1 — DONE
+- Perf: headless 640×360 `tier=thap` L8, L6 and Vô tận each ~60 fps (uncapped), no page errors. INBOX empty. Release notes in docs/RELEASE.md. No code changes (no bugs found).
+- Checked: tsc, vitest, build.
+- Left: real-phone 30 fps and balance check; Xưởng Màu/stock enforcement; boss death checkpoints; Phòng tập polish.
+- Gotchas: playwright is not a project dependency here; use playwright-core as scripts/shots.mjs does.
+
+Next: none (Chương 1 complete)
