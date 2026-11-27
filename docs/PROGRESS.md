@@ -25,3 +25,9 @@ Next: P0b
 - Gotchas: Pages source must be "GitHub Actions". Splash is Capacitor default. Swiftshader headless is slow: slice ran at tier Thấp.
 
 Next: P1 (after user checks APK/Pages)
+
+## P0b · Keystore & secrets — DONE (user + executor)
+- Keystore tạo bằng keytool (alias `xelve`, RSA 2048, hạn 10000 ngày); người dùng đã dán đủ 4 repo secrets trên GitHub: ANDROID_KEYSTORE_B64, ANDROID_KEYSTORE_PASS, ANDROID_KEY_ALIAS, ANDROID_KEY_PASS (đã xác nhận qua ảnh chụp trang Secrets).
+- Workflow `[deploy][apk]` giờ ký release bằng keystore này (không còn fallback debug). Người dùng giữ bản backup `xelve.keystore`; KHÔNG commit (.keys/ và *.keystore bị gitignore). Mất file = không cập nhật đè được APK đã cài.
+- Ghi chú cho AI khác: không thể đặt secrets từ session (gh chưa đăng nhập, request_credential không nhận token github.com). Nếu cần đổi secrets, hướng dẫn người dùng dán tay ở Settings → Secrets and variables → Actions.
+- Chuỗi APK cài trước đó (nếu có, ký debug) phải gỡ trước khi cài bản ký release.
