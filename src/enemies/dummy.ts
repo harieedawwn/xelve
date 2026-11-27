@@ -26,8 +26,8 @@ export class DuelDummy extends Enemy {
   onEvent: (e: DuelEvent, m: Move) => void = () => {}
   private ax = POSE.rest.up[0]; private az = POSE.rest.up[1]; private hitPose: [number, number] = POSE.rest.hit; private thrustPush = 0
 
-  constructor(scene: THREE.Scene, from: THREE.Vector3, order = DUMMY_ORDER) {
-    super(scene, from, DUMMY_DEF)
+  constructor(scene: THREE.Scene, from: THREE.Vector3, order = DUMMY_ORDER, def: EnemyDef = DUMMY_DEF) {
+    super(scene, from, def)
     this.baton.position.y = -0.3; this.foreR.add(this.baton)
     this.script = new DuelScript(order, (e, m) => {
       if (e === 'telegraph' || e === 'switch') this.onSound('duel.telegraph')
@@ -37,6 +37,8 @@ export class DuelDummy extends Enemy {
     this.setState('approach')
   }
   protected staggers() { return false }
+  /** a dummy never dies; bosses turn this off */
+  protected immortal = true
   /** damage multiplier while open (DEFENSE.counterMult); last landed damage for the Phòng tập readout */
   mult = 1; lastDmg = 0
   protected filter(dmg: number) { if (!this.open && this.script.state !== 'stagger') return 0; this.lastDmg = dmg * this.mult; return this.lastDmg }
@@ -45,7 +47,7 @@ export class DuelDummy extends Enemy {
 
   update(dt: number, player: THREE.Vector3) {
     if (!this.alive) return
-    this.status.tick(dt); this.hp = this.maxHp // never dies: a dummy
+    this.status.tick(dt); if (this.immortal) this.hp = this.maxHp
     if (this.status.frozen) return
     this.st += dt; this.hitCooldown -= dt
     const s = this.script; s.update(dt)

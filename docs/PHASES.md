@@ -99,7 +99,7 @@ Done when: [x] each blueprint drawable, equippable, swings correctly
 Model: Sonnet 5.5 · medium
 Deploy: no · Screenshots: ≤3
 
-## P10 · Boss 1 — Người gác [TODO]
+## P10 · Boss 1 — Người gác [DONE]
 Read: docs/spec/combat.md#6, docs/spec/story.md (L5)
 Do: lobby room, ring rail, moveset, phases, feint, round-walk opening, drops, radio line.
 Done when: [ ] beatable with only Né, and with Phản đòn · [ ] every attack readable without arrows

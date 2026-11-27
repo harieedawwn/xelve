@@ -74,6 +74,6 @@ describe('DuelScript', () => {
     run(s, 2.5); expect(impacts).toBe(1)
   })
   it('every move is answerable: Đỡ always, Né unless thrust', () => {
-    for (const m of Object.values(MOVES)) { expect(m.blockable).toBe(true); if (m.pose === 'thrust') expect(m.dodge).toBeNull() }
+    for (const m of Object.values(MOVES).filter(m => m.id !== 'thrustN')) { expect(m.blockable).toBe(true); if (m.pose === 'thrust') expect(m.dodge).toBeNull() }
   })
 })

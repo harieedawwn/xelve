@@ -27,11 +27,18 @@ const telegraph: Recipe = (s, t, v) => { // leather creak + inhale
 }
 const whoosh: Recipe = (s, t, v) => s.hit(t, 0.22, 'bandpass', [500, 560, 450][v], 1.2, 0.4, 1800)
 
+const radio: Recipe = (s, t) => { // one crackle of an old radio: band-limited noise burst + faint carrier
+  s.hit(t, 0.5, 'bandpass', 1700, 1.2, 0.3, 3200)
+  s.hit(t + 0.18, 0.25, 'highpass', 3000, 0.7, 0.12)
+  s.tone(t, 'sawtooth', 310, 305, 0.45, 0.05)
+}
+
 export const duel: Record<string, Def> = {
   'parry': { fn: parry, gap: 150, variants: 3 },
   'block': { fn: block, gap: 80, variants: 3 },
   'dodge': { fn: dodge, gap: 120, variants: 3 },
   'guard.up': { fn: guardUp, gap: 120 },
   'duel.telegraph': { fn: telegraph, gap: 200, variants: 3 },
+  'radio.crackle': { fn: radio, gap: 500 },
   'duel.whoosh': { fn: whoosh, gap: 120, variants: 3 },
 }

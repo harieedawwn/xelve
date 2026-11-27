@@ -135,3 +135,14 @@ Next: P9
 - Gotchas: tests use the default in-memory save (don't call loadSave in vitest: no window).
 
 Next: P10
+
+## P10 · Boss 1 — Người gác — DONE
+- src/bosses/nguoigac.ts: `NguoiGac extends DuelDummy` (body + poses reused), all numbers in `DATA` (hp 520, phases at 66/33 %, per-phase move order / flurry length / walk time / tempo / idle, openMult ×1.5, parryStun 1.5). Flurry → he walks his round facing away (every hit lands ×1.5 = the opening) → next flurry. Phase change = 1.4 s stagger + `onPhase`. Phase 3 adds `feint` (overhead → sweepR at 200 ms) and `slam`.
+- Reuse: `DuelScript.tempo` (faster wind-ups per phase), `DuelDummy.immortal`/def param, new move `thrustN` (his thrust: Đỡ/Phản đòn OR a Né to either side — spec says thrust is Đỡ-only, but "beatable with only Né" needs it; the dummy keeps the old `thrust`).
+- src/levels/lobby.ts (hall, reception desk, thermos, radio, Ve's drawing of Chú Bảy), src/scenes/boss1.ts (route `?boss`, `&weapon=nhe|vua|nang`): duel wiring as `?duel`, ring camera drift (±0.35 rad authored), boss bar with phase ticks, 6 HP pips, restart duel on death, defeat → slow-mo, drops, radio crackle + caption "Tầng mười bốn ổn chưa?".
+- Drops: `src/story/drops.ts` (`grant`), save gained `unlocked: ['khoi']` + `drops: []` (merged by defaults, no version bump). Nguoigac → Bản vẽ Dao + Kiếm + item `loi_nguoigac` (flag only; Lõi has no use until P11).
+- Checked: tsc, 113 vitest (6 boss + 1 drops: phases, Né-only answerable, baton blocks until open, round-walk ×1.5, phase stagger/defeat, drops once), build OK. Headless 640×360 `?boss`: bot with only Né + swipes beat all 3 phases, drop granted, no console errors. 1 screenshot.
+- Left: (1) real-phone feel/balance — the bot is unrepresentative (hp 520 is a guess; check ~60–90 s fight with a Dao/Kiếm); (2) the ring camera only drifts, ‹ › still = Né (no ring strafe); (3) `?boss` is dev-only until P12 wires L5 (Bản vẽ gating via `save().unlocked` is not read by Xưởng/menus yet — P13); (4) shots.mjs has no boss room entry; (5) Lõi Người gác has no weapon use yet; (6) he shares Bóng sound recipes.
+- Gotchas: `Enemy.phase` is the gait clock — boss stage is `stage`. Radio caption uses a setTimeout (real time).
+
+Next: P11

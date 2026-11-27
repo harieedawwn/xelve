@@ -16,6 +16,8 @@ export const MOVES: Record<string, Move> = {
   overhead: { id: 'overhead', pose: 'overhead', windup: 0.85, recover: 0.6, dmg: 1, dodge: 0, blockable: true },
   sweepL: { id: 'sweepL', pose: 'left', windup: 0.75, recover: 0.55, dmg: 1, dodge: 1, blockable: true },
   sweepR: { id: 'sweepR', pose: 'right', windup: 0.75, recover: 0.55, dmg: 1, dodge: -1, blockable: true },
+  /** Người gác's thrust: a step aside also answers it (so a weapon that cannot Đỡ can still win with Né only) */
+  thrustN: { id: 'thrustN', pose: 'thrust', windup: 0.7, recover: 0.7, dmg: 1, dodge: 0, blockable: true },
   thrust: { id: 'thrust', pose: 'thrust', windup: 0.7, recover: 0.7, dmg: 1, dodge: null, blockable: true },
   feint: { id: 'feint', pose: 'overhead', windup: 0.95, recover: 0.6, dmg: 1, dodge: 0, blockable: true, feint: { at: 0.2, to: 'sweepR' } },
   slam: { id: 'slam', pose: 'overhead', windup: 1.1, recover: 0.9, dmg: 2, dodge: 0, blockable: true },
@@ -31,6 +33,8 @@ export class DuelScript {
   move: Move = MOVES[DUMMY_ORDER[0]]
   private base: Move = this.move; private slowSent = false; private switched = false
   idle = 0.8
+  /** speeds the whole script up (<1 = faster wind-ups and recoveries) */
+  tempo = 1
   constructor(public order: string[] = DUMMY_ORDER, public on: (e: DuelEvent, m: Move) => void = () => {}) {}
 
   /** 0..1 progress of the wind-up (for the pose) */
@@ -61,7 +65,8 @@ export class DuelScript {
     }
   }
   private start() {
-    this.base = this.move = MOVES[this.order[this.i++ % this.order.length]]
+    const m = MOVES[this.order[this.i++ % this.order.length]]
+    this.base = this.move = this.tempo === 1 ? m : { ...m, windup: m.windup * this.tempo, recover: m.recover * this.tempo }
     this.state = 'windup'; this.t = 0; this.slowSent = false; this.switched = false
     this.on('telegraph', this.move)
   }

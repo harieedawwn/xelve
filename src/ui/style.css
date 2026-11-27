@@ -96,3 +96,12 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 .luc i { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transform: scaleX(0); }
 .luc.full { border-color: var(--ink); }
 .luc.full i { background: var(--ve); }
+
+/* boss bar + caption (P10): flat ink, fill = scaleX only */
+.bossbar { position: fixed; top: calc(var(--safe-t) + var(--u)); left: 50%; width: min(46vw, 420px); transform: translateX(-50%); pointer-events: none; }
+.bossbar b { display: block; font: 700 clamp(12px, 2.4vmin, 16px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); margin-bottom: 3px; }
+.bossbar .track { height: 10px; border: 2px solid var(--ink); background: var(--paper); overflow: hidden; }
+.bossbar .fill { height: 100%; background: var(--ink); transform-origin: left; transition: transform 160ms var(--ease-in); }
+.bossbar .ticks { position: relative; height: 0; } .bossbar .ticks i { position: absolute; top: -10px; width: 2px; height: 10px; background: var(--paper); }
+.caption { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 6vmin); transform: translateX(-50%); max-width: 70vw; background: var(--ink); color: var(--paper); font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; padding: 1.2vmin 2.4vmin; text-align: center; pointer-events: none; opacity: 0; transition: opacity 200ms; }
+.caption.show { opacity: 1; }
