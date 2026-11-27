@@ -121,7 +121,7 @@ Done when: [ ] Chapter 1 playable start→end · [ ] every setup/payoff in story
 Model: Sonnet 5.5 · medium
 Deploy: yes · Screenshots: ≤4
 
-## P13 · Menu, chế độ, cài đặt [PARTIAL → P13b: Vô tận]
+## P13 · Menu, chế độ, cài đặt [DONE via P13b; Phòng tập polish optional]
 Read: docs/spec/levels.md#app-flow, docs/DESIGN.md#ui #lexicon, docs/spec/combat.md#8
 Do: main screen with live backdrop, chapter map with stains, Vô tận, Phòng tập, settings, thuật ngữ, icon set, transitions. Bans apply.
 Done when: [ ] shots pass on all screens · [ ] no text where an icon works

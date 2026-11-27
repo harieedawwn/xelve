@@ -4,12 +4,12 @@ import type { WeaponDesign } from '../weapon/model'
 
 export const SAVE_VERSION = 1
 export interface Settings { tier: Tier | null; sound: boolean; music: number; reduceShake: boolean; lang: 'vi' }
-export interface SaveData { v: number; settings: Settings; progress: { chapter: number; level: number }; weapons: WeaponDesign[]; equipped: string | null; materials: Record<string, number>; unlocked: string[]; drops: string[] }
+export interface SaveData { v: number; settings: Settings; progress: { chapter: number; level: number }; weapons: WeaponDesign[]; equipped: string | null; materials: Record<string, number>; unlocked: string[]; drops: string[]; bests: Record<string, number> }
 
 export const defaults = (): SaveData => ({
   v: SAVE_VERSION,
   settings: { tier: null, sound: true, music: 0.7, reduceShake: false, lang: 'vi' },
-  progress: { chapter: 1, level: 0 }, weapons: [], equipped: null, materials: {}, unlocked: ['khoi'], drops: [],
+  progress: { chapter: 1, level: 0 }, weapons: [], equipped: null, materials: {}, unlocked: ['khoi'], drops: [], bests: {},
 })
 
 type Migration = (d: any) => any

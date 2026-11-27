@@ -4,7 +4,7 @@ import { CH1, level } from '../levels/ch1'
 import type { LevelData } from '../levels/ch1/types'
 
 export interface Access { forge: boolean; gym: boolean; endless: boolean }
-/** Xưởng + Phòng tập open after L2, Vô tận after L3 (but has no mode yet → UI keeps it locked). */
+/** Xưởng + Phòng tập open after L2, Vô tận after L3. */
 export function menuAccess(s: Pick<SaveData, 'unlocked'>): Access {
   return { forge: s.unlocked.includes('l2'), gym: s.unlocked.includes('l2'), endless: s.unlocked.includes('l3') }
 }

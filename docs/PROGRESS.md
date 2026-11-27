@@ -192,3 +192,12 @@ Next: P13
 - Gotchas: menu skipped whenever URL has `level` or `go`; chapter flow chains with those. Locked icon label shows only on press/focus.
 
 Next: P13b (Vô tận + Phòng tập polish), then P14
+
+## P13b · Vô tận — DONE (Phòng tập polish left)
+- src/scenes/endlessLogic.ts (pure + 6 tests, all numbers in `ENDLESS`): wave size/types from unlocked flags (bong; chay l3; nhieu l4; khien+vo l6), mini-boss every 5th wave (first enemy ×1.45 scale, ×5 hp), 4 rotating backdrops (corridor/office/alley/road, 5 waves each), rewards (Màu every wave, +3 common material every 5th), best wave in `save().bests.endless` (new field, merged by defaults, no version bump).
+- src/scenes/endless.ts (route `?endless`): standing arena, same combat wiring as chapter (Đỡ/Phản đòn, Lực pad), HUD "Đợt N / Kỷ lục M", death → game-over card (Đợt, Kỷ lục, Chơi lại, home). Menu icon now opens it once `l3` is unlocked. i18n endless.*.
+- Checked: tsc, 138 vitest, build; headless 640×360 (thấp) with seeded save: 6 waves cleared, Màu 6 + Chì 3 saved, best 6, no page errors. 1 screenshot.
+- Left (P13c, optional): (1) mini-boss is a scaled/tanky normal enemy, no unique moves; (2) the arena is a straight room, not truly circular (look is authored-only, so enemies come from the front); (3) backdrop swap is instant (no wipe); (4) Phòng tập: damage numbers, quick-swap weapons, slow-mo toggle, unlocked-only enemies; (5) "?" chips for odd terms; (6) Xưởng does not enforce Màu/stock; (7) real-phone check of balance and tap sizes.
+- Gotchas: backdrops are built into a temp Scene and their non-light children moved into a Group; lights/background/fog come from the first room built. `__endless.kill()` is a test helper.
+
+Next: P14

@@ -15,6 +15,7 @@ import { Audio } from './audio/engine'
 import { UI } from './ui/ui'
 import { startMenu } from './scenes/menu'
 import { startChapter } from './scenes/chapter'
+import { startEndless } from './scenes/endless'
 import { level, CH1 } from './levels/ch1'
 import { startFxTest } from './scenes/fxtest'
 import { startCamTest } from './scenes/camtest'
@@ -42,6 +43,7 @@ async function boot() {
   if (location.search.includes('dong')) { ui.hideTitle(); startBoss2(canvas, renderer, audio); return }
   if (location.search.includes('boss')) { ui.hideTitle(); startBoss1(canvas, renderer, audio); return }
   if (location.search.includes('duel')) { ui.hideTitle(); startDuelTest(canvas, renderer, audio); return }
+  if (location.search.includes('endless')) { ui.hideTitle(); startEndless(canvas, renderer, ui, audio); return }
   if (location.search.includes('enemies')) { ui.hideTitle(); startEnemyTest(canvas, renderer, audio); return }
   if (!settings().tier) {
     // 2 s benchmark: a throw-away heavy scene behind the logo

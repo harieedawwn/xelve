@@ -56,7 +56,7 @@ export function startMenu(canvas: HTMLCanvasElement, renderer: Renderer, ui: UI,
   row.append(
     btn('ib lg', ICON.forge, t('forge.title'), openForge, !acc.forge),
     btn('ib lg', ICON.gym, t('menu.gym'), () => go('?enemies'), !acc.gym),
-    btn('ib lg', ICON.endless, t('menu.endless'), () => go('?endless'), true),
+    btn('ib lg', ICON.endless, t('menu.endless'), () => go('?endless'), !acc.endless),
     btn('ib lg', ICON.map, t('menu.map'), () => map.show(true)),
     btn('ib lg', ICON.book, t('menu.terms'), () => terms.show(true)),
     btn('ib lg', ICON.settings, t('menu.settings'), () => ui.settings.show(true)),

@@ -156,3 +156,5 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 .ch2 small { margin-left: auto; font-weight: 400; }
 .terms { display: grid; grid-template-columns: max-content 1fr; gap: 6px calc(var(--u) * 1.5); font: 400 clamp(12px, 2.4vmin, 16px)/1.45 'Be Vietnam Pro', system-ui, sans-serif; }
 .terms dt { font-weight: 900; }
+.endhud { position: fixed; left: 50%; top: calc(var(--safe-t) + 1.5vmin); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 0.8vmin 2.4vmin; font: 700 clamp(13px, 2.8vmin, 20px)/1.2 'Be Vietnam Pro', system-ui, sans-serif; text-align: center; pointer-events: none; }
+.endhud small { display: block; font-weight: 500; opacity: 0.8; }
