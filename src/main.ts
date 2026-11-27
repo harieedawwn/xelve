@@ -13,6 +13,7 @@ import { benchmark } from './core/quality'
 import { Renderer } from './render/pipeline'
 import { Audio } from './audio/engine'
 import { UI } from './ui/ui'
+import { startMenu } from './scenes/menu'
 import { startChapter } from './scenes/chapter'
 import { level, CH1 } from './levels/ch1'
 import { startFxTest } from './scenes/fxtest'
@@ -55,6 +56,7 @@ async function boot() {
   } else await new Promise(r => setTimeout(r, 900)) // logo finishes assembling
   ui.setReady()
   const q = new URLSearchParams(location.search)
+  if ((q.has('menu') || (!q.has('level') && save().progress.level >= 1)) && !q.has('go')) { startMenu(canvas, renderer, ui, audio); return }
   const want = Number(q.get('level')) || Math.min(save().progress.level + 1, CH1.length)
   const lv = level(want) ?? CH1[0]
   if (lv.boss) { ui.hideTitle(); addEventListener('pointerdown', () => audio.unlock(), { once: true }); if (lv.boss === 'nguoigac') startBoss1(canvas, renderer, audio); else startBoss2(canvas, renderer, audio); return }

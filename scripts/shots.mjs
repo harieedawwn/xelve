@@ -47,6 +47,22 @@ for (const [w, h] of VIEWPORTS) {
   console.log(`${w}x${h}: ${problems.length ? 'FAIL\n  ' + problems.join('\n  ') : 'ok'}`)
   fail += problems.length
   await page.close()
+  // main screen + chapter map + Thuật ngữ with a seeded save (L1-L4 cleared)
+  const mp = await browser.newPage({ viewport: { width: w, height: h } })
+  await mp.addInitScript(() => localStorage.setItem('xelve.save', JSON.stringify({ v: 1, settings: { tier: 'thap', sound: true, music: 0.7, reduceShake: false, lang: 'vi' }, progress: { chapter: 1, level: 4 }, unlocked: ['khoi', 'l1', 'l2', 'l3', 'l4', 'grid3', 'grid5'] })))
+  await mp.goto('http://localhost:4177/?menu')
+  await mp.waitForSelector('.menu .btn.big', { timeout: 20000 }); await mp.waitForTimeout(1200)
+  const mprob = (await mp.evaluate(check)).map(p => 'menu ' + p)
+  if (w === 640 || w === 915) await mp.screenshot({ path: `shots/menu-${w}x${h}.png` })
+  for (const [i, name] of [[3, 'map'], [4, 'terms']]) {
+    await mp.click(`.iconrow .ib:nth-child(${i + 1})`); await mp.waitForTimeout(500)
+    mprob.push(...(await mp.evaluate(check)).map(p => name + ' ' + p))
+    if (w === 640 && name === 'map') await mp.screenshot({ path: `shots/map-${w}x${h}.png` })
+    await mp.click('.sheet.show .sheet-head .ib'); await mp.waitForTimeout(300)
+  }
+  console.log(`menu ${w}x${h}: ${mprob.length ? 'FAIL\n  ' + mprob.join('\n  ') : 'ok'}`)
+  fail += mprob.length
+  await mp.close()
   // Xưởng: every Bản vẽ and each of its parts; cells must stay ≥ 18 px
   const fp = await browser.newPage({ viewport: { width: w, height: h } })
   await fp.goto('http://localhost:4177/?forge&grid=8')

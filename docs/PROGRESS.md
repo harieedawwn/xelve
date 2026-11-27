@@ -181,3 +181,14 @@ Next: P12b (finish P12: L5–L8)
 - Gotchas: bosses' camera/tier fixed at 'tb'; L5/L8 need `?level=` in the URL to chain (finishLevel in chapter.ts sets it). Page mesh for `bua` shows note.l2 text.
 
 Next: P13
+
+## P13 · Menu, chế độ, cài đặt — PARTIAL (Vô tận left)
+- Main screen: src/scenes/menu.ts (live backdrop = last cleared room, slow authored drift; Tiếp tục bottom-right with level name; icon row bottom-left: Xưởng, Phòng tập, Vô tận, Bản đồ, Thuật ngữ, Cài đặt). Shown at boot when progress.level ≥ 1 (no `level`/`go` param) or `?menu`. First launch still goes straight to L1.
+- src/scenes/menuLogic.ts (pure + 5 tests): access (Xưởng/Phòng tập after l2, Vô tận flag l3), resumeLevel, node states, deterministic stains. menuSheets.ts: chapter map (8 nodes, orange stains on cleared, current inverted, locked + lock icon, Chương 2 "Sắp ra mắt") and Thuật ngữ sheet (11 lexicon terms). Replay any cleared/current level from the map (`?level=N&go=1`).
+- Home icon added to the in-level HUD bar and Phòng tập; Phòng tập (`?enemies`) now player-facing: i18n enemy names, Dọn sạch, back icon; material demos only with `&dev`.
+- Icons: ICON.play/forge/gym/endless/map/book/home/back in ui/dom.ts. i18n: menu.*, enemy.*, term.*, gym.clear, map.chapter1. CSS block "main screen" in style.css.
+- Checked: tsc, 132 vitest, build, `npm run shots` ok on 6 viewports (new `menu` entry: main screen, map, terms with seeded save). 2 screenshots viewed.
+- Left (P13b): (1) Vô tận mode itself (arena, waves, mini-boss every 5, best wave saved) — icon is locked "Sắp ra mắt" for now; (2) Phòng tập: damage numbers, quick-swap saved weapons, slow-mo toggle, spawn only unlocked enemies; (3) menu→scene uses wipe + page load, no "?" chips for odd terms yet; (4) Xưởng does not enforce Màu/stock (P14 or P13b); (5) backdrop is a corridor-style drift, no player stains in 3D yet; (6) real-phone check of tap sizes.
+- Gotchas: menu skipped whenever URL has `level` or `go`; chapter flow chains with those. Locked icon label shows only on press/focus.
+
+Next: P13b (Vô tận + Phòng tập polish), then P14

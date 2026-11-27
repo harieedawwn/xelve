@@ -2,6 +2,7 @@
 import { t } from '../i18n'
 import { el, ICON } from './dom'
 import { SettingsPanel } from './settingsPanel'
+import { wipe } from './wipe'
 
 const GLYPHS: Record<string, string[]> = {
   X: ['1...1', '.1.1.', '..v..', '.1.1.', '1...1'],
@@ -42,7 +43,9 @@ export class UI {
     gear.onclick = (e) => { e.stopPropagation(); this.onClick(); this.settings.show(true) }
     const rs = el('button', 'ib', ICON.restart); rs.setAttribute('aria-label', t('menu.restart'))
     rs.onclick = (e) => { e.stopPropagation(); this.onClick(); this.onRestart() }
-    this.bar.append(gear, rs)
+    const home = el('button', 'ib', ICON.home); home.setAttribute('aria-label', t('menu.home'))
+    home.onclick = (e) => { e.stopPropagation(); this.onClick(); wipe(1, () => { location.href = `${location.pathname}?menu` }) }
+    this.bar.append(gear, rs, home)
     this.card.innerHTML = `<h2>${t('end.title')}</h2>`
     const again = el('button', 'btn', ICON.restart + t('menu.restart')); again.onclick = (e) => { e.stopPropagation(); this.onClick(); this.onRestart() }
     this.card.appendChild(again)

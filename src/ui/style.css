@@ -126,3 +126,33 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 /* pickup caption (P12): ink label, bottom-centre, no box chrome beyond the flat ink block */
 .pickcap { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 8vmin); transform: translate(-50%, 8px); background: var(--ink); color: var(--paper); padding: 1.2vmin 2.4vmin; font: 600 clamp(13px, 2.6vmin, 18px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; opacity: 0; transition: opacity 200ms, transform 300ms var(--ease-in); pointer-events: none; }
 .pickcap.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* main screen */
+.menu { position: fixed; inset: 0; pointer-events: none; }
+.menu > * { pointer-events: auto; }
+.iconrow { position: absolute; left: calc(var(--safe-l) + var(--u) * 1.5); bottom: calc(var(--safe-b) + var(--u) * 1.5); display: flex; flex-wrap: wrap; gap: var(--u); max-width: 52vw; }
+.ib.lg { width: clamp(48px, 9vmin, 64px); height: clamp(48px, 9vmin, 64px); }
+.ib.locked { color: var(--stone); cursor: not-allowed; position: relative; }
+.ib.locked svg { stroke: var(--stone); }
+.ib.locked small { position: absolute; left: 0; right: 0; bottom: 100%; margin-bottom: 4px; font: 600 11px/1.2 'Be Vietnam Pro', system-ui, sans-serif; color: var(--paper); text-shadow: none; background: var(--ink); text-align: center; display: none; }
+.ib.locked:focus small, .ib.locked:active small { display: block; }
+.btn.big { position: absolute; right: calc(var(--safe-r) + var(--u) * 1.5); bottom: calc(var(--safe-b) + var(--u) * 1.5); min-height: clamp(56px, 12vmin, 80px); padding: 0 calc(var(--u) * 2.4); display: grid; grid-template-columns: auto 1fr; column-gap: var(--u); align-items: center; text-align: left; max-width: 44vw; }
+.btn.big svg { grid-row: 1 / 3; width: 28px; height: 28px; }
+.btn.big span { font: 900 clamp(18px, 4.4vmin, 28px)/1.15 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; }
+.btn.big small { font: 400 clamp(11px, 2vmin, 14px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; color: var(--paper-2); }
+.sheet-box.wide { width: min(100%, 760px); }
+.map { display: grid; gap: calc(var(--u) * 1.2); }
+.nodes { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--u); }
+.node { position: relative; min-height: clamp(56px, 14vmin, 84px); border: 2px solid var(--ink); background: var(--paper); box-shadow: 3px 3px 0 var(--ink); color: var(--ink); display: grid; align-content: center; justify-items: start; padding: 4px 8px; cursor: pointer; overflow: hidden; font: 600 clamp(11px, 2.2vmin, 15px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; text-align: left; }
+.node b { font: 900 clamp(16px, 3.6vmin, 24px)/1.1 'Be Vietnam Pro', system-ui, sans-serif; position: relative; }
+.node span { position: relative; overflow-wrap: anywhere; }
+.node i { position: absolute; background: var(--ve); }
+.node.current { background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--ve); }
+.node.locked { color: var(--stone); border-color: var(--stone); box-shadow: none; cursor: not-allowed; }
+.node svg { position: absolute; right: 6px; top: 6px; width: 18px; height: 18px; stroke: var(--stone); stroke-width: 2; fill: none; stroke-linecap: square; }
+.node:active { transform: translate(2px, 2px) scale(.97); box-shadow: none; }
+.ch2 { display: flex; align-items: center; gap: var(--u); border: 2px dashed var(--stone); color: var(--stone); padding: 8px 12px; min-height: 44px; font: 600 clamp(12px, 2.4vmin, 16px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; }
+.ch2 svg { width: 20px; height: 20px; stroke: var(--stone); stroke-width: 2; fill: none; stroke-linecap: square; }
+.ch2 small { margin-left: auto; font-weight: 400; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 6px calc(var(--u) * 1.5); font: 400 clamp(12px, 2.4vmin, 16px)/1.45 'Be Vietnam Pro', system-ui, sans-serif; }
+.terms dt { font-weight: 900; }

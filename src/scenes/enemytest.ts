@@ -16,6 +16,9 @@ import type { Enemy } from '../enemies/base'
 import { startLoop } from '../core/loop'
 import { bindFinger } from '../core/input'
 import { Time } from '../core/time'
+import { ICON } from '../ui/dom'
+import { wipe } from '../ui/wipe'
+import { t, Key } from '../i18n'
 
 export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, audio: Audio) {
   renderer.resize('tb')
@@ -52,11 +55,14 @@ export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, au
     b.style.cssText = 'min-height:40px;min-width:48px;padding:0 8px;border:2px solid #16161a;background:#ecebe6;color:#16161a;font:inherit;border-radius:0'
     b.onclick = on; bar.append(b)
   }
-  Object.keys(ENEMIES).forEach(id => btn(id, () => spawn(id)))
-  btn('x5 bong', () => spawn('bong', 5)); btn('x6 vo', () => spawn('vo', 6)); btn('clear', () => { enemies.forEach(e => e.alive && scene.remove(e.root)); enemies = [] })
+  const home = document.createElement('button'); home.innerHTML = ICON.back; home.setAttribute('aria-label', t('menu.home')); home.className = 'ib'
+  home.onclick = () => wipe(1, () => { location.href = `${location.pathname}?menu` }); bar.append(home)
+  const pb = (label: string, on: () => void) => { const b = document.createElement('button'); b.textContent = label; b.className = 'tg'; b.onclick = on; bar.append(b) }
+  Object.keys(ENEMIES).forEach(id => pb(t(`enemy.${id}` as Key), () => spawn(id)))
+  pb(`${t('enemy.bong')} ×5`, () => spawn('bong', 5)); pb(t('gym.clear'), () => { enemies.forEach(e => e.alive && scene.remove(e.root)); enemies = [] })
   // material demos (dev labels): each pole carries one material in its effect region; "bua" = heavy head on a thin handle (snaps once)
-  Object.keys(MATERIALS).forEach(id => btn('mat:' + id, () => weapon.setDesign(materialDemo(id))))
-  btn('bua gãy', () => weapon.setDesign(neckDemo())); btn('restore', () => weapon.restore())
+  if (location.search.includes('dev')) Object.keys(MATERIALS).forEach(id => btn('mat:' + id, () => weapon.setDesign(materialDemo(id))))
+  if (location.search.includes('dev')) { btn('bua gãy', () => weapon.setDesign(neckDemo())); btn('restore', () => weapon.restore()) }
   addEventListener('resize', () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); renderer.resize('tb') })
 
   const strike = () => { hp = hp <= 1 ? 6 : hp - 1; audio.playerHurt() }
