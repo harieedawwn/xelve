@@ -17,6 +17,8 @@ export class Bong {
   armL = new THREE.Group(); armR = new THREE.Group(); legL = new THREE.Group(); legR = new THREE.Group()
   foreL!: THREE.Mesh; foreR!: THREE.Mesh; shinL!: THREE.Mesh; shinR!: THREE.Mesh
   hp = 30; state: State = 'emerge'; st = 0
+  /** sound hook: 'bong.telegraph' | 'bong.lunge' | 'bong.death' | 'bong.hurt' */
+  onSound: (name: string) => void = () => {}
   blood = PAL.bloodTim
   vel = new THREE.Vector3(); phase = Math.random() * 6; slotX = 0
   private seed = Math.random() * 10
@@ -71,7 +73,8 @@ export class Bong {
     host.worldToLocal(w.position.copy(at)); w.rotation.z = Math.random() * 3; host.add(w); this.wounds.push(w)
     fx.blood(at, dir, this.blood, weak ? 46 : 28)
     fx.splash(at, dir, this.blood, weak ? 4 : 2)
-    if (this.hp <= 0) { this.die(dir, fx); return true }
+    if (this.hp <= 0) { this.onSound('bong.death'); this.die(dir, fx); return true }
+    this.onSound('bong.hurt')
     if (this.state === 'windup' || this.state === 'approach' || this.state === 'lunge') { this.state = 'stagger'; this.st = 0 }
     return false
   }
@@ -104,10 +107,10 @@ export class Bong {
       case 'emerge': speed = 0.9; if (this.st > 0.9) { this.state = 'approach'; this.st = 0 } break
       case 'approach':
         speed = 0.6 * (0.55 + 0.45 * Math.max(0, Math.sin(this.phase * 0.5)))
-        if (dist < 0.12) { this.state = 'windup'; this.st = 0 }
+        if (dist < 0.12) { this.state = 'windup'; this.st = 0; this.onSound('bong.telegraph') }
         break
       case 'windup': armRaise = smooth(this.st / 0.65); push = -0.1 * armRaise
-        if (this.st > 0.7) { this.state = 'lunge'; this.st = 0; this.struckPlayer = false } break
+        if (this.st > 0.7) { this.state = 'lunge'; this.st = 0; this.struckPlayer = false; this.onSound('bong.lunge') } break
       case 'lunge': armRaise = 1; push = 0.38 * smooth(this.st / 0.14)
         if (this.st > 0.13 && !this.struckPlayer) { this.struckPlayer = true; onStrike(this) }
         if (this.st > 0.3) { this.state = 'recover'; this.st = 0 } break

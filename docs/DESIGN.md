@@ -53,7 +53,8 @@ Gradients, neon, glow, soft bloom, coloured/blurred shadows, frosted glass/backd
 
 ## Sound direction
 Realistic and heavy. Swing whoosh tracks tip speed. Impacts layered transient/body/low per material (metal ring, flesh thud, glass shatter, rubber bounce). Heavy charged hit adds a sub-bass drop + short silence before (anticipation). Slow-mo: lowpass + pitch down world, heartbeat. UI: low "cộc" body + dry "tách" transient, no high chimes. Music: slot only (assets/music/*.mp3 picked up automatically; volume slider exists).
-Audition results go here: *(pending — audition page in P3)*.
+Audition page: `/audition.html` (P4). Mặc định giữ nguyên các biến thể 1 cho tới khi người dùng chọn.
+Audition results go here: *(pending — user picks after listening; defaults = variant 1 / random of 3)*.
 
 ## Lexicon (use exactly these words)
 | Concept | In-game word |

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>XELVE · nghe thử âm thanh</title>
+<style>
+  body{margin:0;padding:12px;background:#F2EEE3;color:#16161A;font:400 15px/1.4 'Be Vietnam Pro',system-ui,sans-serif}
+  h1{font-weight:900;font-size:20px;letter-spacing:-.02em;margin:0 0 8px}
+  h2{font-weight:900;font-size:14px;margin:14px 0 6px}
+  .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  button{font:600 14px/1.4 inherit;min-height:44px;padding:0 14px;background:#F2EEE3;color:#16161A;border:2px solid #16161A;border-radius:2px;box-shadow:3px 3px 0 #16161A}
+  button:active{transform:translate(2px,2px);box-shadow:none}
+  label{display:flex;gap:8px;align-items:center}
+  input[type=range]{width:200px}
+  .note{font-size:13px;opacity:.75}
+</style>
+</head>
+<body>
+<h1>Nghe thử âm thanh</h1>
+<p class="note">Chạm một nút để nghe. Mỗi nút có 3 biến thể (đánh số 1–3). Cho tôi biết bản nào cậu chọn.</p>
+<div id="app"></div>
+<script type="module" src="./src/audition.ts"></script>
+</body>
+</html>

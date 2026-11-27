@@ -56,7 +56,7 @@ applyTier(tier)
 const applySettings = () => {
   const st = settings()
   if (st.tier && st.tier !== tier) applyTier(st.tier)
-  audio.setMuted(!st.sound); audio.setLevel(1); rig.reduceMotion = !!st.reduceShake
+  audio.setMuted(!st.sound); audio.setLevel(1); audio.setMusic(st.music); rig.reduceMotion = !!st.reduceShake
 }
 onSettings(applySettings); applySettings()
 addEventListener('resize', () => { rig.cam.aspect = innerWidth / innerHeight; rig.cam.updateProjectionMatrix(); applyTier(tier) })
@@ -68,7 +68,7 @@ ui.title.onclick = () => {
   if (!ui.ready) return
   document.documentElement.requestFullscreen?.().catch(() => {})
   ;(screen.orientation as any)?.lock?.('landscape')?.catch?.(() => {})
-  audio.unlock(); audio.ui(); ui.hideTitle(); ui.hud(true)
+  audio.unlock(); audio.ui(); audio.music.play('slice'); ui.hideTitle(); ui.hud(true)
   rig.startWake(); state = 'wake'
 }
 
@@ -79,7 +79,7 @@ function spawnWave() {
   const enc = ENCOUNTERS[encIdx], slots = [-0.45, 0, 0.45]
   enc.doors.forEach((d, i) => {
     const from = d === 'far' ? new THREE.Vector3(0, 0, -25) : world.doors[d].clone()
-    const b = new Bong(scene, from); b.slotX = slots[i % 3]; enemies.push(b)
+    const b = new Bong(scene, from); b.slotX = slots[i % 3]; b.onSound = (n) => audio.play(n); audio.play('bong.appear'); enemies.push(b)
   })
 }
 const alive = () => enemies.filter(e => e.alive)

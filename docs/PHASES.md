@@ -57,7 +57,7 @@ Done when: [ ] heavy test weapon visibly lags the finger, light one sticks · [ 
 Model: Opus 5.5 · medium — game feel; wrong calls here are expensive later
 Deploy: yes · Screenshots: ≤3
 
-## P4 · Âm thanh [TODO]
+## P4 · Âm thanh [DONE]
 Read: docs/DESIGN.md#sound-direction, docs/spec/notes.md#sound, docs/spec/tech.md#audio
 Do: audition page (`/audition.html`): whoosh by speed slider, impacts per material (3 variants), heavy charged hit, slow-mo in/out, footsteps per floor type, UI tap/toggle/back, Bóng sounds. Then the engine: buses, recipes, reverb per space (generated IR), limiter, music slot. Record chosen variants in DESIGN.md after the user picks (leave defaults if no answer).
 Done when: [ ] audition page deployed · [ ] all game events mapped to sounds · [ ] min gap per sound, pause on hidden

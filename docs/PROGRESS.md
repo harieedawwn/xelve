@@ -63,3 +63,14 @@ Next: P3
 - Gotchas: needs `npm ci` in fresh sessions; `__xelve.weapon` exposed for tests.
 
 Next: P4
+
+## P4 · Âm thanh — DONE
+- Engine split: src/audio/synth.ts (toolbox), recipes/{impacts,world,ui,bong}.ts (one registry `RECIPES`, each with min gap + 3 variants, ±3% pitch), reverb.ts (generated IR per space: corridor/hall/small/open, `setSpace`), music.ts (slot: assets/music/*.mp3 auto-picked, mapping SCENE_MUSIC; silent when none), engine.ts (buses sfx/ui/music → master → lowpass → limiter; `play(name,p,v)`; pause on hidden; old API kept as wrappers).
+- Recipes: hit.{flesh,metal,glass,rubber,stone,wood}, hit.heavy (silence → sub drop), hit.weak, kill, step.{concrete,metal,wood,wet}, player.hurt, heartbeat, slow.in/out, ui.{tap,on,off,back}, bong.{appear,telegraph,lunge,hurt,death}.
+- Wired in slice: Bóng appear/telegraph/lunge/hurt/death via `Bong.onSound`; music volume from settings (Nhạc slider now drives the music bus); music.play('slice') on start.
+- Audition page `/audition.html` (dev labels, 60 buttons, whoosh slider, reverb spaces). vite builds it as a second page.
+- Checked: tsc, 26 tests, build, headless click of all 60 audition buttons with no errors.
+- Left: user listens and picks variants → record in DESIGN.md; ui.back/ui.on/ui.off not yet wired to the settings UI (only `tap` used); step floor type still concrete (levels P6+); heavy hit/material hits get wired when analyze()/materials land (P7/P8); no real music files yet.
+- Gotchas: needs `npm ci` first; global `Audio` is shadowed by our class only in files that import engine.
+
+Next: P5
