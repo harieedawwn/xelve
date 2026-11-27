@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { surfaceHit, HALF_W, HEIGHT } from '../levels/corridor'
 import { PAL } from '../render/palette'
 
-const MAXP = 1200, MAXD = 300
+const MAXP = 1500, MAXD = 300
 
 function splatTex() {
   const s = 32, cv = document.createElement('canvas'); cv.width = cv.height = s
@@ -35,6 +35,11 @@ export class FX {
   private m4 = new THREE.Matrix4(); private q = new THREE.Quaternion(); private v3 = new THREE.Vector3(); private s3 = new THREE.Vector3()
   private hit = { p: new THREE.Vector3(), n: new THREE.Vector3() }
   private z = new THREE.Vector3(0, 0, 1)
+  // scratch (no per-frame allocation)
+  private sq = new THREE.Quaternion(); private sc = new THREE.Color(); private sp = new THREE.Vector3(); private sn = new THREE.Vector3(); private sd = new THREE.Vector3()
+  private up = new THREE.Vector3(0, 1, 0); private dn = new THREE.Vector3(0, -1, 0); private wn = new THREE.Vector3()
+  get particleCount() { return this.pn }
+  get decalCount() { return this.dm.count }
 
   constructor(private scene: THREE.Scene) {
     this.pm = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial(), MAXP)
@@ -57,7 +62,7 @@ export class FX {
     for (let k = 0; k < n; k++) {
       if (this.pn >= this.maxParticles) break
       const i = this.pn++
-      this.pp.set([at.x, at.y, at.z], i * 3)
+      this.pp[i * 3] = at.x; this.pp[i * 3 + 1] = at.y; this.pp[i * 3 + 2] = at.z
       const sp = speed * (0.35 + Math.random())
       this.pv[i * 3] = dir.x * sp + (Math.random() - 0.5) * 2.2
       this.pv[i * 3 + 1] = dir.y * sp + Math.random() * 2.2
@@ -71,11 +76,11 @@ export class FX {
   decal(p: THREE.Vector3, n: THREE.Vector3, color: number, size: number) {
     const i = this.di++ % this.maxDecals
     this.q.setFromUnitVectors(this.z, n)
-    const spin = new THREE.Quaternion().setFromAxisAngle(this.z, Math.random() * 6.28)
-    this.q.multiply(spin)
+    this.sq.setFromAxisAngle(this.z, Math.random() * 6.28)
+    this.q.multiply(this.sq)
     this.v3.copy(p).addScaledVector(n, 0.004 + (i % 7) * 0.0006)
     this.m4.compose(this.v3, this.q, this.s3.set(size, size, 1))
-    this.dm.setMatrixAt(i, this.m4); this.dm.setColorAt(i, new THREE.Color(color))
+    this.dm.setMatrixAt(i, this.m4); this.dm.setColorAt(i, this.sc.setHex(color))
     this.dm.count = Math.min(this.maxDecals, Math.max(this.dm.count, i + 1))
     this.dm.instanceMatrix.needsUpdate = true; this.dm.instanceColor!.needsUpdate = true
   }
@@ -83,14 +88,14 @@ export class FX {
   /** spray toward surfaces behind the target to stain the white world */
   splash(at: THREE.Vector3, dir: THREE.Vector3, color: number, count: number) {
     for (let k = 0; k < count; k++) {
-      const d = this.v3.copy(dir).add(new THREE.Vector3((Math.random() - 0.5) * 1.4, (Math.random() - 0.3) * 1.2, (Math.random() - 0.5) * 1.4)).normalize()
-      if (surfaceHit(at, d, this.hit)) this.decal(this.hit.p.clone(), this.hit.n.clone(), color, 0.12 + Math.random() * 0.35)
+      const d = this.sd.copy(dir).add(this.sp.set((Math.random() - 0.5) * 1.4, (Math.random() - 0.3) * 1.2, (Math.random() - 0.5) * 1.4)).normalize()
+      if (surfaceHit(at, d, this.hit)) this.decal(this.hit.p, this.hit.n, color, 0.12 + Math.random() * 0.35)
     }
   }
 
   smearPush(a: THREE.Vector3, b: THREE.Vector3, t: number) {
-    this.trail.push({ a: a.clone(), b: b.clone(), t })
-    if (this.trail.length > 32) this.trail.shift()
+    if (this.trail.length >= 32) { const o = this.trail.shift()!; o.a.copy(a); o.b.copy(b); o.t = t; this.trail.push(o) }
+    else this.trail.push({ a: a.clone(), b: b.clone(), t })
   }
 
   addDebris(o: THREE.Object3D, v: THREE.Vector3, w: THREE.Vector3) { this.debris.push({ o, v, w, life: 5 }) }
@@ -107,8 +112,8 @@ export class FX {
       const landed = y < 0.002 || y > HEIGHT || Math.abs(x) > HALF_W
       if (landed || this.pl[i] <= 0) {
         if (landed && Math.random() < 0.35) {
-          const n = y < 0.01 ? new THREE.Vector3(0, 1, 0) : y > HEIGHT ? new THREE.Vector3(0, -1, 0) : new THREE.Vector3(-Math.sign(x), 0, 0)
-          const p = new THREE.Vector3(Math.max(-HALF_W, Math.min(HALF_W, ox)), Math.max(0, Math.min(HEIGHT, oy)), oz)
+          const n = y < 0.01 ? this.up : y > HEIGHT ? this.dn : this.wn.set(-Math.sign(x), 0, 0)
+          const p = this.sn.set(Math.max(-HALF_W, Math.min(HALF_W, ox)), Math.max(0, Math.min(HEIGHT, oy)), oz)
           if (n.y > 0) p.y = 0; if (n.x !== 0) p.x = -n.x * HALF_W
           this.decal(p, n, this.pc[i].getHex(), 0.03 + Math.random() * 0.07)
         }
@@ -139,7 +144,7 @@ export class FX {
       const age = Math.min(1, (now - e.t) / life)
       const k = Math.min(1, age * 1.15)
       const ax = e.a.x + (e.b.x - e.a.x) * k, ay = e.a.y + (e.b.y - e.a.y) * k, az = e.a.z + (e.b.z - e.a.z) * k
-      this.spos.set([ax, ay, az, e.b.x, e.b.y, e.b.z], i * 6)
+      const o = i * 6; this.spos[o] = ax; this.spos[o + 1] = ay; this.spos[o + 2] = az; this.spos[o + 3] = e.b.x; this.spos[o + 4] = e.b.y; this.spos[o + 5] = e.b.z
     }
     ;(this.sg.attributes.position as THREE.BufferAttribute).needsUpdate = true
     this.sm.visible = n >= 2

@@ -36,7 +36,7 @@ Done when:
 Model: Sonnet 5.5 · medium — clear spec, mostly config
 Deploy: yes · APK: yes (pipeline check) · Screenshots: ≤4
 
-## P1 · Renderer & hiệu ứng [TODO]
+## P1 · Renderer & hiệu ứng [DONE]
 Read: docs/DESIGN.md#rendering-look #effects, docs/spec/tech.md#quality-tiers
 Do: finish low-res pipeline per tier; ink outline pass; grit textures (generated greyscale, 32–64 px); impact frame; smear meshes; ghost blur (TB) + directional blur (Cao); pooled particles + blood decals with tier caps; ASCII glyph material + dissolve; slow-mo colour drain shader (keeps blood/weapon colour). Bans: no bloom/glow/gradients.
 Done when: [ ] effect test scene toggles every effect at all 3 tiers · [ ] 60 fps desktop at Cao, no allocations per frame in effects (check with a counter)

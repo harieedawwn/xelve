@@ -180,6 +180,8 @@ function render(_a: number, realDt: number) {
   desat = lerp(desat, wantDesat, 1 - Math.exp(-12 * realDt)); renderer.desat = desat
   const ang = rig.cam.quaternion.angleTo(prevQ); prevQ.copy(rig.cam.quaternion)
   renderer.ghost = q.ghost ? clamp((ang / Math.max(realDt, 1e-3) - 1.5) / 8, 0, 0.45) : 0
+  const sp = clamp((ang / Math.max(realDt, 1e-3) - 1.5) / 8, 0, 0.45) * 0.06
+  renderer.blur.set(sp, 0)
   renderer.mode = impactQ > 0 ? impactQ-- : 0
   ui.setLid(state === 'title' ? 1 : rig.eyelid)
   renderer.render(scene, rig.cam)

@@ -31,3 +31,15 @@ Next: P1 (after user checks APK/Pages)
 - Workflow `[deploy][apk]` giờ ký release bằng keystore này (không còn fallback debug). Người dùng giữ bản backup `xelve.keystore`; KHÔNG commit (.keys/ và *.keystore bị gitignore). Mất file = không cập nhật đè được APK đã cài.
 - Ghi chú cho AI khác: không thể đặt secrets từ session (gh chưa đăng nhập, request_credential không nhận token github.com). Nếu cần đổi secrets, hướng dẫn người dùng dán tay ở Settings → Secrets and variables → Actions.
 - Chuỗi APK cài trước đó (nếu có, ký debug) phải gỡ trước khi cài bản ký release.
+
+## P1 · Renderer & hiệu ứng — DONE
+- pipeline.ts: depth texture on the low-res target → 1 px ink depth-edge outline (toggle `renderer.outline`); Cao directional blur (`renderer.blur`, uv vector from camera angular velocity); ghost accumulation moved to Trung bình (quality table: tb = ghost, cao = directional; slice wires both).
+- render/ascii.ts: ASCII glyph *material* (screen-space 8 px cells, generated atlas) + `setDissolve()` death break-up; cheap tier = frozen glyphs. Not yet used by Bóng (P5 wires it).
+- fx.ts: removed per-frame allocations (scratch vectors/colors, smear trail reuse, no array literals); particle buffer 1500 / decals 300 match tier caps; `particleCount`/`decalCount` getters.
+- scenes/fxtest.ts: dev scene `?fx` — buttons for tier ×3 and each effect (outline, blur, ghost, impact, drain, smear, dissolve, spray, burst, stress), stats line (fps, particles, decals, heap KB). Labels are dev-only, not in vi.ts.
+- Already existed from P0: impact frame, slow-mo colour drain (keeps saturated blood/weapon), smear crescent, pooled particles/decals, grit textures (levels/corridor gritTex).
+- Checked: tsc clean, 8 tests, build OK; headless 640x360 all effects at 3 tiers, no errors (swiftshader: 56/54/44 fps). Steady-state heap growth ≈270 KB/4 s in the test scene (test's own Vector3s + three internals); effects code itself allocation-free.
+- Left: real-device FPS / look check at Cao; normal-based outline edges (depth only now); ASCII on real Bóng meshes (P5); speed lines belong to P2/P3.
+- Gotchas: Chromium-only heap counter (performance.memory); `?fx` skips UI/benchmark.
+
+Next: P2

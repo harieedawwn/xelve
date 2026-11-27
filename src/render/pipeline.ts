@@ -6,10 +6,22 @@ import { QUALITY, Tier } from '../core/quality'
 const vert = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`
 const blendFrag = `uniform sampler2D tCur, tPrev; uniform float amt; varying vec2 vUv;
 void main(){ gl_FragColor = mix(texture2D(tCur, vUv), texture2D(tPrev, vUv), amt); }`
-const displayFrag = `uniform sampler2D tSrc; uniform int mode; uniform float desat, vig; uniform vec2 res; varying vec2 vUv;
+const displayFrag = `uniform sampler2D tSrc, tDepth; uniform int mode, outline; uniform float desat, vig, near, far; uniform vec2 res, bdir; varying vec2 vUv;
+float lin(vec2 uv){ float d = texture2D(tDepth, uv).r; return near * far / (far - d * (far - near)); }
 const vec3 INK = vec3(0.0079,0.0079,0.0103); const vec3 PAPER = vec3(0.838,0.832,0.791);
 void main(){
   vec3 c = texture2D(tSrc, vUv).rgb;
+  if (dot(bdir, bdir) > 0.0) { // Cao: directional blur along camera angular velocity (solid taps, no glow)
+    vec3 a = c;
+    for (int i = 1; i < 6; i++) a += texture2D(tSrc, vUv - bdir * float(i) / 5.0).rgb;
+    c = a / 6.0;
+  }
+  if (outline == 1) { // depth edge -> 1 low-res px ink line
+    vec2 o = 1.0 / res; float d0 = lin(vUv);
+    float e = abs(lin(vUv + vec2(o.x, 0.0)) - d0) + abs(lin(vUv - vec2(o.x, 0.0)) - d0)
+            + abs(lin(vUv + vec2(0.0, o.y)) - d0) + abs(lin(vUv - vec2(0.0, o.y)) - d0);
+    c = mix(c, INK, step(0.06 * d0 + 0.02, e) * step(d0, far * 0.9));
+  }
   float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
   float sat = (mx - mn) / (mx + 0.0001); float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
   float keep = step(0.4, sat) * step(0.004, mx);
@@ -25,6 +37,8 @@ void main(){
   #include <colorspace_fragment>
 }`
 
+const ZERO = new THREE.Vector2()
+
 export class Renderer {
   gl: THREE.WebGLRenderer
   rt!: THREE.WebGLRenderTarget; acc: THREE.WebGLRenderTarget[] = []
@@ -32,14 +46,16 @@ export class Renderer {
   private blendMat: THREE.ShaderMaterial; private dispMat: THREE.ShaderMaterial
   private ping = 0
   tier: Tier = 'tb'
-  mode = 0; desat = 0; vig = 0; ghost = 0
+  mode = 0; desat = 0; vig = 0; ghost = 0; outline = true
+  /** Cao only: blur vector in uv units (from camera angular velocity); ignored on other tiers */
+  blur = new THREE.Vector2()
   lowW = 0; lowH = 0
 
   constructor(canvas: HTMLCanvasElement) {
     this.gl = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' })
     this.gl.setPixelRatio(1)
     this.blendMat = new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: blendFrag, uniforms: { tCur: { value: null }, tPrev: { value: null }, amt: { value: 0 } }, depthTest: false })
-    this.dispMat = new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: displayFrag, uniforms: { tSrc: { value: null }, mode: { value: 0 }, desat: { value: 0 }, vig: { value: 0 }, res: { value: new THREE.Vector2() } }, depthTest: false })
+    this.dispMat = new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: displayFrag, uniforms: { tSrc: { value: null }, mode: { value: 0 }, desat: { value: 0 }, vig: { value: 0 }, res: { value: new THREE.Vector2() }, tDepth: { value: null }, outline: { value: 1 }, near: { value: 0.1 }, far: { value: 50 }, bdir: { value: new THREE.Vector2() } }, depthTest: false })
     this.quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.dispMat); this.quad.frustumCulled = false
     this.qscene.add(this.quad)
   }
@@ -55,6 +71,7 @@ export class Renderer {
     this.lowH = QUALITY[tier].h; this.lowW = Math.round(this.lowH * W / H)
     this.rt?.dispose(); this.acc.forEach(a => a.dispose())
     this.rt = this.mkRT(this.lowW, this.lowH, true)
+    this.rt.depthTexture = new THREE.DepthTexture(this.lowW, this.lowH)
     this.acc = [this.mkRT(this.lowW, this.lowH, false), this.mkRT(this.lowW, this.lowH, false)]
     ;(this.dispMat.uniforms.res.value as THREE.Vector2).set(this.lowW, this.lowH)
   }
@@ -62,6 +79,7 @@ export class Renderer {
   render(scene: THREE.Scene, cam: THREE.Camera) {
     const g = this.gl
     g.setRenderTarget(this.rt); g.render(scene, cam)
+    const pc = cam as THREE.PerspectiveCamera
     let src = this.rt.texture
     if (QUALITY[this.tier].ghost) {
       const out = this.acc[this.ping], prev = this.acc[1 - this.ping]
@@ -71,6 +89,10 @@ export class Renderer {
       src = out.texture; this.ping = 1 - this.ping
     }
     const u = this.dispMat.uniforms
+    u.tDepth.value = this.rt.depthTexture; u.outline.value = this.outline ? 1 : 0
+    if (pc.isPerspectiveCamera) { u.near.value = pc.near; u.far.value = pc.far }
+    const dirOn = QUALITY[this.tier].blur === 'directional'
+    ;(u.bdir.value as THREE.Vector2).copy(dirOn ? this.blur : ZERO)
     u.tSrc.value = src; u.mode.value = this.mode; u.desat.value = this.desat; u.vig.value = this.vig
     this.quad.material = this.dispMat; g.setRenderTarget(null); g.render(this.qscene, this.qcam)
   }

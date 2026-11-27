@@ -14,11 +14,13 @@ import { Renderer } from './render/pipeline'
 import { Audio } from './audio/engine'
 import { UI } from './ui/ui'
 import { startSlice } from './scenes/slice'
+import { startFxTest } from './scenes/fxtest'
 
 async function boot() {
   await loadSave()
   const canvas = document.getElementById('c') as HTMLCanvasElement
   const renderer = new Renderer(canvas)
+  if (location.search.includes('fx')) { renderer.resize('tb'); startFxTest(renderer); return }
   const ui = new UI()
   const audio = new Audio()
   if (!settings().tier) {

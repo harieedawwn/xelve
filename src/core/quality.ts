@@ -8,8 +8,8 @@ export interface Quality {
 }
 export const QUALITY: Record<Tier, Quality> = {
   thap: { h: 240, fps: 30, particles: 150, decals: 20, blur: 'none', ghost: false, shadows: 'blob', maxEnemies: 6 },
-  tb: { h: 360, fps: 60, particles: 500, decals: 80, blur: 'ghost', ghost: false, shadows: 'blob', maxEnemies: 10 },
-  cao: { h: 480, fps: 60, particles: 1500, decals: 300, blur: 'directional', ghost: true, shadows: 'map', maxEnemies: 14 },
+  tb: { h: 360, fps: 60, particles: 500, decals: 80, blur: 'ghost', ghost: true, shadows: 'blob', maxEnemies: 10 },
+  cao: { h: 480, fps: 60, particles: 1500, decals: 300, blur: 'directional', ghost: false, shadows: 'map', maxEnemies: 14 },
 }
 
 /** Pick a tier from measured average frame time (ms) of a 2 s benchmark. */
