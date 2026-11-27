@@ -92,10 +92,10 @@ Done when: [x] a test duel dummy exercises every move · [x] perfect parry feels
 Model: Opus 5.5 · medium — timing feel
 Deploy: yes · Screenshots: ≤3
 
-## P9 · Bản vẽ Dao, Kiếm, Búa [TODO]
+## P9 · Bản vẽ Dao, Kiếm, Búa [DONE]
 Read: docs/spec/weapon.md#3
 Do: blueprint registry + 3 blueprints (parts, anchors, ghosts, grips), equip flow.
-Done when: [ ] each blueprint drawable, equippable, swings correctly
+Done when: [x] each blueprint drawable, equippable, swings correctly
 Model: Sonnet 5.5 · medium
 Deploy: no · Screenshots: ≤3
 

@@ -126,3 +126,12 @@ Next: P8
 - Gotchas: defence uses game time (`time.now`), so slow-mo widens the real-time windows on purpose. DuelDummy never dies (hp reset each tick); `__duel` exposed for tests. Pad buttons call `setPointerCapture` in try (synthetic events in tests).
 
 Next: P9
+
+## P9 · Bản vẽ Dao, Kiếm, Búa — DONE
+- The blueprint registry, the 3 blueprints (parts, anchors, ghosts, grips) and the equip flow (`storeDesign` equips, `equippedDesign` feeds slice and Phòng tập) already shipped in P6. P9 audited them against weapon.md#3 and locked them with tests.
+- src/weapon/blueprints.test.ts (10 tests): part sizes = spec (Dao 4×12 + 3×6; Kiếm 5×24 + 9×3 + 3×8; Búa 10×8 depth 2 + 3×20), grip only in cán and inside it, all parts join to the grip (no loose cells), grip in the lower half, ghosts non-empty, swing profile order Dao < Kiếm < Búa inertia with charged = false/true/true, cut at the neck → loose cells, equip flow (one saved design per Bản vẽ, switching).
+- Checked: tsc, 105 vitest, build OK. No code changes were needed, so no screenshots taken.
+- Left: real-phone feel of the swing per Bản vẽ; Ch2 Bản vẽ stay "Sắp ra mắt".
+- Gotchas: tests use the default in-memory save (don't call loadSave in vitest: no window).
+
+Next: P10
