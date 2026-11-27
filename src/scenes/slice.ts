@@ -7,6 +7,7 @@ import { buildCorridor } from '../levels/corridor'
 import { FX } from '../render/fx'
 import { Bong } from '../enemies/bong'
 import { Weapon } from '../combat/weapon'
+import { equippedDesign } from '../weapon/store'
 import { PROFILES } from '../combat/profiles'
 import { sweep } from '../combat/sweep'
 import { Bus } from '../combat/bus'
@@ -90,7 +91,7 @@ function impactFrame() {
   lastImpact = time.real; impactQ = 2
 }
 
-{ const w = new URLSearchParams(location.search).get('weapon'); if (w && PROFILES[w]) weapon.setProfile(PROFILES[w]) }
+{ const w = new URLSearchParams(location.search).get('weapon'); if (w && PROFILES[w]) weapon.setProfile(PROFILES[w]); else { const d = equippedDesign(); if (d) weapon.setDesign(d) } }
 const motes = new Motes(scene, weapon.pivot, () => bus.emit('mote', { n: 1 }))
 bus.on('mote', () => weapon.spring.v.y += 0.25)
 bus.on('hurt', (e) => { rig.hitTaken(e.side); audio.playerHurt() })

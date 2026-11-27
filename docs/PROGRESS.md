@@ -85,3 +85,15 @@ Next: P5
 - Gotchas: `Enemy.update` must run before `sweep`; `hittable` is a getter (nhieu). Vo children need `onSpawn` wired by the owner to join the enemy list.
 
 Next: P6
+
+## P6 · Xưởng (editor) — DONE
+- src/weapon: model.ts (Cell/Part/WeaponDesign, makeDesign, assemble → global grid + grip), blueprints/{khoi,dao,kiem,bua}.ts + registry (parts, anchors, depth 2 for Búa đầu, ghost silhouettes, Đối xứng default; Ch2 names in SOON), materials/*.ts + registry (id, name, density, colour only — effects P7), analyze.ts (P6 part: connectivity from grip, mass, reach, inertia, thickness → sắc, 5 bars 0..1), mesh.ts (greedy front/back per material, culled sides incl. depth-2 seams, crack-free ink hull), runtime.ts (stats → combat Profile, stand-in until P7), store.ts (one saved design per Bản vẽ + `equipped` in the save).
+- src/forge: forge.ts (layout, Bản vẽ seg + locked "Sắp ra mắt", part tabs, tools, 7 materials, stats bars tap → numbers, loose count, Thử, Lưu → "Đã lưu"), grid.ts (canvas Lưới; Bản vẽ parts lie horizontal with tip right, Khối upright; 1 finger draws, 2 fingers pan + pinch 18–56 px, second finger cancels the stroke; wheel pans, ctrl+wheel zooms; ghost, loose = red frame + hatch, mirror axis, grip mark), preview.ts (own low-res WebGL canvas, rotating; Thử = swing at a dummy with swingSpring(inertia) lag + hit sound + hitstop), ops.ts (line, fill, mirror paint, Làm gọn), history.ts (Hoàn tác/Làm lại, stroke cancel).
+- Weapon.setDesign(): mesh + samples + profile from the design. Slice and Phòng tập (`?enemies`) use the equipped design (`?weapon=` still overrides).
+- Route: `?forge` (dev until menus P13), `&grid=1|3|5|8` for the Khối size; `khoiSize(level)` follows weapon.md#2. Back → title.
+- shots.mjs: also opens Xưởng on all 6 viewports, every Bản vẽ and part, checks cells ≥ 18 px + overlap/outside/overflow; fixed the leftover vite preview process (detached group kill).
+- Checked: tsc, 49 vitest (15 new: line, mirror, fill, Làm gọn, history, Khối progression, anchors/grip, loose cells, mass/reach/inertia/speed, sắc vs cùn, bars in range for random drawings on all Bản vẽ, greedy mesh finite/merged, full 8×8 = 1 front quad, outward winding), build OK, `npm run shots` all ok. Headless 640×360: drawing, fill, eraser, undo/redo, Làm gọn, pinch (18→56 px, no stray cell), Lưu, saved Dao used in `?enemies`; no page errors. 3 screenshots.
+- Left: (1) feel on a real phone (drawing comfort, pinch); (2) 8% bevel + baked AO on the mesh (greedy + hull only now); (3) Thuỷ tinh alpha .6 not rendered (opaque); (4) stats are P6 stand-ins — P7 replaces with full analyze() (tips, necks, class, regions) and Màu cost/stock; (5) unlock gating (`unlocked`, khoiSize from progress) is wired by P12/P13 menus; (6) "?" chip for odd terms (levels.md) not done.
+- Gotchas: `assemble()` anchors are integer cells (Búa cán sits at x=3 under a 10-wide head). Bản vẽ grids are shown rotated: view col = h−1−y, view row = x. `__forge` is exposed on window for tests.
+
+Next: P7

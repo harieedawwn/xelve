@@ -1,0 +1,43 @@
+/* Xưởng. Paper + ink, square corners, hard 3px ink offset shadows. Bans: gradients, glow, blur, pills, hint boxes. */
+.forge { position: fixed; inset: 0; z-index: 4; background: var(--paper); color: var(--ink);
+  display: grid; gap: calc(var(--u) * .7) var(--u);
+  grid-template-columns: auto minmax(0, 1fr) clamp(140px, 27vw, 300px);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas: 'top top top' 'tools parts side' 'tools grid side' 'tools mats side';
+  padding: calc(var(--safe-t) + var(--u) * .7) calc(var(--safe-r) + var(--u)) calc(var(--safe-b) + var(--u) * .7) calc(var(--safe-l) + var(--u)); }
+.forge svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: square; stroke-linejoin: miter; flex: none; }
+.f-top { grid-area: top; display: flex; align-items: center; gap: var(--u); min-width: 0; }
+.f-top h2 { font: 900 clamp(18px, 4.4vmin, 30px)/1.15 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; }
+.f-bps { margin-left: auto; min-width: 0; }
+.f-bps button.locked, .f-parts button.locked { display: inline-flex; align-items: center; gap: 4px; color: var(--stone); cursor: not-allowed; }
+.f-bps button.locked svg { width: 16px; height: 16px; }
+.f-bps button.locked small { font-size: .8em; font-weight: 400; white-space: nowrap; }
+.f-save { justify-self: end; }
+.btn.done { background: var(--paper); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); outline: 2px solid var(--ink); outline-offset: -2px; }
+.f-tools { grid-area: tools; display: grid; grid-template-columns: repeat(2, 44px); grid-auto-rows: 44px; gap: calc(var(--u) * .7); align-content: start; padding: 0 3px 3px 0; }
+.forge .ib { color: var(--ink); }
+.forge .ib.on { background: var(--ink); color: var(--paper); }
+.forge .ib[disabled] { color: var(--stone); box-shadow: 3px 3px 0 var(--stone); border-color: var(--stone); }
+.f-parts { grid-area: parts; justify-self: start; }
+.lw { grid-area: grid; position: relative; min-height: 0; min-width: 0; overflow: hidden; border: 2px solid var(--ink); background: var(--paper); touch-action: none; }
+.lw canvas { position: absolute; left: 0; top: 0; display: block; touch-action: none; }
+.f-mats { grid-area: mats; display: flex; gap: calc(var(--u) * .6); flex-wrap: nowrap; overflow-x: auto; padding: 0 3px 3px 0; scrollbar-width: none; }
+.f-mat { flex: none; width: 44px; height: 44px; border: 2px solid var(--ink); background: var(--m); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; position: relative; }
+.f-mat.on::after { content: ''; position: absolute; inset: 5px; border: 3px solid var(--ink); outline: 2px solid var(--paper); outline-offset: -5px; }
+.f-mat:active, .f-bars:active { transform: translate(2px, 2px) scale(.97); box-shadow: none; }
+.f-side { grid-area: side; display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; gap: calc(var(--u) * .7); min-height: 0; }
+.pv { position: relative; min-height: 0; border: 2px solid var(--ink); background: var(--paper); overflow: hidden; }
+.pv canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
+.f-bars { display: grid; gap: 4px; padding: 6px 8px; border: 2px solid var(--ink); background: var(--paper); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; color: var(--ink); text-align: left; font: 600 12px/1.2 'Be Vietnam Pro', system-ui, sans-serif; }
+.f-bar { display: grid; grid-template-columns: 18px minmax(0, 1fr); align-items: center; gap: 6px; height: 16px; }
+.f-bar svg { width: 16px; height: 16px; }
+.f-bar b { display: block; height: 8px; border: 2px solid var(--ink); position: relative; overflow: hidden; }
+.f-bar u { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transition: transform 160ms var(--ease-in); }
+.f-bar em { display: none; font-style: normal; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.f-bars.nums .f-bar { grid-template-columns: 18px minmax(0, 1fr) auto; }
+.f-bars.nums .f-bar em { display: block; }
+.f-loose { display: flex; align-items: center; gap: 6px; font: 600 13px/1.4 'Be Vietnam Pro', system-ui, sans-serif; color: #6E0B14; min-height: 18px; }
+.f-loose svg { width: 18px; height: 18px; }
+.f-try { justify-self: stretch; justify-content: center; }
+@media (max-height: 420px) { .f-top h2 { display: none; } .f-loose { min-height: 0; } }
+@media (max-width: 720px) { .f-bps button { padding: 0 8px; } }

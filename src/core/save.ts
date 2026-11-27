@@ -1,14 +1,15 @@
 // Versioned save. localStorage (web); mirrored to Capacitor Preferences on Android.
 import type { Tier } from './quality'
+import type { WeaponDesign } from '../weapon/model'
 
 export const SAVE_VERSION = 1
 export interface Settings { tier: Tier | null; sound: boolean; music: number; reduceShake: boolean; lang: 'vi' }
-export interface SaveData { v: number; settings: Settings; progress: { chapter: number; level: number }; weapons: unknown[]; materials: Record<string, number> }
+export interface SaveData { v: number; settings: Settings; progress: { chapter: number; level: number }; weapons: WeaponDesign[]; equipped: string | null; materials: Record<string, number> }
 
 export const defaults = (): SaveData => ({
   v: SAVE_VERSION,
   settings: { tier: null, sound: true, music: 0.7, reduceShake: false, lang: 'vi' },
-  progress: { chapter: 1, level: 0 }, weapons: [], materials: {},
+  progress: { chapter: 1, level: 0 }, weapons: [], equipped: null, materials: {},
 })
 
 type Migration = (d: any) => any

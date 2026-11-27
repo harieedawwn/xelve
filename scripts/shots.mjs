@@ -7,7 +7,7 @@ const VIEWPORTS = [[640, 360], [800, 360], [915, 412], [1024, 768], [1280, 800],
 const MIN = 40
 const exe = ['/opt/pw-browsers/chromium', process.env.CHROME_PATH].find(p => p && existsSync(p))
 if (!existsSync('dist/index.html')) await new Promise(r => spawn('npm', ['run', 'build'], { stdio: 'inherit' }).on('close', r))
-const srv = spawn('npx', ['vite', 'preview', '--port', '4177', '--strictPort'], { stdio: 'ignore' })
+const srv = spawn('npx', ['vite', 'preview', '--port', '4177', '--strictPort'], { stdio: 'ignore', detached: true })
 await new Promise(r => setTimeout(r, 2500))
 mkdirSync('shots', { recursive: true })
 
@@ -30,7 +30,7 @@ const check = () => {
     if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) out.push(`overlap: ${R[i].n} / ${R[j].n}`)
   }
   // text overflow inside its own box
-  document.querySelectorAll('.sheet-box, .card').forEach(b => { if (b.scrollWidth > b.clientWidth + 1) out.push('horizontal overflow: ' + b.className) })
+  document.querySelectorAll('.sheet-box, .card, .f-top, .f-bars, .f-side').forEach(b => { if (b.scrollWidth > b.clientWidth + 1) out.push('horizontal overflow: ' + b.className) })
   return out
 }
 
@@ -47,6 +47,26 @@ for (const [w, h] of VIEWPORTS) {
   console.log(`${w}x${h}: ${problems.length ? 'FAIL\n  ' + problems.join('\n  ') : 'ok'}`)
   fail += problems.length
   await page.close()
+  // Xưởng: every Bản vẽ and each of its parts; cells must stay ≥ 18 px
+  const fp = await browser.newPage({ viewport: { width: w, height: h } })
+  await fp.goto('http://localhost:4177/?forge&grid=8')
+  await fp.waitForSelector('.forge .lw canvas', { timeout: 20000 }); await fp.waitForTimeout(400)
+  const fprob = []
+  for (const bp of ['khoi', 'dao', 'kiem', 'bua']) {
+    await fp.click(`.f-bps [data-bp=${bp}]`); await fp.waitForTimeout(150)
+    const parts = await fp.$$eval('.f-parts button', bs => bs.filter(b => b.offsetParent).map(b => b.dataset.part))
+    for (const part of parts.length ? parts : ['']) {
+      if (part) { await fp.click(`.f-parts [data-part=${part}]`); await fp.waitForTimeout(120) }
+      const cs = await fp.evaluate(() => window.__forge.grid.cs)
+      if (cs < 18) fprob.push(`cell ${cs}px: ${bp}/${part}`)
+      fprob.push(...(await fp.evaluate(check)).map(p => `${bp}/${part} ${p}`))
+    }
+  }
+  await fp.click('.f-bps [data-bp=kiem]'); await fp.waitForTimeout(200)
+  await fp.screenshot({ path: `shots/forge-${w}x${h}.png` })
+  console.log(`forge ${w}x${h}: ${fprob.length ? 'FAIL\n  ' + [...new Set(fprob)].join('\n  ') : 'ok'}`)
+  fail += fprob.length
+  await fp.close()
 }
-await browser.close(); srv.kill()
+await browser.close(); process.kill(-srv.pid)
 process.exit(fail ? 1 : 0)

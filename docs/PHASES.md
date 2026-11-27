@@ -71,7 +71,7 @@ Done when: [ ] each type in Phòng tập debug spawn · [ ] every attack has pos
 Model: Sonnet 5.5 · medium
 Deploy: no · Screenshots: ≤4
 
-## P6 · Xưởng (editor) [TODO]
+## P6 · Xưởng (editor) [DONE]
 Read: docs/spec/weapon.md#1-#4 #8, docs/DESIGN.md#ui, docs/spec/levels.md#tutorial-beats
 Do: grid editor DOM (pinch zoom, pan, tools, mirror, Làm gọn, undo), part selector for Bản vẽ, ghost silhouettes, live 3D preview, 5 stat bars, "Thử" swing, save designs. Bans apply.
 Done when: [ ] drawing on a 360-px-tall phone viewport is comfortable (cells ≥18 px) · [ ] shots pass · [ ] ugly random drawings still produce a clean mesh

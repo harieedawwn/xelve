@@ -17,6 +17,8 @@ import { startSlice } from './scenes/slice'
 import { startFxTest } from './scenes/fxtest'
 import { startCamTest } from './scenes/camtest'
 import { startEnemyTest } from './scenes/enemytest'
+import { Forge } from './forge/forge'
+import { BLUEPRINTS } from './weapon/blueprints/registry'
 
 async function boot() {
   await loadSave()
@@ -26,6 +28,12 @@ async function boot() {
   if (location.search.includes('cam')) { renderer.resize('tb'); startCamTest(renderer); return }
   const ui = new UI()
   const audio = new Audio()
+  if (location.search.includes('forge')) { // Xưởng (dev route until menus land in P13): ?forge&grid=1|3|5|8
+    ui.hideTitle(); addEventListener('pointerdown', () => audio.unlock(), { once: true })
+    const g = Number(new URLSearchParams(location.search).get('grid') ?? 8)
+    const f = new Forge({ khoiSize: [1, 3, 5, 8].includes(g) ? g : 8, unlocked: Object.keys(BLUEPRINTS), onBack: () => { location.href = location.pathname }, onSound: (n, p) => audio.play(n, p) })
+    document.getElementById('ui')!.appendChild(f.root); (window as any).__forge = f; return
+  }
   if (location.search.includes('enemies')) { ui.hideTitle(); startEnemyTest(canvas, renderer, audio); return }
   if (!settings().tier) {
     // 2 s benchmark: a throw-away heavy scene behind the logo

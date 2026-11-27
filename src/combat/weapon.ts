@@ -4,6 +4,11 @@ import { Spring3, clamp } from '../camera/springs'
 import { PAL } from '../render/palette'
 import { swingSpring, speedCap, chargeTime } from './damage'
 import { PROFILES, Profile } from './profiles'
+import type { WeaponDesign } from '../weapon/model'
+import { assemble } from '../weapon/model'
+import { analyze } from '../weapon/analyze'
+import { weaponMesh } from '../weapon/mesh'
+import { designProfile } from '../weapon/runtime'
 
 const V = 0.04 // Khối voxel size (4 cm)
 // A crude cleaver someone drew on the 5×5→ grid: o = Voxel thô (orange), c = Chì, . = empty. Row 0 = top.
@@ -55,6 +60,7 @@ function outlineGeometry(src: THREE.BufferGeometry, w: number) {
 export class Weapon {
   pivot = new THREE.Group()       // in camera space
   mesh: THREE.Group
+  private blade: THREE.Object3D[] = []
   spring = new Spring3()           // k from inertia (damage.swingSpring)
   profile: Profile = PROFILES.nhe
   charge = 1                       // lực charge 0..1 (vừa/nặng only); refills in chargeTime(I)
@@ -78,7 +84,7 @@ export class Weapon {
     this.mesh = new THREE.Group()
     const body = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }))
     const line = new THREE.Mesh(outlineGeometry(geo, 0.004), new THREE.MeshBasicMaterial({ color: PAL.ink, side: THREE.BackSide }))
-    this.mesh.add(line, body)
+    this.mesh.add(line, body); this.blade = [line, body]
     // hand: ink fist + forearm leaving the frame (body awareness)
     const ink = new THREE.MeshLambertMaterial({ color: 0x2a2a2f, flatShading: true })
     const fist = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.09, 0.08), ink); fist.position.set(0, 0, 0)
@@ -93,6 +99,21 @@ export class Weapon {
       this.samplesLocal.push(new THREE.Vector3(0.5 * V, (0.25 + 0.75 * i / 3) * top, 0))
       this.prev.push(new THREE.Vector3()); this.cur.push(new THREE.Vector3())
     }
+  }
+
+  /** swap in a Xưởng design: new mesh, samples from grip to the farthest connected voxel, profile from analyze() */
+  setDesign(d: WeaponDesign) {
+    const st = analyze(d)
+    if (!st.connected.length) return
+    const a = assemble(d), s = a.voxel
+    for (const o of this.blade) this.mesh.remove(o)
+    const g = weaponMesh(st.connected, a.grip, s, PAL.ink)
+    this.blade = [...g.children]; for (const o of this.blade) this.mesh.add(o)
+    let far = st.connected[0], best = -1
+    for (const v of st.connected) { const dd = (v.x - a.grip[0]) ** 2 + (v.y - a.grip[1]) ** 2; if (dd > best) { best = dd; far = v } }
+    const tx = (far.x - a.grip[0]) * s, ty = (a.grip[1] - far.y) * s + (best === 0 ? s : 0)
+    for (let i = 0; i < 4; i++) this.samplesLocal[i].set(tx * (0.25 + 0.75 * i / 3), ty * (0.25 + 0.75 * i / 3), 0)
+    this.setProfile(designProfile(st))
   }
 
   setProfile(p: Profile) {
