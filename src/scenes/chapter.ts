@@ -40,6 +40,8 @@ import { Forge } from '../forge/forge'
 import { BLUEPRINTS } from '../weapon/blueprints/registry'
 import { khoiSize } from '../weapon/economy'
 import { el } from '../ui/dom'
+import { Tutorial } from '../ui/tutorial'
+import { TUTORIAL } from '../ui/tutorialLogic'
 import { t } from '../i18n'
 
 type State = 'title' | 'wake' | 'walk' | 'fight' | 'clear' | 'pick' | 'end'
@@ -87,11 +89,12 @@ bindFinger(canvas, weapon.finger, (d) => { weapon.touching = d })
 
 const def = new Defense()
 const pad = new CombatPad({
-  block: (d) => { if (d) { def.press(time.now); if (def.guarding) audio.play('guard.up') } else def.release(); weapon.guarding = def.guarding },
+  block: (d) => { if (d) { if (alive().some(e => e.state === 'windup')) tut.did('block'); def.press(time.now); if (def.guarding) audio.play('guard.up') } else def.release(); weapon.guarding = def.guarding },
   dodge: () => {}, leap: () => {},
 })
 ui.root.append(pad.root, pad.luc)
 let padOn = false
+const tut = new Tutorial(ui.root)
 const padContext = (on: boolean) => {
   padOn = on; def.canBlock = on && canBlockWith(weapon.profile.cls, false)
   if (!def.canBlock) { def.release(); weapon.guarding = false }
@@ -133,6 +136,7 @@ const motes = new Motes(scene, weapon.pivot, () => bus.emit('mote', { n: 1 }))
 bus.on('mote', () => weapon.spring.v.y += 0.25)
 bus.on('hurt', (e) => { rig.hitTaken(e.side); audio.playerHurt() })
 bus.on('hit', (e) => {
+  if (!e.blocked) { tut.did('swipe'); if (e.speed >= TUTORIAL.fastSpeed) tut.did('fast'); if (e.head) tut.did('head') }
   if (e.blocked) { audio.play('hit.metal'); rig.addTrauma(0.1); time.freeze(0.04); return }
   audio.hit(e.dmg / 10, e.head); rig.addTrauma(e.killed ? 0.35 : 0.18)
   rig.slashKick(weapon.slashDir.x, weapon.slashDir.y, e.killed ? 1 : 0.7)
@@ -178,7 +182,7 @@ function finishLevel() {
   const go = () => { if (next) wipe(1, () => { location.href = `${location.pathname}?level=${next.id}&go=1` }); else ui.showCard(true) }
   if (!lv.forge) { setTimeout(go, 900); return }
   const f = new Forge({ khoiSize: khoiSize(save()), unlocked: Object.keys(BLUEPRINTS).filter(k => save().unlocked.includes(k)), onBack: () => { f.root.remove(); go() }, onSound: (n, p) => audio.play(n, p) })
-  setTimeout(() => ui.root.appendChild(f.root), 900)
+  tut.show('forge'); setTimeout(() => { tut.did('forge'); tut.hide(); ui.root.appendChild(f.root) }, 1400)
 }
 
 function lookAt() {
@@ -210,6 +214,19 @@ function fightLook(w: THREE.Vector3) {
   }
   w.copy(ti[k].aim); w.y -= 0.15 // chest-high so a lunging body stays in frame with the pitch bias
   clampPitch(eye, w)
+}
+
+// tutorial: one prompt at a time, first time the mechanic is in play (swipe → fast → head, then Lực, Đỡ)
+let wasFull = false
+function offerTutorial() {
+  const near = alive().length > 0 && state !== 'title' && deadT <= 0
+  if (!near) { if (tut.shown && tut.shown !== 'forge') tut.hide(); return }
+  const full = weapon.charge >= 1; if (full && !wasFull && tut.shown === 'luc') tut.did('luc'); wasFull = full
+  if (def.canBlock && alive().some(e => e.state === 'windup') && tut.show('block')) return
+  if (tut.show('swipe')) return
+  if (tut.show('fast')) return
+  if (tut.show('head')) return
+  if (weapon.profile.charged && padOn) tut.show('luc')
 }
 
 function step(realDt: number) {
@@ -247,6 +264,7 @@ function step(realDt: number) {
 
   if (php.update(dt, alive().length > 0)) { hp = php.hp; ui.setHP(hp) }
   spawnQueued(dt)
+  offerTutorial()
   motes.update(realDt)
   lookAt()
   rig.update(dt, realDt)

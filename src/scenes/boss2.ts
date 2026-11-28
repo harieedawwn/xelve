@@ -21,6 +21,7 @@ import { Audio } from '../audio/engine'
 import { DongBrain, DONG, nextCover, nearestCover, throwBreaks, impactDamage, inReach, type Seam } from '../bosses/dong'
 import { DongBody } from '../bosses/dongBody'
 import { CombatPad } from '../ui/combatPad'
+import { Tutorial } from '../ui/tutorial'
 import { startLoop } from '../core/loop'
 import { bindFinger } from '../core/input'
 import { Time } from '../core/time'
@@ -64,6 +65,7 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
   const contact = new BladeContact(weapon, fx.withSparks(rig.cam), () => { audio.play('hit.metal'); time.freeze(0.04); rig.slashKick(weapon.slashDir.x, weapon.slashDir.y, 0.5) })
   const seams = (['faceL', 'faceR', 'shoulder', 'chest'] as Seam[]).map(seamTarget)
 
+  const tut = new Tutorial(document.getElementById('ui')!)
   const pad = new CombatPad({
     block: (d) => { if (d) { def.press(time.now); if (def.guarding) audio.play('guard.up') } else def.release(); weapon.guarding = def.guarding },
     dodge: (side) => dash(side),
@@ -82,6 +84,7 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
 
   function dash(side: -1 | 1) {
     if (won >= 0 || dying >= 0) return
+    tut.did('cover'); if (tut.shown === 'cover') tut.hide()
     if (rig.busy) { if (!assault) queued = side; return }
     const to = nextCover(alive(), cover, side); if (to === cover) return
     const from = coverFeet(cover); cover = to; rig.rail = railAt(to)
@@ -89,6 +92,7 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
   }
   function leap() {
     if (!canLeap()) return
+    tut.did('leap'); if (tut.shown === 'leap') tut.hide()
     const hand = body.handPos(1), sh = body.root.localToWorld(new THREE.Vector3(2.7, 9.2, -0.3))
     const list = brain.seams.filter(s => s !== 'chest' || body.panelOff), s = list[assaults % list.length]
     const seam = body.seamPos(s), back = nearestCover(alive(), brain.armAt)
@@ -215,6 +219,7 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
       if (php.update(dt, brain.alive)) { hp = php.hp; hud.setPips(hp) }
       if (won >= 0) { won += h; ending(won) }
       context()
+      if (won < 0 && dying < 0) { if (canLeap()) tut.show('leap'); else if (brain.state === 'windup') tut.show('cover'); else if (tut.shown) tut.hide() } else tut.hide()
     },
     render: (_a, realDt) => {
       vig = Math.max(0, vig - 1.5 * realDt); renderer.vig = vig

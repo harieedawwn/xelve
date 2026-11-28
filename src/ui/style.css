@@ -161,3 +161,9 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 .chcard .sig { display: flex; align-items: center; gap: 2vmin; font: 900 clamp(14px, 3vmin, 22px)/1 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: 0.12em; }
 .chcard .sig b:last-child { color: var(--ve); }
 .chcard .sig i { width: 6vmin; height: 2px; background: var(--ink); }
+
+/* tutorial prompt: one line, skewed ink slab, bottom-centre */
+.tut { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 7vmin); display: flex; align-items: center; gap: 1.6vmin; max-width: min(78vw, 560px); padding: 1.2vmin 2.6vmin; background: var(--ink); color: var(--paper); border: 2px solid var(--paper); transform: translate(-50%, 10px) skewX(-8deg); opacity: 0; transition: opacity 160ms, transform 300ms var(--ease-in); pointer-events: none !important; z-index: 5; }
+.tut.show { opacity: 1; transform: translate(-50%, 0) skewX(-8deg); }
+.tut svg { flex: none; width: clamp(18px, 4vmin, 26px); height: clamp(18px, 4vmin, 26px); stroke: var(--ve); stroke-width: 2; fill: none; stroke-linecap: square; stroke-linejoin: miter; transform: skewX(8deg); }
+.tut span { font: 900 clamp(13px, 2.8vmin, 19px)/1.25 'Be Vietnam Pro', system-ui, sans-serif; transform: skewX(8deg); }

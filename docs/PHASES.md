@@ -176,7 +176,7 @@ Done when: [ ] grep for removed words in src/ returns nothing · [ ] every setup
 Model: Sonnet 5.5 · medium
 Deploy: no · Screenshots: ≤2
 
-## P18 · Hướng dẫn có chữ [TODO]
+## P18 · Hướng dẫn có chữ [DONE]
 Read: docs/DESIGN.md#ui (Tutorial prompts), docs/spec/levels.md#tutorial-beats
 Do: a `tutorial` module: one-line prompt slab + icon, shown the first time each mechanic appears, hidden after the player performs it twice, stored in save. Prompts (i18n): Vuốt để chém · Vuốt nhanh để chém mạnh · Chém vào đầu để gây thêm sát thương · Mở Xưởng để vẽ vũ khí · Giữ để nạp Lực · Giữ Đỡ ngay khi nó đánh · Bấm ‹ › để né theo hướng nó vung · Bấm ‹ › để đổi chỗ nấp · Bấm ↑ để nhảy lên chém. Xưởng first open: 3 prompts in sequence (Vẽ vào lưới · Bật đối xứng · Bấm Thử). Keep Ve's doodles and ghost finger.
 Done when: [ ] every prompt appears once at the right moment in a headless run · [ ] shots pass

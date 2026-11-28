@@ -12,6 +12,9 @@ import { Preview } from './preview'
 import { History } from './history'
 import { fill, lineCells, paint, tidy } from './ops'
 import { FI } from './icons'
+import { Tutorial } from '../ui/tutorial'
+import { FORGE_SEQ, nextOf, TutId } from '../ui/tutorialLogic'
+import { save } from '../core/save'
 
 type Tool = 'pen' | 'eraser' | 'fill' | 'line'
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', html = '') => { const e = document.createElement(tag); if (cls) e.className = cls; if (html) e.innerHTML = html; return e }
@@ -31,10 +34,13 @@ export class Forge {
   private showNums = false; private dirty = true
   private ui: Record<string, HTMLElement> = {}
 
+  private tut = new Tutorial(this.root)
+  private tutNext() { const n = nextOf(save().tutorial, FORGE_SEQ); if (n) this.tut.show(n); else this.tut.hide() }
+  private tutDid(id: TutId) { this.tut.did(id); if (this.tut.shown === null) this.tutNext() }
   constructor(private o: ForgeOpts) {
     this.grid = new GridView({ start: (x, y) => this.strokeStart(x, y), move: (x, y) => this.strokeMove(x, y), end: () => this.strokeEnd(), cancel: () => this.strokeCancel() })
     this.preview.onHit = (p, heavy) => this.o.onSound(heavy ? 'hit.heavy' : 'hit.flesh', 0.6 + p * 0.6)
-    this.build()
+    this.build(); setTimeout(() => this.tutNext(), 500)
     this.selectBp(o.unlocked[0] ?? 'khoi')
     const tick = () => { if (this.dirty) { this.dirty = false; this.refresh() } requestAnimationFrame(tick) }
     requestAnimationFrame(tick)
@@ -64,7 +70,7 @@ export class Forge {
 
     const tools = el('div', 'f-tools')
     for (const k of ['pen', 'eraser', 'fill', 'line'] as Tool[]) { const b = this.btn('ib', FI[k], `tool.${k}`, () => { this.tool = k; this.syncTools() }); b.dataset.tool = k; tools.appendChild(b) }
-    this.ui.mirror = this.btn('ib', FI.mirror, 'tool.mirror', () => { this.mirror = !this.mirror; this.syncTools(); this.dirty = true })
+    this.ui.mirror = this.btn('ib', FI.mirror, 'tool.mirror', () => { this.mirror = !this.mirror; this.syncTools(); this.dirty = true; if (this.mirror) this.tutDid('mirror') })
     this.ui.tidy = this.btn('ib', FI.tidy, 'tool.tidy', () => { this.hist.push(this.d); if (tidy(this.cur())) this.dirty = true; else this.hist.drop(); this.syncTools() })
     this.ui.undo = this.btn('ib', FI.undo, 'tool.undo', () => { const p = this.hist.undo(this.d); if (p) this.setDesign(p) })
     this.ui.redo = this.btn('ib', FI.redo, 'tool.redo', () => { const p = this.hist.redo(this.d); if (p) this.setDesign(p) })
@@ -86,7 +92,7 @@ export class Forge {
     }
     this.ui.bars = bars
     this.ui.loose = el('div', 'f-loose', FI.crack + `<span></span>`); this.ui.loose.title = t('forge.loose')
-    const tryB = this.btn('btn f-try', FI.play + `<span>${t('forge.try')}</span>`, 'forge.try', () => this.preview.swing())
+    const tryB = this.btn('btn f-try', FI.play + `<span>${t('forge.try')}</span>`, 'forge.try', () => { this.preview.swing(); this.tutDid('try') })
     side.append(this.preview.root, bars, this.ui.loose, tryB)
     this.root.append(top, tools, this.ui.parts, this.grid.root, mats, side)
   }
@@ -143,6 +149,7 @@ export class Forge {
       this.last = this.lineFrom; this.tool = 'pen'; this.apply(this.lineTo[0], this.lineTo[1]); this.tool = 'line'
       this.lineFrom = this.lineTo = null
     }
+    if (this.changed) this.tutDid('draw')
     if (!this.changed) this.hist.drop()
     this.last = null; this.syncTools(); this.dirty = true
   }

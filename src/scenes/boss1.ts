@@ -24,6 +24,7 @@ import { completeLevel } from '../story/progress'
 import { level } from '../levels/ch1'
 import { wipe } from '../ui/wipe'
 import { el } from '../ui/dom'
+import { Tutorial } from '../ui/tutorial'
 import { t } from '../i18n'
 
 export function startBoss1(canvas: HTMLCanvasElement, renderer: Renderer, audio: Audio) {
@@ -50,9 +51,10 @@ export function startBoss1(canvas: HTMLCanvasElement, renderer: Renderer, audio:
   const say = (key: Parameters<typeof t>[0], secs: number) => { caption.textContent = t(key); caption.classList.add('show'); setTimeout(() => caption.classList.remove('show'), secs * 1000) }
   const setPips = () => pips.querySelectorAll('i').forEach((e, i) => e.classList.toggle('off', i >= hp))
 
+  const tut = new Tutorial(ui)
   const pad = new CombatPad({
-    block: (d) => { if (d) { def.press(time.now); if (def.guarding) audio.play('guard.up') } else def.release(); weapon.guarding = def.guarding },
-    dodge: (side) => { if (def.dodge(side, time.now)) { dodgeT = DEFENSE.dodgeTime; dodgeSide = side; audio.play('dodge') } },
+    block: (d) => { if (d) { if (boss.script.state === 'windup') tut.did('block'); def.press(time.now); if (def.guarding) audio.play('guard.up') } else def.release(); weapon.guarding = def.guarding },
+    dodge: (side) => { tut.did('dodge'); tut.hide(); if (def.dodge(side, time.now)) { dodgeT = DEFENSE.dodgeTime; dodgeSide = side; audio.play('dodge') } },
     leap: () => {},
   })
   ui.append(pad.root, pad.luc)
@@ -115,6 +117,7 @@ export function startBoss1(canvas: HTMLCanvasElement, renderer: Renderer, audio:
       kick = Math.max(0, kick - h * 3)
       weapon.update(time.hitstop > 0 ? 0 : h, now)
       boss.update(dt, player)
+      if (boss.alive && !won) { const w = boss.script.state === 'windup'; if (w) { if (!tut.show('dodge')) tut.show('block') } else if (tut.shown) tut.hide() } else tut.hide()
       if (boss.alive) sweep(weapon, [boss], fx, bus)
       audio.swing(weapon.touching ? weapon.tipSpeed : 0, time.scale)
       if (weapon.tipSpeed > 3 && weapon.touching && dt > 0) fx.smearPush(weapon.inner, weapon.tip, now)

@@ -247,3 +247,12 @@ Next: P17
 - Gotchas: msg.N.time holds source + time; voice header may be long on 640 px (ellipsis not added).
 
 Next: P18
+
+## P18 · Hướng dẫn có chữ — DONE
+- src/ui/tutorialLogic.ts (pure, `TUTORIAL` numbers: need 2, fastSpeed 6 m/s, showSecs 14; `needed/bump/nextOf`) + src/ui/tutorial.ts (`Tutorial` slab: skewed ink, icon + one line, one at a time, bottom-centre; `show(id)` / `did(id)` / `hide()`). Counters in new `save().tutorial` (merged by defaults, no version bump). 12 prompts in vi.ts `tut.*`.
+- Wiring: chapter.ts — swipe → fast → head on hits, Đỡ while an enemy winds up, Lực (charged weapons, counts when the bar fills), "Mở Xưởng" just before the Xưởng opens at level end; menu — "Mở Xưởng" on the main screen; boss1 — ‹ › né (then Đỡ) during the boss windup; boss2 — ‹ › đổi chỗ nấp on a telegraph, ↑ when the arm is open; forge.ts — sequence Vẽ vào lưới → Bật đối xứng → Bấm Thử (advances as each is done twice). Prompts hide when no enemy is alive.
+- Checked: tsc, 156 vitest (new tutorial.test.ts), build. `node scripts/tutorial.mjs <level> [shot.png]` (SEED='{"swipe":2}' to skip ahead): L1 fresh → "swipe"; seeded L3 → "fast"; L6 → "forge"; no page errors. 1 screenshot viewed (640×360). `npm run shots` run (see commit).
+- Left: block/luc/dodge/cover/leap/Xưởng-sequence not run headless (bot kills before any windup) — only type-checked; ghost finger on L1 does not exist in code yet (levels.md beat unimplemented); prompts are not shown in Vô tận/Phòng tập; "?" chips for odd terms still open.
+- Gotchas: `window.__tut.log` lists shown prompts (test helper). A prompt that was shown but not done re-appears next session.
+
+Next: P19

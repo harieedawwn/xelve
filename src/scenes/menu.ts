@@ -16,6 +16,7 @@ import { t } from '../i18n'
 import { menuAccess, resumeLevel } from './menuLogic'
 import { chapterMap, glossary } from './menuSheets'
 import { Forge } from '../forge/forge'
+import { Tutorial } from '../ui/tutorial'
 import { BLUEPRINTS } from '../weapon/blueprints/registry'
 import { khoiSize } from '../weapon/economy'
 
@@ -48,8 +49,9 @@ export function startMenu(canvas: HTMLCanvasElement, renderer: Renderer, ui: UI,
   const next = resumeLevel(s)
   const cont = btn('btn big', ICON.play + `<span>${t('menu.continue')}</span><small>${t('map.chapter1')} · ${t(next.name as any)}</small>`, t('menu.continue'), () => go(`?level=${next.id}&go=1`))
   const row = el('div', 'iconrow')
+  const tut = new Tutorial(ui.root)
   const openForge = () => {
-    ui.hud(false)
+    tut.did('forge'); tut.hide(); ui.hud(false)
     const f = new Forge({ khoiSize: khoiSize(save()), unlocked: Object.keys(BLUEPRINTS).filter(k => save().unlocked.includes(k)), onBack: () => { f.root.remove() }, onSound: (n, p) => audio.play(n, p) })
     ui.root.appendChild(f.root)
   }
@@ -65,6 +67,7 @@ export function startMenu(canvas: HTMLCanvasElement, renderer: Renderer, ui: UI,
   const terms = glossary(() => audio.ui())
   root.append(row, cont)
   ui.root.append(root, map.root, terms.root)
+  if (acc.forge) setTimeout(() => tut.show('forge'), 900)
   ;(window as any).__menu = { acc, next: next.id }
 
   // ---- backdrop: slow authored drift, no player control
