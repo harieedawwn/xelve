@@ -1,4 +1,4 @@
-/* Xưởng. Paper + ink, square corners, hard 3px ink offset shadows. Bans: gradients, glow, blur, pills, hint boxes. */
+/* Xưởng v2: technical-drawing sheets (paper + ruler ticks + ink frame), slab tools, skewed stat bars. Reuses P20 tokens/components only. Bans: gradients, glow, blur, pills, shadows. */
 .forge { position: fixed; inset: 0; z-index: 4; background: var(--paper); color: var(--ink);
   display: grid; gap: calc(var(--u) * .7) var(--u);
   grid-template-columns: auto minmax(0, 1fr) clamp(140px, 27vw, 300px);
@@ -19,20 +19,21 @@
 .forge .ib.on { --slab: var(--ink); --on-slab: var(--paper); }
 .forge .ib[disabled] { --on-slab: var(--stone); }
 .f-parts { grid-area: parts; justify-self: start; }
-.lw { grid-area: grid; position: relative; min-height: 0; min-width: 0; overflow: hidden; border: 2px solid var(--ink); background: var(--paper); touch-action: none; }
+.lw { grid-area: grid; position: relative; min-height: 0; min-width: 0; overflow: hidden; outline: 2px solid var(--ink); outline-offset: -2px; background: var(--paper) var(--ticks-t) left top / 40px 10px repeat-x; touch-action: none; }
 .lw canvas { position: absolute; left: 0; top: 0; display: block; touch-action: none; }
 .f-mats { grid-area: mats; display: flex; gap: calc(var(--u) * .6); flex-wrap: nowrap; overflow-x: auto; padding: 0 3px 3px 0; scrollbar-width: none; }
-.f-mat { flex: none; width: 44px; height: 44px; border: 2px solid var(--ink); background: var(--m) var(--t) center / cover; image-rendering: pixelated; box-shadow: 3px 3px 0 var(--ink); cursor: pointer; position: relative; }
-.f-mat.on::after { content: ''; position: absolute; inset: 5px; border: 3px solid var(--ink); outline: 2px solid var(--paper); outline-offset: -5px; }
-.f-mat:active, .f-bars:active { transform: translate(2px, 2px) scale(.97); box-shadow: none; }
+.f-mat { flex: none; width: 44px; height: 44px; background: var(--m) var(--t) center / cover; image-rendering: pixelated; clip-path: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%); cursor: pointer; position: relative; transition: transform 140ms var(--ease-in); }
+.f-mat.on { transform: translateY(-4px); }
+.f-mat.on::after { content: ''; position: absolute; left: 50%; bottom: 3px; width: 10px; height: 10px; margin-left: -5px; background: var(--ve); outline: 2px solid var(--ink); }
+.f-mat:active, .f-bars:active { transform: translateY(3px); }
 .f-side { grid-area: side; display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; gap: calc(var(--u) * .7); min-height: 0; }
-.pv { position: relative; min-height: 0; border: 2px solid var(--ink); background: var(--paper); overflow: hidden; }
+.pv { position: relative; min-height: 0; outline: 2px solid var(--ink); outline-offset: -2px; background: var(--paper) var(--ticks-l) left top / 10px 40px repeat-y; overflow: hidden; }
 .pv canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
-.f-bars { display: grid; gap: 4px; padding: 6px 8px; border: 2px solid var(--ink); background: var(--paper); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; color: var(--ink); text-align: left; font: 600 12px/1.2 'Be Vietnam Pro', system-ui, sans-serif; }
+.f-bars { display: grid; gap: 4px; padding: 6px calc(8px + var(--cut)) 6px 8px; background: var(--ink); clip-path: polygon(0 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); transition: transform 140ms var(--ease-in); cursor: pointer; color: var(--paper); text-align: left; font: 600 12px/1.2 'Be Vietnam Pro', system-ui, sans-serif; }
 .f-bar { display: grid; grid-template-columns: 18px minmax(0, 1fr); align-items: center; gap: 6px; height: 16px; }
 .f-bar svg { width: 16px; height: 16px; }
-.f-bar b { display: block; height: 8px; border: 2px solid var(--ink); position: relative; overflow: hidden; }
-.f-bar u { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transition: transform 160ms var(--ease-in); }
+.f-bar b { display: block; height: 8px; outline: 1px solid var(--paper); outline-offset: -1px; position: relative; overflow: hidden; clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); }
+.f-bar u { position: absolute; inset: 0; background: var(--paper); transform-origin: left; transition: transform 160ms var(--ease-in); }
 .f-bar em { display: none; font-style: normal; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .f-bars.nums .f-bar { grid-template-columns: 18px minmax(0, 1fr) auto; }
 .f-bars.nums .f-bar em { display: block; }

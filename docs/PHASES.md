@@ -203,7 +203,7 @@ Done when:
 Model: Opus 5.5 · medium — first-time aesthetics, expensive if wrong
 Deploy: yes · Screenshots: ≤4
 
-## P20b · UI kiểu game: Xưởng & màn phụ [TODO]
+## P20b · UI kiểu game: Xưởng & màn phụ [DONE]
 Read: docs/DESIGN.md#ui, P20's components (src/ui/)
 Do: apply the P20 components to Xưởng (grid frame as a technical drawing sheet, tool bar as skewed slabs, stat bars skewed), Vô tận HUD/cards, Phòng tập, signals UI, tutorial slab. Reuse only; no new styles.
 Done when: [ ] shots pass · [ ] no leftover v1 styles (grep old class names)

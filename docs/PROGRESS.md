@@ -278,3 +278,12 @@ Next: P20
 - Gotchas: `.tut` sits higher on the main screen via `body:has(.menu)`; boss HP moves via `.bossbar ~ .hp` (DOM order matters). Skewing with transform makes scrollWidth overflow in Xưởng — use clip-path, not skewX, on anything inside a checked container.
 
 Next: P20b
+
+## P20b · UI kiểu game: Xưởng & màn phụ — DONE
+- src/forge/forge.css only (reuse of P20 tokens): grid = technical sheet (ruler ticks along top, 2px ink frame via outline, no border/shadow); preview sheet with left ticks; materials = skewed texture chips, selected = lifts 4px + orange voxel; stat bars = ink slab cut on the right, skewed bars paper-on-ink. All v1 offset box-shadows and bordered boxes removed from forge.css.
+- Vô tận HUD/cards, signals/voice, tutorial slab already used P20 components (`.chcard`, `.tut`, hud.css) — nothing left to convert. Phòng tập has no own CSS.
+- Checked: tsc, 157 vitest, build, `npm run shots` ok at all viewports; 1 screenshot viewed (forge 640×360). grep for box-shadow/border-radius in src css: none left (only debug buttons in test scenes via inline style).
+- Left: at 640×360 the Xưởng preview sheet looked empty/hidden in the shot (not touched by this phase; check if pre-existing); real device not tried; dev-test scenes (fxtest/dueltest/enemytest/camtest) keep inline v1 buttons (debug only).
+- Gotchas: `npm ci` needed in a fresh container before build/shots.
+
+Next: P21
