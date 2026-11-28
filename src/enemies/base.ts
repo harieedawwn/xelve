@@ -6,6 +6,8 @@ import type { FX } from '../render/fx'
 import type { HitMeta } from '../combat/sweep'
 import { clamp, lerp, smooth } from '../camera/springs'
 import { Status } from '../combat/status'
+import { FEEL } from '../combat/feel'
+import type { BoxCollider } from '../combat/contact'
 
 export interface EnemyDef {
   id: string; hp: number; blood: number; scale: number
@@ -32,6 +34,8 @@ export class Enemy {
   /** vo: new enemies born from this one; the owner wires them (list, sound, strike) */
   onSpawn: (e: Enemy) => void = () => {}
   vel = new THREE.Vector3(); phase = Math.random() * 6; slotX = 0
+  /** hard parts the blade cannot pass through (P16: khien's sign) */
+  hard?: BoxCollider[]
   hitCooldown = 0; struckPlayer = false; sound = 'bong'
   status = new Status()
   private lastFx: FX | null = null; private tinted: number | null = null; private dotT = 0
@@ -156,7 +160,7 @@ export class Enemy {
     const d = this.def, sprint = d.gait === 'sprint'
     this.st += dt; this.hitCooldown -= dt
     const p = this.root.position
-    const goal = this.tmp.set(player.x + this.slotX, 0, player.z - 1.05)
+    const goal = this.tmp.set(player.x + this.slotX, 0, player.z - FEEL.stopGap)
     const to = goal.sub(p); to.y = 0
     const dist = to.length()
     let speed = 0, armRaise = 0, push = 0, crouch = 0

@@ -18,6 +18,7 @@ import { Weapon } from '../combat/weapon'
 import { equippedDesign } from '../weapon/store'
 import { PROFILES } from '../combat/profiles'
 import { sweep, spreadBurn } from '../combat/sweep'
+import { BladeContact, hardOf } from '../combat/contact'
 import { Bus } from '../combat/bus'
 import { Motes } from '../combat/motes'
 import { PlayerHP, MAX_HP } from '../combat/player'
@@ -53,6 +54,7 @@ const bounds = lv.room === 'corridor' ? { halfW: HALF_W, height: HEIGHT } : worl
 const doodle = (world as any).doodle as THREE.Vector3 | undefined
 const fx = new FX(scene, bounds.halfW, bounds.height)
 const weapon = new Weapon(rig.cam)
+const blade = new BladeContact(weapon, fx.withSparks(rig.cam), () => { audio.play('hit.metal'); time.freeze(0.03) }) // P16: khien's sign stops the blade
 const time = new Time()
 rig.onStep = () => audio.step()
 
@@ -251,6 +253,7 @@ function step(realDt: number) {
   weapon.update(time.hitstop > 0 ? 0 : realDt, now)
   for (const e of enemies) e.update(dt, player, onPlayerStruck)
   if (deadT <= 0) { sweep(weapon, enemies, fx, bus); spreadBurn(enemies) }
+  blade.step(hardOf(enemies))
   audio.swing(weapon.touching ? weapon.tipSpeed : 0, scale)
   if (weapon.tipSpeed > 3 && weapon.touching && dt > 0) fx.smearPush(weapon.inner, weapon.tip, now)
   fx.update(dt, now)

@@ -226,3 +226,14 @@ Next: P15
 - Gotchas: headless swiftshader fps drops with nhieu/many enemies → wall-clock times in pace.mjs are pessimistic. `__xelve.spawn/kill/cam` are test helpers. Encounter index advances at the stop; `waveIdx` = last spawned wave (death respawns it).
 
 Next: P16
+
+## P16 · Tầm chém & độ nhạy — DONE
+- All numbers in src/combat/feel.ts (`FEEL`). src/combat/aim.ts (pure): touch-down sets the start like the old map, then finger motion in cm (63 css px/cm) × 0.057 m/cm × gain (1.6 slow ≤10 cm/s → 3.2 fast ≥60 cm/s, smoothstep); target range x ±0.55, y −0.2..+0.35. weapon.ts: yaw (order YXZ) + roll from hand velocity, capped 70°; forward extension up to 0.45 m with tip speed; `resample()` / `nudge()` for contact push-back.
+- Reach: sweep capsule/head radius ×1.15, extra tip test point 0.25 m ahead along the tip's motion (`touches()` exported). Enemies stand at 1.35 m (`FEEL.stopGap`, base.ts).
+- Smear: 64 samples, life 0.16 s, sub-samples inserted every 5 cm so wide swings draw a wide crescent (fx.smearPush).
+- Contact: src/combat/contact.ts (`boxOf` local box colliders that follow their piece, `probe`, `resolveContact` push-out 2 passes, `BladeContact` glue, `hardOf`, `showColliders` debug). src/render/sparks.ts: pooled hard-edged quads (paper + orange) and scratch strips parented to the hit piece; `fx.withSparks(cam)`. Đống: every body car is a collider (family car excluded, roof panel until ripped, off after the win); `?dong&debug` draws the boxes. Bóng khiên: the sign plate is a collider while held; blocked hits spark + scratch the sign (paper splash only where a scene has no sparks). Wired in chapter, endless, Phòng tập, boss2. Clank = 'hit.metal' + 30–40 ms hitstop.
+- Checked: tsc, 152 vitest (feel.test: 6 cm flick in 0.08 s → tip > 4 m/s with Khối and nhe/Dao weight, travel ≥ 1.8× old map, yaw > 0.6 rad; contact.test: rotated/scaled box exit, swing through a box never stays inside), build. `node scripts/leap.mjs`: 2 arm runs with hard swipes → contact frames 55/131, residual depth 0, seam hits register, no page errors (1 screenshot with debug boxes). pace.mjs L1 22 s, L6 42 s to the end; feet.mjs all on screen.
+- Left: real-phone feel (pxPerCm assumes 160 css dpi; tablets will feel a bit slower — could read screen size); room props (parked cars in L6/L7) are not colliders — the player walks the centre so the blade never reaches them; scratches are a light strip only (no blood) and only on Đống/khien; boss1 (Người gác) has no hard parts.
+- Gotchas: `Sparks` runs its own clock (scrape continuity), scenes must call fx.update. `BladeContact.stats.residual` is the debug "inside the body" measure. Samples 1–3 only are pushed (sample 0 sits at the hand).
+
+Next: P17

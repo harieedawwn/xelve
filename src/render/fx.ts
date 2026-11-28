@@ -1,5 +1,7 @@
 // Blood (pixel droplets → wall/floor decals), slash smear (solid crescent), debris.
 import * as THREE from 'three'
+import { FEEL } from '../combat/feel'
+import { Sparks } from './sparks'
 import { surfaceHit, HALF_W, HEIGHT } from '../levels/corridor'
 import { PAL } from '../render/palette'
 
@@ -38,6 +40,9 @@ export class FX {
   // scratch (no per-frame allocation)
   private sq = new THREE.Quaternion(); private sc = new THREE.Color(); private sp = new THREE.Vector3(); private sn = new THREE.Vector3(); private sd = new THREE.Vector3()
   private up = new THREE.Vector3(0, 1, 0); private dn = new THREE.Vector3(0, -1, 0); private wn = new THREE.Vector3()
+  /** metal contact sparks + scratches (P16), made on demand by scenes that have hard bodies */
+  sparks: Sparks | null = null
+  withSparks(cam: THREE.Camera) { return this.sparks ??= new Sparks(this.scene, cam) }
   get particleCount() { return this.pn }
   get decalCount() { return this.dm.count }
 
@@ -51,9 +56,9 @@ export class FX {
     this.dm = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), dmat, MAXD); this.dm.count = 0; this.dm.frustumCulled = false
     for (let i = 0; i < MAXD; i++) this.dm.setColorAt(i, new THREE.Color())
     scene.add(this.dm)
-    this.spos = new Float32Array(32 * 2 * 3)
+    this.spos = new Float32Array(FEEL.smearN * 2 * 3)
     this.sg = new THREE.BufferGeometry(); this.sg.setAttribute('position', new THREE.BufferAttribute(this.spos, 3))
-    const idx: number[] = []; for (let i = 0; i < 31; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2) }
+    const idx: number[] = []; for (let i = 0; i < FEEL.smearN - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2) }
     this.sg.setIndex(idx)
     this.sm = new THREE.Mesh(this.sg, new THREE.MeshBasicMaterial({ color: PAL.ve, side: THREE.DoubleSide, depthTest: true }))
     this.sm.frustumCulled = false; this.sm.renderOrder = 5; scene.add(this.sm)
@@ -95,13 +100,20 @@ export class FX {
   }
 
   smearPush(a: THREE.Vector3, b: THREE.Vector3, t: number) {
-    if (this.trail.length >= 32) { const o = this.trail.shift()!; o.a.copy(a); o.b.copy(b); o.t = t; this.trail.push(o) }
-    else this.trail.push({ a: a.clone(), b: b.clone(), t })
+    // wide swings move the tip far per frame: insert sub-samples so the crescent follows the arc
+    const last = this.trail[this.trail.length - 1], N = FEEL.smearN
+    const steps = last && t - last.t < 0.05 ? Math.min(4, Math.floor(last.b.distanceTo(b) / FEEL.smearStep)) : 0
+    for (let i = 1; i <= steps + 1; i++) {
+      const u = i / (steps + 1), pa = this.sp.copy(last ? last.a : a).lerp(a, u), pb = this.sd.copy(last ? last.b : b).lerp(b, u), pt = last ? last.t + (t - last.t) * u : t
+      if (this.trail.length >= N) { const o = this.trail.shift()!; o.a.copy(pa); o.b.copy(pb); o.t = pt; this.trail.push(o) }
+      else this.trail.push({ a: pa.clone(), b: pb.clone(), t: pt })
+    }
   }
 
   addDebris(o: THREE.Object3D, v: THREE.Vector3, w: THREE.Vector3) { this.debris.push({ o, v, w, life: 5 }) }
 
   update(dt: number, now: number) {
+    this.sparks?.update(dt)
     // particles
     for (let i = 0; i < this.pn; i++) {
       const j = i * 3
@@ -136,10 +148,10 @@ export class FX {
     if (this.pm.instanceColor) this.pm.instanceColor.needsUpdate = true
 
     // smear: solid crescent; old samples collapse toward the tip (taper), no fading
-    const life = 0.11
+    const life = FEEL.smearLife
     while (this.trail.length && now - this.trail[0].t > life) this.trail.shift()
     const n = this.trail.length
-    for (let i = 0; i < 32; i++) {
+    for (let i = 0; i < FEEL.smearN; i++) {
       const e = this.trail[Math.min(i, n - 1)]
       if (!e || n < 2) { this.spos.fill(0, i * 6, i * 6 + 6); continue }
       const age = Math.min(1, (now - e.t) / life)

@@ -9,6 +9,7 @@ import { Weapon } from '../combat/weapon'
 import { PROFILES } from '../combat/profiles'
 import { equippedDesign } from '../weapon/store'
 import { sweep, spreadBurn } from '../combat/sweep'
+import { BladeContact, hardOf } from '../combat/contact'
 import { Bus } from '../combat/bus'
 import { Motes } from '../combat/motes'
 import { PlayerHP, MAX_HP } from '../combat/player'
@@ -36,6 +37,7 @@ export function startEndless(canvas: HTMLCanvasElement, renderer: Renderer, ui: 
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 50)
   cam.position.set(0, 1.5, 0); scene.add(cam)
   const fx = new FX(scene), weapon = new Weapon(cam), bus = new Bus(), time = new Time()
+  const blade = new BladeContact(weapon, fx.withSparks(cam), () => { audio.play('hit.metal'); time.freeze(0.03) }) // P16: khien's sign stops the blade
   fx.maxParticles = QUALITY[tier].particles; fx.maxDecals = QUALITY[tier].decals
   const w = new URLSearchParams(location.search).get('weapon'); if (w && PROFILES[w]) weapon.setProfile(PROFILES[w]); else { const d = equippedDesign(); if (d) weapon.setDesign(d) }
   audio.setMuted(!settings().sound); audio.setMusic(settings().music)
@@ -127,6 +129,7 @@ export function startEndless(canvas: HTMLCanvasElement, renderer: Renderer, ui: 
       motes.update(h); weapon.update(time.hitstop > 0 ? 0 : h, now)
       for (const e of enemies) e.update(dt, player, onStruck)
       if (state !== 'dead') { sweep(weapon, enemies, fx, bus); spreadBurn(enemies) }
+      blade.step(hardOf(enemies))
       audio.swing(weapon.touching ? weapon.tipSpeed : 0, time.scale)
       fx.update(dt, now)
     },

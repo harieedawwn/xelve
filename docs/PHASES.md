@@ -153,7 +153,7 @@ Done when:
 Model: Opus 5.5 · medium — game feel + camera judgment
 Deploy: yes · Screenshots: ≤4
 
-## P16 · Tầm chém & độ nhạy [TODO]
+## P16 · Tầm chém & độ nhạy [DONE]
 Feedback: reach tiny; a long slash needs a whole-screen swipe; normal swipes short and weak; boss 2 leap slashes clip through the body.
 Read: docs/spec/weapon.md#5, src/combat/weapon.ts, src/combat/sweep.ts, src/scenes/boss2.ts (leap/seam parts only)
 Do:

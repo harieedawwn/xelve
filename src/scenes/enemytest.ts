@@ -7,6 +7,7 @@ import { Weapon } from '../combat/weapon'
 import { PROFILES } from '../combat/profiles'
 import { equippedDesign } from '../weapon/store'
 import { sweep, spreadBurn } from '../combat/sweep'
+import { BladeContact, hardOf } from '../combat/contact'
 import { materialDemo, neckDemo } from '../weapon/demo'
 import { MATERIALS } from '../weapon/materials/registry'
 import { Bus } from '../combat/bus'
@@ -26,6 +27,7 @@ export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, au
   cam.position.set(0, 1.5, 0); scene.add(cam)
   buildCorridor(scene)
   const fx = new FX(scene), weapon = new Weapon(cam), bus = new Bus(), time = new Time()
+  const blade = new BladeContact(weapon, fx.withSparks(cam), () => { audio.play('hit.metal'); time.freeze(0.03) }) // P16: khien's sign stops the blade
   const w = new URLSearchParams(location.search).get('weapon'); if (w && PROFILES[w]) weapon.setProfile(PROFILES[w]); else { const d = equippedDesign(); if (d) weapon.setDesign(d) }
   (window as any).__xelve = { weapon }
   let enemies: Enemy[] = [], hits = 0, kills = 0, hp = 6
@@ -72,6 +74,7 @@ export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, au
       weapon.update(time.hitstop > 0 ? 0 : h, now)
       for (const e of enemies) e.update(dt, player, strike)
       sweep(weapon, enemies, fx, bus); spreadBurn(enemies)
+      blade.step(hardOf(enemies))
       audio.swing(weapon.touching ? weapon.tipSpeed : 0, time.scale)
       fx.update(dt, now)
     },

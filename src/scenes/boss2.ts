@@ -13,6 +13,7 @@ import { Weapon } from '../combat/weapon'
 import { PROFILES } from '../combat/profiles'
 import { PlayerHP } from '../combat/player'
 import { sweep, type Target } from '../combat/sweep'
+import { boxOf, showColliders, BladeContact } from '../combat/contact'
 import { Bus } from '../combat/bus'
 import { Defense, canBlockWith } from '../combat/defense'
 import { equippedDesign } from '../weapon/store'
@@ -57,6 +58,10 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
     hitParts() { const c = body.seamPos(s); return { a: c.clone().add(new THREE.Vector3(-0.55, 0, 0)), b: c.clone().add(new THREE.Vector3(0.55, 0, 0)), r: 0.55, head: c, hr: 0.3 } },
     takeHit(dmg, at, dir, f, weak) { brain.damage(dmg * DONG.seamMult); f.blood(at, dir, PAL.bloodDo, weak ? 44 : 26); this.hitCooldown = 0.12; stats.hits++; return !brain.alive },
   })
+  // P16 contact: every car of the body is a hard box (blade stops at the surface: sparks + scratch); the roof panel until it is off
+  const cols = body.pieces.filter(o => o !== body.family).map(o => boxOf(o, o !== body.panel, o === body.panel ? () => !body.panelOff && won < 0 : () => won < 0))
+  if (q.has('debug')) showColliders(cols)
+  const contact = new BladeContact(weapon, fx.withSparks(rig.cam), () => { audio.play('hit.metal'); time.freeze(0.04); rig.slashKick(weapon.slashDir.x, weapon.slashDir.y, 0.5) })
   const seams = (['faceL', 'faceR', 'shoulder', 'chest'] as Seam[]).map(seamTarget)
 
   const pad = new CombatPad({
@@ -203,6 +208,7 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
       rig.update(dt, h)
       weapon.update(time.hitstop > 0 ? 0 : h, now)
       if (assault) sweep(weapon, seams, fx, bus); else if (won < 0) tryWave()
+      if (won < 0) contact.step(cols)
       for (const s of seams) s.hitCooldown = Math.max(0, s.hitCooldown - dt)
       audio.swing(weapon.touching ? weapon.tipSpeed : 0, time.scale)
       if (weapon.tipSpeed > 3 && weapon.touching && dt > 0) fx.smearPush(weapon.inner, weapon.tip, now)
@@ -222,5 +228,5 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
     fpsCap: () => QUALITY[tier].fps,
   })
   hud.setPips(hp)
-  ;(window as any).__dong = { renderer, brain, body, rig, weapon, pad, time, park, dash, leap, get cover() { return cover }, get assault() { return assault }, get beat() { return beat }, get stats() { return { ...stats, hp, bossHp: brain.hp, state: brain.state, phase: brain.stage + 1, covers: alive().filter(Boolean).length } } }
+  ;(window as any).__dong = { renderer, brain, body, rig, weapon, pad, time, park, dash, leap, get cover() { return cover }, get assault() { return assault }, get beat() { return beat }, get contact() { return contact.stats }, get stats() { return { ...stats, hp, bossHp: brain.hp, state: brain.state, phase: brain.stage + 1, covers: alive().filter(Boolean).length } } }
 }
