@@ -44,7 +44,7 @@ export function startBoss1(canvas: HTMLCanvasElement, renderer: Renderer, audio:
   const ui = document.getElementById('ui')!
   const bossbar = el('div', 'bossbar'), fill = el('div', 'fill'), track = el('div', 'track'), ticks = el('div', 'ticks')
   for (const f of DATA.phaseAt) { const i = el('i'); i.style.left = `${f * 100}%`; ticks.append(i) }
-  track.append(fill); bossbar.append(el('b', '', t('boss.nguoigac')), track, ticks)
+  track.append(fill, ticks); bossbar.append(el('b', '', t('boss.nguoigac')), track)
   const caption = el('div', 'caption'), pips = el('div', 'hp')
   for (let i = 0; i < 6; i++) pips.append(el('i'))
   ui.append(bossbar, caption, pips)

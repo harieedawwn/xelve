@@ -12,6 +12,7 @@ import { CH1, level } from '../levels/ch1'
 import { UI } from '../ui/ui'
 import { el, ICON } from '../ui/dom'
 import { wipe } from '../ui/wipe'
+import { voxel } from '../ui/vox'
 import { t } from '../i18n'
 import { menuAccess, resumeLevel } from './menuLogic'
 import { chapterMap, glossary } from './menuSheets'
@@ -65,8 +66,12 @@ export function startMenu(canvas: HTMLCanvasElement, renderer: Renderer, ui: UI,
   )
   const map = chapterMap(s, (id) => go(`?level=${id}&go=1`), () => audio.ui())
   const terms = glossary(() => audio.ui())
-  root.append(row, cont)
+  const two = (n: number) => String(n).padStart(2, '0')
+  const big = el('div', 'm-big', t('map.chapter1'))
+  const anno = el('div', 'm-anno', `<span>${two(next.id)} / ${two(CH1.length)}</span><b></b>`)
+  root.append(big, anno, el('div', 'm-strip'), row, cont)
   ui.root.append(root, map.root, terms.root)
+  const vox = voxel(root); requestAnimationFrame(() => vox.to(cont))
   if (acc.forge) setTimeout(() => tut.show('forge'), 900)
   ;(window as any).__menu = { acc, next: next.id }
 

@@ -266,3 +266,15 @@ Next: P19
 - Gotchas: the atlas needs `document`; node tests get `null`. Adding a recipe changes tile slots (order of keys) — append new ones at the end.
 
 Next: P20
+
+## P20 · UI kiểu game (thiết kế lại) — DONE
+- CSS split: src/ui/style.css (tokens, slab components, chém màn, rotate) imports hud.css (HP/Lực/boss bar/pad/caption/voice/endhud/tut) and screens.css (title, main screen, sheets, map, terms, cards).
+- Slab buttons: `.ib/.btn/.seg button/.tg/.pb` keep a plain layout box; the ink slab is `::before` cut by clip-path (`--sk`), colours via `--slab`/`--on-slab` (forge.css uses paper-2 slabs). Press = drop 3px + 1 white frame. Selection = orange voxel (src/ui/vox.ts, FLIP 160 ms, `.fx` shift 6px) on the main screen + map; `.on` seg/toggle get a small voxel.
+- Chém màn (src/ui/wipe.ts, same `wipe()` API): leaving = two ink halves close along a diagonal seam (260 ms); next page load `reveal()` (first line of boot) starts covered, `cutOpen()` (setReady/hideTitle, 3 s fallback) = paper slash 220 ms + halves slide apart 380 ms. Tap skips. dir −1 = back (home buttons). Reduced motion = 150 ms crossfade. Sheets and cards enter with a clip-path diagonal cut (380 ms).
+- Main screen: huge "Chương 1" (21vh, cropped by the top-left edge) + "05 / 08" annotation, paper strip with ruler ticks along the bottom, icon slabs bottom-left, Tiếp tục slab bottom-right. Icons redrawn as bold/filled shapes (Xưởng = anvil, Phòng tập = target, Vô tận, bản đồ, Thuật ngữ, Cài đặt) after user feedback.
+- HUD: HP = 6 skewed ink bars with paper hairline; Lực = skewed bar bottom-right filling from the weapon side; boss bar = full-width ink slab at top (name small at the left end, phase ticks inside the track; HP moves under it); captions/voice/pickup/endhud = cut ink slabs. Cards (end of level, chapter end, Vô tận game over) = ink slab with huge word + paper action slabs.
+- Checked: tsc, 157 vitest, build, `npm run shots` ok at all 6 viewports (settings, menu, map, terms, Xưởng, duel, Đống); headless cut test menu → L5: closing cut, covered on arrival, removed, no page errors. 3 screenshots viewed (menu, icon row crop, map).
+- Left: boss name is horizontal (rotated text does not fit a 30 px bar); settings/terms/end cards not eyeballed (shots pass); Xưởng only re-coloured to slabs — full restyle is P20b; tutorial slab unchanged (P20b).
+- Gotchas: `.tut` sits higher on the main screen via `body:has(.menu)`; boss HP moves via `.bossbar ~ .hp` (DOM order matters). Skewing with transform makes scrollWidth overflow in Xưởng — use clip-path, not skewX, on anything inside a checked container.
+
+Next: P20b

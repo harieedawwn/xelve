@@ -7,7 +7,7 @@ export function bossHud() {
   const ui = document.getElementById('ui')!
   const bar = el('div', 'bossbar'), fill = el('div', 'fill'), track = el('div', 'track'), ticks = el('div', 'ticks')
   for (const f of DONG.phaseAt) { const i = el('i'); i.style.left = `${f * 100}%`; ticks.append(i) }
-  track.append(fill); bar.append(el('b', '', t('boss.dong')), track, ticks)
+  track.append(fill, ticks); bar.append(el('b', '', t('boss.dong')), track)
   const pips = el('div', 'hp'); for (let i = 0; i < 6; i++) pips.append(el('i'))
   ui.append(bar, pips)
   let last = -1

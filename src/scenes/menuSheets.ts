@@ -4,6 +4,7 @@ import { CH1 } from '../levels/ch1'
 import { el, ICON } from '../ui/dom'
 import { t, Key } from '../i18n'
 import { nodeState, stains } from './menuLogic'
+import { voxel } from '../ui/vox'
 
 export interface Sheet { root: HTMLElement; show(v: boolean): void }
 function sheet(title: string, body: HTMLElement, click: () => void): Sheet {
@@ -33,7 +34,9 @@ export function chapterMap(s: SaveData, play: (id: number) => void, click: () =>
   }
   const ch2 = el('div', 'ch2', ICON.lock + `<b>${t('chapter.2')}</b><small>${t('locked.soon')}</small>`)
   body.append(nodes, ch2)
-  return sheet(t('map.chapter1'), body, click)
+  const sh = sheet(t('map.chapter1'), body, click), vox = voxel(nodes)
+  const cur = nodes.querySelector<HTMLElement>('.node.current')
+  return { root: sh.root, show(v: boolean) { sh.show(v); if (v && cur) requestAnimationFrame(() => { vox.to(cur); vox.place() }) } }
 }
 
 const TERMS = ['voxel', 'mau', 'xuong', 'luoi', 'banve', 'bong', 'trang', 'do', 'ne', 'luc', 'diemyeu'] as const

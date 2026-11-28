@@ -58,7 +58,7 @@ export function startEnemyTest(canvas: HTMLCanvasElement, renderer: Renderer, au
     b.onclick = on; bar.append(b)
   }
   const home = document.createElement('button'); home.innerHTML = ICON.back; home.setAttribute('aria-label', t('menu.home')); home.className = 'ib'
-  home.onclick = () => wipe(1, () => { location.href = `${location.pathname}?menu` }); bar.append(home)
+  home.onclick = () => wipe(-1, () => { location.href = `${location.pathname}?menu` }); bar.append(home)
   const pb = (label: string, on: () => void) => { const b = document.createElement('button'); b.textContent = label; b.className = 'tg'; b.onclick = on; bar.append(b) }
   Object.keys(ENEMIES).forEach(id => pb(t(`enemy.${id}` as Key), () => spawn(id)))
   pb(`${t('enemy.bong')} ×5`, () => spawn('bong', 5)); pb(t('gym.clear'), () => { enemies.forEach(e => e.alive && scene.remove(e.root)); enemies = [] })

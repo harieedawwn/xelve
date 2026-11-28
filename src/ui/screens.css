@@ -1,0 +1,86 @@
+/* Screens v2: title, main screen, sheets (Cài đặt, bản đồ chương, Thuật ngữ), end / game-over cards. */
+/* ---- title: technical paper with ticks on the left edge; the voxel logo; tap line = ink slab */
+.title { position: fixed; inset: 0; background: var(--paper) var(--ticks-l) left top / 10px 40px repeat-y; display: grid; grid-template-rows: 1fr auto; padding: calc(var(--safe-t) + 4vmin) calc(var(--safe-r) + 6vmin) calc(var(--safe-b) + 5vmin) calc(var(--safe-l) + 6vmin); cursor: pointer; }
+.logo { align-self: center; display: grid; grid-auto-flow: column; gap: 2.2vmin; justify-content: start; }
+.glyph { display: grid; grid-template-columns: repeat(5, 3.6vmin); grid-auto-rows: 3.6vmin; gap: 2px; }
+.glyph b { background: var(--ink); opacity: 0; transform: translateY(-1.4vmin) scale(.6); animation: drop 420ms var(--ease-in) forwards; }
+.glyph b.v { background: var(--ve); }
+.glyph b.x { visibility: hidden; }
+@keyframes drop { to { opacity: 1; transform: none; } }
+.tap { justify-self: end; font: 900 clamp(14px, 2.8vmin, 19px)/1.2 var(--f); display: flex; align-items: center; gap: 1.4vmin; padding: 1.4vmin calc(var(--cut) + 2vmin); background: var(--ink); color: var(--paper); clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); opacity: 0; }
+.title.ready .tap { animation: drop 400ms var(--ease-in) forwards; }
+.tap::before { content: ''; width: 2.2vmin; height: 2.2vmin; background: var(--ve); display: block; }
+.title.out { transition: clip-path 520ms var(--ease-cut); clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%); }
+.title { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+.corner { position: fixed; top: calc(var(--safe-t) + var(--u)); right: calc(var(--safe-r) + var(--u) * 1.5); }
+
+/* ---- main screen: huge chapter word cropped by the top-left edge, paper strip along the bottom, slabs on it */
+.menu { position: fixed; inset: 0; pointer-events: none; }
+.menu > * { pointer-events: auto; }
+.m-big { position: absolute; left: calc(var(--safe-l) - .06em); top: calc(var(--safe-t) - .2em); font: 900 min(21vh, 12vw)/1 var(--f); letter-spacing: -0.05em; color: var(--ink); white-space: nowrap; pointer-events: none !important; }
+.m-anno { position: absolute; left: calc(var(--safe-l) + var(--u) * 1.5); top: calc(var(--safe-t) + min(21vh, 12vw) * .95); display: flex; gap: var(--u); align-items: center; font: 600 clamp(11px, 2vmin, 14px)/1 var(--f); letter-spacing: .06em; color: var(--ink); pointer-events: none !important; }
+.m-anno b { width: clamp(28px, 8vmin, 60px); height: 2px; background: var(--ink); }
+.m-strip { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--safe-b) + var(--u) * 3 + clamp(56px, 12vmin, 80px)); background: var(--paper) var(--ticks-t) left top / 40px 10px repeat-x; clip-path: polygon(0 0, 58% 0, 62% 100%, 0 100%); pointer-events: none !important; }
+.iconrow { position: absolute; left: calc(var(--safe-l) + var(--u) * 1.8); bottom: calc(var(--safe-b) + var(--u) * 1.5); display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1.1); max-width: 52vw; }
+.ib.locked { --slab: var(--paper-2); --on-slab: var(--stone); cursor: not-allowed; }
+.ib.locked small { position: absolute; left: -6px; right: -6px; bottom: 100%; margin-bottom: 6px; font: 600 11px/1.2 var(--f); color: var(--paper); background: var(--ink); text-align: center; padding: 2px 0; display: none; }
+.ib.locked:focus small, .ib.locked:active small { display: block; }
+.btn.big { --sk: 16px; position: absolute; right: calc(var(--safe-r) + var(--u) * 1.8); bottom: calc(var(--safe-b) + var(--u) * 1.5); min-height: clamp(56px, 12vmin, 80px); padding: 0 calc(var(--u) * 2.6); display: grid; grid-template-columns: auto 1fr; column-gap: calc(var(--u) * 1.2); align-items: center; text-align: left; max-width: 44vw; }
+.btn.big svg { grid-row: 1 / 3; width: 28px; height: 28px; fill: var(--paper); stroke: none; }
+.btn.big span { font: 900 clamp(20px, 5.2vmin, 34px)/1.05 var(--f); letter-spacing: -0.03em; }
+.btn.big small { font: 600 clamp(11px, 2vmin, 14px)/1.3 var(--f); color: var(--paper-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- sheets: ink dim (flat, no blur) + a paper strip panel that is cut open along a diagonal */
+.sheet { position: fixed; inset: 0; background: rgba(22,22,26,.6); display: grid; place-items: center; padding: calc(var(--safe-t) + 8px) calc(var(--safe-r) + 8px) calc(var(--safe-b) + 8px) calc(var(--safe-l) + 8px); visibility: hidden; opacity: 0; transition: opacity 160ms, visibility 0s 380ms; z-index: 5; }
+.sheet.show { visibility: visible; opacity: 1; transition: opacity 160ms; }
+.sheet-box { position: relative; background: var(--paper) var(--ticks-l) left top / 10px 40px repeat-y; width: min(100%, 580px); max-height: 100%; overflow: auto; scrollbar-width: none; padding: calc(var(--u) * 1.2) calc(var(--u) * 1.6 + var(--cut)) calc(var(--u) * 1.4) calc(var(--u) * 2.2); display: grid; gap: var(--u); clip-path: polygon(0 0, var(--cut) 0, 0 100%, 0 100%); transition: clip-path 380ms var(--ease-cut); }
+.sheet.show .sheet-box { clip-path: polygon(0 0, 100% 0, calc(100% - var(--cut) * 2) 100%, 0 100%); }
+.sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--u); }
+.sheet-head h2 { font: 900 clamp(26px, 9vh, 60px)/.95 var(--f); letter-spacing: -0.04em; margin-left: -.04em; }
+.sheet-box.wide { width: min(100%, 780px); }
+.rows { display: grid; gap: calc(var(--u) * .7); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: var(--u); min-height: 44px; padding-bottom: calc(var(--u) * .5); border-bottom: 1px solid var(--paper-2); }
+.lbl { font: 600 clamp(13px, 2.4vmin, 16px)/1.3 var(--f); }
+.rng { -webkit-appearance: none; appearance: none; width: min(36vw, 220px); height: 40px; background: transparent; cursor: pointer; }
+.rng::-webkit-slider-runnable-track { height: 2px; background: var(--ink); }
+.rng::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 26px; margin-top: -12px; background: var(--ink); border: 0; border-radius: 0; }
+.rng::-moz-range-track { height: 2px; background: var(--ink); }
+.rng::-moz-range-thumb { width: 16px; height: 26px; background: var(--ink); border: 0; border-radius: 0; }
+
+/* chapter map: staggered road of skewed slabs; cleared = blood stains, current = voxel, locked = paper-2 */
+.map { position: relative; display: grid; gap: calc(var(--u) * 1.2); }
+.nodes { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(var(--u) * 1.1) calc(var(--u) * 1.2); padding-right: calc(var(--u) * 3); }
+.node { position: relative; min-height: clamp(52px, 14vmin, 84px); border: 0; background: var(--ink); color: var(--paper); clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); display: grid; align-content: center; justify-items: start; padding: 4px var(--cut) 4px calc(var(--cut) + 2px); cursor: pointer; overflow: hidden; font: 600 clamp(11px, 2.1vmin, 15px)/1.2 var(--f); text-align: left; transition: transform 160ms var(--ease-in); }
+.node:nth-child(n+5) { left: calc(var(--u) * 3); }
+.node b { font: 900 clamp(16px, 3.8vmin, 26px)/1 var(--f); position: relative; }
+.node span { position: relative; overflow-wrap: anywhere; }
+.node i { position: absolute; background: var(--blood); }
+.node.locked { background: var(--paper-2); color: var(--stone); cursor: not-allowed; }
+.node svg { position: absolute; right: calc(var(--cut) + 2px); top: 6px; width: 16px; height: 16px; stroke: var(--stone); stroke-width: 2; fill: none; }
+.node:active { transform: translateY(3px); }
+.ch2 { display: flex; align-items: center; gap: var(--u); background: var(--stone); color: var(--paper); clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); padding: 8px calc(var(--cut) + 12px); min-height: 44px; font: 600 clamp(12px, 2.4vmin, 16px)/1.3 var(--f); }
+.ch2 svg { flex: none; width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+.ch2 small { margin-left: auto; font-weight: 400; white-space: nowrap; }
+.terms { display: grid; grid-template-columns: max-content 1fr; gap: 7px calc(var(--u) * 1.5); font: 400 clamp(12px, 2.4vmin, 16px)/1.45 var(--f); }
+.terms dt { font-weight: 900; }
+.terms dd { padding-bottom: 6px; border-bottom: 1px solid var(--paper-2); }
+
+/* ---- end-of-level card and chapter / game-over card: huge word + one slab of actions, cut open on entry */
+.card, .chcard { position: fixed; display: grid; gap: 2vmin; justify-items: start; background: var(--ink); color: var(--paper); clip-path: polygon(0 0, var(--cut) 0, 0 100%, 0 100%); transition: clip-path 380ms var(--ease-cut) 220ms; pointer-events: none; }
+.card { right: 0; bottom: calc(var(--safe-b) + 7vmin); max-width: 78vw; padding: 3vmin calc(var(--safe-r) + 6vmin) 3.4vmin calc(var(--cut) + 4vmin); }
+.chcard { left: 0; bottom: calc(var(--safe-b) + 7vmin); max-width: 82vw; padding: 3vmin calc(var(--cut) * 2 + 4vmin) 3.4vmin calc(var(--safe-l) + 6vmin); }
+.card.show, .chcard.show { clip-path: polygon(0 0, 100% 0, calc(100% - var(--cut) * 2) 100%, 0 100%); pointer-events: auto; }
+.card.show { clip-path: polygon(calc(var(--cut) * 2) 0, 100% 0, 100% 100%, 0 100%); }
+.card h2, .chcard h2, .chcard .ct { font: 900 clamp(28px, 13vh, 84px)/.95 var(--f); letter-spacing: -0.04em; margin-left: -.04em; }
+.chcard p, .chcard .cs { font: 600 clamp(13px, 2.6vmin, 18px)/1.3 var(--f); color: var(--paper-2); }
+.card .btn, .chcard .btn, .chcard .ib { --slab: var(--paper); --on-slab: var(--ink); }
+.chcard .sig { display: flex; align-items: center; gap: 2vmin; font: 900 clamp(14px, 3vmin, 22px)/1 var(--f); letter-spacing: .12em; }
+.chcard .sig b:last-child { color: var(--ve); }
+.chcard .sig i { width: 6vmin; height: 2px; background: var(--paper); }
+.chcard .acts { display: flex; gap: calc(var(--u) * 1.4); align-items: center; }
+@media (prefers-reduced-motion: reduce) {
+  .sheet-box, .card, .chcard, .title.out { transition: opacity 150ms linear; }
+  .sheet .sheet-box, .card, .chcard, .title.out { clip-path: none; }
+  .card:not(.show), .chcard:not(.show) { opacity: 0; }
+}
+body:has(.menu) .tut { bottom: calc(var(--safe-b) + var(--u) * 4.5 + clamp(56px, 12vmin, 80px)); }

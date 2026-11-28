@@ -1,169 +1,88 @@
+/* UI v2 — "Vết chém trên giấy kỹ thuật" (DESIGN.md#ui). Ink slabs + technical-paper strips, diagonal cuts, orange voxel = selection.
+   Bans: gradients, neon, glow, soft bloom, coloured/blurred shadows, backdrop-filter, pill buttons, bordered rectangle cards, emoji. */
+@import './hud.css';
+@import './screens.css';
 :root {
-  --paper: #ECEBE6; --paper-2: #CFCDC6; --stone: #8E8C86; --ink: #16161A; --ve: #E8590C;
+  --paper: #ECEBE6; --paper-2: #CFCDC6; --stone: #8E8C86; --ink: #16161A; --ve: #E8590C; --blood: #4A0E6B;
   --safe-l: env(safe-area-inset-left, 0px); --safe-r: env(safe-area-inset-right, 0px);
   --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
   --u: clamp(8px, 2.2vmin, 14px);
-  --ease-in: cubic-bezier(.16,1,.3,1);
+  --skew: -12deg; --unskew: 12deg;
+  --cut: clamp(10px, 3.2vmin, 22px); /* run of a 12–18° diagonal cut across a slab's height */
+  --ease-in: cubic-bezier(.16,1,.3,1); --ease-cut: cubic-bezier(.7,0,.2,1);
+  --f: 'Be Vietnam Pro', system-ui, sans-serif;
+  /* ruler ticks along one edge of a paper strip: the only pattern allowed (hairlines, no grid) */
+  --ticks-l: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='40'%3E%3Cpath d='M0 .5h9M0 10.5h4M0 20.5h6M0 30.5h4' stroke='%238E8C86'/%3E%3C/svg%3E");
+  --ticks-t: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='10'%3E%3Cpath d='M.5 0v9M10.5 0v4M20.5 0v6M30.5 0v4' stroke='%238E8C86'/%3E%3C/svg%3E");
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { width: 100%; height: 100dvh; overflow: hidden; background: var(--ink); overscroll-behavior: none; touch-action: none; user-select: none; -webkit-user-select: none; }
-body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); }
+body { font-family: var(--f); color: var(--ink); }
+button { font-family: var(--f); }
 #c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; }
 #ui { position: fixed; inset: 0; pointer-events: none; }
 #ui > * { pointer-events: auto; }
+svg { stroke-linecap: square; stroke-linejoin: miter; }
+
+/* ---- slab buttons: the element keeps a plain box (layout, hit area); the skewed ink slab is ::before, text stays upright */
+.ib, .btn, .seg button, .tg, .pb { position: relative; isolation: isolate; background: none; border: 0; color: var(--on-slab, var(--paper)); cursor: pointer; transition: transform 140ms var(--ease-in); }
+.ib::before, .btn::before, .seg button::before, .tg::before, .pb::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--slab, var(--ink)); clip-path: polygon(var(--sk, 9px) 0, 100% 0, calc(100% - var(--sk, 9px)) 100%, 0 100%); transition: transform 90ms var(--ease-in); }
+.ib:active::before, .btn:active::before, .seg button:active::before, .tg:active::before, .pb.on::before { transform: translateY(3px); animation: flash 34ms steps(1); }
+@keyframes flash { 0% { background: var(--paper); } }
+.ib svg, .btn svg, .pb svg { stroke: currentColor; stroke-width: 2.5; fill: none; }
+.ib { width: 44px; min-height: 44px; display: grid; place-items: center; }
+.ib svg { width: 22px; height: 22px; }
+.ib.lg { --sk: 11px; width: clamp(48px, 9vmin, 64px); height: clamp(48px, 9vmin, 64px); }
+.ib.lg svg { width: clamp(26px, 5.4vmin, 38px); height: clamp(26px, 5.4vmin, 38px); }
+.btn { font: 900 clamp(14px, 2.8vmin, 19px)/1.2 var(--f); letter-spacing: -0.01em; min-height: 44px; padding: 0 calc(var(--u) * 1.8); display: inline-flex; align-items: center; gap: 1.2vmin; justify-self: start; }
+.btn svg { width: 20px; height: 20px; flex: none; }
+/* selected state = the orange voxel snaps on; the slab shifts 6px along its skew */
+.fx { transform: translate(6px, -1px); }
+.vox { position: absolute; left: 0; top: 0; width: clamp(10px, 2.2vmin, 14px); height: clamp(10px, 2.2vmin, 14px); background: var(--ve); pointer-events: none !important; opacity: 0; transition: transform 160ms var(--ease-in), opacity 120ms; z-index: 3; }
+
+/* segmented choice: separate slabs; off = paper-2 slab, on = ink slab + voxel */
+.seg { display: flex; gap: calc(var(--u) * .9); padding: 0 6px; }
+.seg button { --slab: var(--paper-2); --on-slab: var(--ink); min-width: 48px; min-height: 40px; padding: 0 calc(var(--u) * 1.2); font: 600 clamp(12px, 2.2vmin, 15px)/1.3 var(--f); }
+.seg button.on, .tg.on { --slab: var(--ink); --on-slab: var(--paper); }
+.seg button.on::after, .tg.on::after { content: ''; position: absolute; left: -2px; top: -5px; width: 8px; height: 8px; background: var(--ve); }
+.seg button.locked { --on-slab: var(--stone); display: inline-flex; align-items: center; gap: 6px; cursor: not-allowed; }
+.seg button.locked svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; }
+.seg button.locked small { font-size: .78em; font-weight: 400; }
+.tg { --slab: var(--paper-2); --on-slab: var(--ink); font: 600 clamp(13px, 2.2vmin, 15px)/1.3 var(--f); min-width: 72px; min-height: 40px; }
+
+/* ink slab / paper strip surfaces */
+.slab { background: var(--ink); color: var(--paper); clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); }
+.strip { background: var(--paper) var(--ticks-l) left top / 10px 40px repeat-y; color: var(--ink); }
+.anno { font: 600 clamp(9px, 1.7vmin, 12px)/1 var(--f); letter-spacing: .08em; color: var(--stone); writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; pointer-events: none; }
 
 /* eyelids */
 .lid { position: fixed; left: 0; right: 0; height: 50.5%; background: var(--ink); pointer-events: none !important; transform-origin: top; transform: scaleY(0); }
 .lid.b { bottom: 0; transform-origin: bottom; }
 .lid.t { top: 0; }
 
-/* HUD */
-.hp { position: fixed; top: calc(var(--safe-t) + var(--u)); left: calc(var(--safe-l) + var(--u) * 1.5); display: flex; gap: 4px; pointer-events: none !important; }
-.hp i { width: calc(var(--u) * 1.4); height: calc(var(--u) * 1.4); background: var(--ink); border: 2px solid var(--paper); display: block; transition: transform 140ms var(--ease-in); }
-.hp i.off { background: transparent; transform: scale(.7); }
-.bar { position: fixed; top: calc(var(--safe-t) + var(--u)); right: calc(var(--safe-r) + var(--u) * 1.5); display: flex; gap: var(--u); align-items: stretch; }
-.seg { display: flex; border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); background: var(--paper); }
-.seg button, .ib { min-width: 44px; font: 600 clamp(12px, 2.2vmin, 15px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); background: var(--paper); border: 0; min-height: 40px; padding: 0 calc(var(--u) * 1.1); cursor: pointer; }
-.seg button + button { border-left: 2px solid var(--ink); }
-.seg button.on { background: var(--ink); color: var(--paper); }
-.ib { width: 44px; padding: 0; border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); display: grid; place-items: center; }
-.ib svg { width: 22px; height: 22px; stroke: var(--ink); stroke-width: 2; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
-.seg button:active, .ib:active, .btn:active { transform: translate(2px, 2px) scale(.97); box-shadow: none; }
-
-/* title */
-.title { position: fixed; inset: 0; background: var(--paper); display: grid; grid-template-rows: 1fr auto; padding: calc(var(--safe-t) + 4vmin) calc(var(--safe-r) + 6vmin) calc(var(--safe-b) + 5vmin) calc(var(--safe-l) + 6vmin); cursor: pointer; }
-.logo { align-self: center; display: grid; grid-auto-flow: column; gap: 2.2vmin; justify-content: start; }
-.glyph { display: grid; grid-template-columns: repeat(5, 3.6vmin); grid-auto-rows: 3.6vmin; gap: 2px; }
-.glyph b { background: var(--ink); opacity: 0; transform: translateY(-1.4vmin) scale(.6); animation: drop 420ms var(--ease-in) forwards; }
-.glyph b.v { background: var(--ve); }
-.glyph b.x { visibility: hidden; }
-@keyframes drop { to { opacity: 1; transform: none; } }
-.tap { justify-self: end; font: 600 clamp(13px, 2.6vmin, 18px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; display: flex; align-items: center; gap: 1.4vmin; opacity: 0; }
-.title.ready .tap { animation: drop 400ms var(--ease-in) forwards; }
-.tap::before { content: ''; width: 2.4vmin; height: 2.4vmin; background: var(--ve); display: block; }
-.title.out { transition: clip-path 520ms cubic-bezier(.65,0,.35,1); clip-path: inset(0 0 0 100%); }
-
-/* end card */
-.card { position: fixed; right: calc(var(--safe-r) + 6vmin); bottom: calc(var(--safe-b) + 6vmin); background: var(--paper); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); padding: 3vmin 3.4vmin; display: grid; gap: 2vmin; transform: translateY(14px) rotate(-1.5deg); opacity: 0; transition: transform 420ms var(--ease-in), opacity 200ms; }
-.card.show { transform: none; opacity: 1; }
-.card h2 { font: 900 clamp(20px, 5vmin, 40px)/1.15 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; }
-.btn { font: 600 clamp(14px, 2.6vmin, 18px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; background: var(--ink); color: var(--paper); border: 0; min-height: 44px; padding: 0 2.4vmin; display: inline-flex; align-items: center; gap: 1.2vmin; justify-self: start; box-shadow: 3px 3px 0 var(--ve); cursor: pointer; }
-.btn svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: square; }
+/* ---- "chém màn": slash along a diagonal seam, the two ink halves slide apart (wipe.ts). Transforms only. */
+.cut { position: fixed; inset: 0; z-index: 30; pointer-events: auto; }
+.cut.rev { transform: scaleX(-1); }
+.cut .h { position: absolute; inset: 0; background: var(--ink); transition: transform 380ms var(--ease-cut); }
+.cut .a { clip-path: polygon(0 0, 100% 0, 100% 38.6%, 0 62.6%); transform: translate(-8vw, -72vh); }
+.cut .b { clip-path: polygon(0 62.2%, 100% 38.2%, 100% 100%, 0 100%); transform: translate(8vw, 72vh); }
+.cut.shut .h { transform: none; }
+.cut.closing .h { transition-duration: 260ms; }
+.cut .sl { position: absolute; left: 0; top: 62.4%; width: var(--len, 110vw); height: max(3px, .7vmin); margin-top: calc(max(3px, .7vmin) / -2); background: var(--paper); transform-origin: left center; transform: rotate(var(--ang, -20deg)) scaleX(0); transition: transform 220ms var(--ease-cut), opacity 120ms; }
+.cut.slash .sl { transform: rotate(var(--ang, -20deg)) scaleX(1); }
+.cut.open .sl { opacity: 0; }
+.cut.rm .h { transform: none; transition: none; }
+.cut.rm { opacity: 0; transition: opacity 150ms linear; }
+.cut.rm.shut { opacity: 1; }
+.cut.rm .sl { display: none; }
 
 /* rotate overlay (web only) */
-.rotate { position: fixed; inset: 0; background: var(--paper); display: none; place-items: center; z-index: 9; }
-.rotate svg { width: 96px; height: 96px; stroke: var(--ink); stroke-width: 2.5; fill: none; stroke-linecap: square; animation: turn 1.6s var(--ease-in) infinite; }
+.rotate { position: fixed; inset: 0; background: var(--paper); display: none; place-items: center; align-content: center; justify-items: center; z-index: 40; }
+.rotate svg { width: 96px; height: 96px; stroke: var(--ink); stroke-width: 2.5; fill: none; animation: turn 1.6s var(--ease-in) infinite; }
+.rotate p { margin-top: 16px; font: 600 16px/1.4 var(--f); }
 @keyframes turn { 0%, 30% { transform: rotate(0); } 70%, 100% { transform: rotate(-90deg); } }
 @media (orientation: portrait) { .rotate { display: grid; } }
-@media (prefers-reduced-motion: reduce) { .glyph b, .tap { animation-duration: 1ms; animation-delay: 0s; } .rotate svg { animation: none; } }
-
-/* settings sheet */
-.corner { position: fixed; top: calc(var(--safe-t) + var(--u)); right: calc(var(--safe-r) + var(--u) * 1.5); }
-.sheet { position: fixed; inset: 0; background: rgba(22,22,26,.55); display: grid; place-items: center; padding: calc(var(--safe-t) + 8px) calc(var(--safe-r) + 8px) calc(var(--safe-b) + 8px) calc(var(--safe-l) + 8px); visibility: hidden; opacity: 0; transition: opacity 160ms, visibility 0s 160ms; z-index: 5; }
-.sheet.show { visibility: visible; opacity: 1; transition: opacity 160ms; }
-.sheet-box { background: var(--paper); border: 2px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); width: min(100%, 560px); max-height: 100%; overflow: auto; padding: calc(var(--u) * 1.2) calc(var(--u) * 1.6); display: grid; gap: var(--u); transform: translateY(14px) rotate(-1deg); transition: transform 360ms var(--ease-in); }
-.sheet.show .sheet-box { transform: none; }
-.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: var(--u); }
-.sheet-head h2 { font: 900 clamp(18px, 4.4vmin, 30px)/1.15 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; }
-.rows { display: grid; gap: calc(var(--u) * .6); }
-.row { display: flex; justify-content: space-between; align-items: center; gap: var(--u); min-height: 44px; }
-.lbl { font: 600 clamp(13px, 2.4vmin, 16px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; }
-.tg { font: 600 clamp(13px, 2.2vmin, 15px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; min-width: 72px; min-height: 40px; border: 2px solid var(--ink); background: var(--paper); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; color: var(--ink); }
-.tg.on { background: var(--ink); color: var(--paper); }
-.tg:active { transform: translate(2px, 2px) scale(.97); box-shadow: none; }
-.rng { width: min(40vw, 220px); min-height: 40px; accent-color: var(--ink); }
-.seg button.locked { display: inline-flex; align-items: center; gap: 6px; color: var(--stone); cursor: not-allowed; }
-.seg button.locked svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: square; }
-.seg button.locked small { font-size: .78em; font-weight: 400; }
-.rotate p { margin-top: 16px; font: 600 16px/1.4 'Be Vietnam Pro', system-ui, sans-serif; }
-.rotate { place-items: center; align-content: center; justify-items: center; }
-.wipe { position: fixed; inset: 0; display: grid; z-index: 20; pointer-events: none; }
-.wipe i { background: var(--ink); transform: scale(0); transition: transform 220ms var(--ease-in); margin: -.5px; }
-.wipe.in i { transform: scale(1.02); }
-
-/* combat pad: left-thumb cluster (combat.md#1) — square, ink, hard offset shadow; never over the right 60% */
-.pad { position: fixed; left: calc(var(--safe-l) + var(--u) * 1.5); bottom: calc(var(--safe-b) + var(--u) * 1.5); display: grid; grid-template-columns: repeat(3, clamp(64px, 11vmin, 84px)); grid-template-rows: repeat(2, clamp(64px, 11vmin, 84px)); gap: calc(var(--u) * .8); max-width: 40vw; }
-.pb { border: 2px solid var(--ink); background: var(--paper); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); display: grid; place-items: center; cursor: pointer; touch-action: none; transition: transform 90ms var(--ease-in), opacity 160ms; }
-.pb svg { width: 30px; height: 30px; stroke: var(--ink); stroke-width: 2.5; fill: none; stroke-linecap: square; stroke-linejoin: miter; }
-.pb span { font: 900 clamp(18px, 3.6vmin, 24px)/1 'Be Vietnam Pro', system-ui, sans-serif; }
-.pb.up { grid-column: 2; grid-row: 1; } .pb.l { grid-column: 1; grid-row: 2; } .pb.blk { grid-column: 2; grid-row: 2; } .pb.r { grid-column: 3; grid-row: 2; }
-.pb.on { transform: translate(2px, 2px); box-shadow: none; background: var(--ink); color: var(--paper); }
-.pb.on svg { stroke: var(--paper); }
-.pb.hide { visibility: hidden; opacity: 0; }
-.pb.hitp { animation: hitp 220ms var(--ease-in); }
-@keyframes hitp { 0% { transform: translate(3px, 3px) scale(.92); } 100% { transform: none; } }
-.luc { position: fixed; top: calc(var(--safe-t) + var(--u) * 3.2); left: calc(var(--safe-l) + var(--u) * 1.5); width: calc(var(--u) * 8.4 + 20px); height: 8px; border: 2px solid var(--paper); background: transparent; pointer-events: none !important; overflow: hidden; }
-.luc i { position: absolute; inset: 0; background: var(--ink); transform-origin: left; transform: scaleX(0); }
-.luc.full { border-color: var(--ink); }
-.luc.full i { background: var(--ve); }
-
-/* boss bar + caption (P10): flat ink, fill = scaleX only */
-.bossbar { position: fixed; top: calc(var(--safe-t) + var(--u)); left: 50%; width: min(46vw, 420px); transform: translateX(-50%); pointer-events: none; }
-.bossbar b { display: block; font: 700 clamp(12px, 2.4vmin, 16px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); margin-bottom: 3px; }
-.bossbar .track { height: 10px; border: 2px solid var(--ink); background: var(--paper); overflow: hidden; }
-.bossbar .fill { height: 100%; background: var(--ink); transform-origin: left; transition: transform 160ms var(--ease-in); }
-.bossbar .ticks { position: relative; height: 0; } .bossbar .ticks i { position: absolute; top: -10px; width: 2px; height: 10px; background: var(--paper); }
-.caption { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 6vmin); transform: translateX(-50%); max-width: 70vw; background: var(--ink); color: var(--paper); font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; padding: 1.2vmin 2.4vmin; text-align: center; pointer-events: none; opacity: 0; transition: opacity 200ms; }
-.caption.show { opacity: 1; }
-/* Đống arena (P11): voice message 6, white-out, chapter card */
-.voice { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 6vmin); transform: translate(-50%, 8px); width: min(72vw, 640px); background: var(--ink); color: var(--paper); padding: 1.4vmin 2.4vmin 1.6vmin; opacity: 0; transition: opacity 200ms, transform 300ms var(--ease-in); pointer-events: auto; }
-.voice.show { opacity: 1; transform: translate(-50%, 0); }
-.voice .vh { display: flex; align-items: center; gap: 1vmin; font: 600 clamp(11px, 2vmin, 14px)/1 'Be Vietnam Pro', system-ui, sans-serif; color: var(--paper-2); margin-bottom: 0.8vmin; }
-.voice .vh svg { width: 18px; height: 18px; stroke: var(--ve); stroke-width: 2; fill: none; stroke-linecap: square; }
-.voice.static .vh svg { stroke: var(--paper-2); transform: scaleY(0.25); }
-.voice p { font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; min-height: 1.4em; max-height: 2.8em; overflow: hidden; }
-.whiteout { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none !important; transition: opacity 1.2s linear; }
-.whiteout.show { opacity: 1; }
-.chcard { position: fixed; left: calc(var(--safe-l) + 8vmin); bottom: calc(var(--safe-b) + 10vmin); display: grid; gap: 2vmin; opacity: 0; transform: translateY(14px) rotate(-1.5deg); transition: transform 420ms var(--ease-in), opacity 200ms; }
-.chcard.show { opacity: 1; transform: none; }
-.chcard h2 { font: 900 clamp(26px, 7vmin, 56px)/1.1 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; color: var(--ink); }
-.chcard p { font: 600 clamp(14px, 2.8vmin, 20px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; color: var(--stone); }
-
-/* voice message skip ring (P12): hold 0.6 s */
-.voice { position: fixed; }
-.voice .ring { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--ve); transform: scaleX(0); transform-origin: left; }
-
-/* pickup caption (P12): ink label, bottom-centre, no box chrome beyond the flat ink block */
-.pickcap { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 8vmin); transform: translate(-50%, 8px); background: var(--ink); color: var(--paper); padding: 1.2vmin 2.4vmin; font: 600 clamp(13px, 2.6vmin, 18px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; opacity: 0; transition: opacity 200ms, transform 300ms var(--ease-in); pointer-events: none; }
-.pickcap.show { opacity: 1; transform: translate(-50%, 0); }
-
-/* main screen */
-.menu { position: fixed; inset: 0; pointer-events: none; }
-.menu > * { pointer-events: auto; }
-.iconrow { position: absolute; left: calc(var(--safe-l) + var(--u) * 1.5); bottom: calc(var(--safe-b) + var(--u) * 1.5); display: flex; flex-wrap: wrap; gap: var(--u); max-width: 52vw; }
-.ib.lg { width: clamp(48px, 9vmin, 64px); height: clamp(48px, 9vmin, 64px); }
-.ib.locked { color: var(--stone); cursor: not-allowed; position: relative; }
-.ib.locked svg { stroke: var(--stone); }
-.ib.locked small { position: absolute; left: 0; right: 0; bottom: 100%; margin-bottom: 4px; font: 600 11px/1.2 'Be Vietnam Pro', system-ui, sans-serif; color: var(--paper); text-shadow: none; background: var(--ink); text-align: center; display: none; }
-.ib.locked:focus small, .ib.locked:active small { display: block; }
-.btn.big { position: absolute; right: calc(var(--safe-r) + var(--u) * 1.5); bottom: calc(var(--safe-b) + var(--u) * 1.5); min-height: clamp(56px, 12vmin, 80px); padding: 0 calc(var(--u) * 2.4); display: grid; grid-template-columns: auto 1fr; column-gap: var(--u); align-items: center; text-align: left; max-width: 44vw; }
-.btn.big svg { grid-row: 1 / 3; width: 28px; height: 28px; }
-.btn.big span { font: 900 clamp(18px, 4.4vmin, 28px)/1.15 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: -0.02em; }
-.btn.big small { font: 400 clamp(11px, 2vmin, 14px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; color: var(--paper-2); }
-.sheet-box.wide { width: min(100%, 760px); }
-.map { display: grid; gap: calc(var(--u) * 1.2); }
-.nodes { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--u); }
-.node { position: relative; min-height: clamp(56px, 14vmin, 84px); border: 2px solid var(--ink); background: var(--paper); box-shadow: 3px 3px 0 var(--ink); color: var(--ink); display: grid; align-content: center; justify-items: start; padding: 4px 8px; cursor: pointer; overflow: hidden; font: 600 clamp(11px, 2.2vmin, 15px)/1.3 'Be Vietnam Pro', system-ui, sans-serif; text-align: left; }
-.node b { font: 900 clamp(16px, 3.6vmin, 24px)/1.1 'Be Vietnam Pro', system-ui, sans-serif; position: relative; }
-.node span { position: relative; overflow-wrap: anywhere; }
-.node i { position: absolute; background: var(--ve); }
-.node.current { background: var(--ink); color: var(--paper); box-shadow: 3px 3px 0 var(--ve); }
-.node.locked { color: var(--stone); border-color: var(--stone); box-shadow: none; cursor: not-allowed; }
-.node svg { position: absolute; right: 6px; top: 6px; width: 18px; height: 18px; stroke: var(--stone); stroke-width: 2; fill: none; stroke-linecap: square; }
-.node:active { transform: translate(2px, 2px) scale(.97); box-shadow: none; }
-.ch2 { display: flex; align-items: center; gap: var(--u); border: 2px dashed var(--stone); color: var(--stone); padding: 8px 12px; min-height: 44px; font: 600 clamp(12px, 2.4vmin, 16px)/1.4 'Be Vietnam Pro', system-ui, sans-serif; }
-.ch2 svg { width: 20px; height: 20px; stroke: var(--stone); stroke-width: 2; fill: none; stroke-linecap: square; }
-.ch2 small { margin-left: auto; font-weight: 400; }
-.terms { display: grid; grid-template-columns: max-content 1fr; gap: 6px calc(var(--u) * 1.5); font: 400 clamp(12px, 2.4vmin, 16px)/1.45 'Be Vietnam Pro', system-ui, sans-serif; }
-.terms dt { font-weight: 900; }
-.endhud { position: fixed; left: 50%; top: calc(var(--safe-t) + 1.5vmin); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 0.8vmin 2.4vmin; font: 700 clamp(13px, 2.8vmin, 20px)/1.2 'Be Vietnam Pro', system-ui, sans-serif; text-align: center; pointer-events: none; }
-.endhud small { display: block; font-weight: 500; opacity: 0.8; }
-.chcard .sig { display: flex; align-items: center; gap: 2vmin; font: 900 clamp(14px, 3vmin, 22px)/1 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: 0.12em; }
-.chcard .sig b:last-child { color: var(--ve); }
-.chcard .sig i { width: 6vmin; height: 2px; background: var(--ink); }
-
-/* tutorial prompt: one line, skewed ink slab, bottom-centre */
-.tut { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 7vmin); display: flex; align-items: center; gap: 1.6vmin; max-width: min(78vw, 560px); padding: 1.2vmin 2.6vmin; background: var(--ink); color: var(--paper); border: 2px solid var(--paper); transform: translate(-50%, 10px) skewX(-8deg); opacity: 0; transition: opacity 160ms, transform 300ms var(--ease-in); pointer-events: none !important; z-index: 5; }
-.tut.show { opacity: 1; transform: translate(-50%, 0) skewX(-8deg); }
-.tut svg { flex: none; width: clamp(18px, 4vmin, 26px); height: clamp(18px, 4vmin, 26px); stroke: var(--ve); stroke-width: 2; fill: none; stroke-linecap: square; stroke-linejoin: miter; transform: skewX(8deg); }
-.tut span { font: 900 clamp(13px, 2.8vmin, 19px)/1.25 'Be Vietnam Pro', system-ui, sans-serif; transform: skewX(8deg); }
+@media (prefers-reduced-motion: reduce) {
+  .glyph b, .tap { animation-duration: 1ms; animation-delay: 0s; } .rotate svg { animation: none; }
+  .vox, .fx, .ib, .btn { transition: none; }
+}

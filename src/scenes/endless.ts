@@ -109,10 +109,10 @@ export function startEndless(canvas: HTMLCanvasElement, renderer: Renderer, ui: 
   }
   function gameOver() {
     const s = save(); if (wave > bestWave(s)) { s.bests[BEST_KEY] = wave; persist() }
-    const box = el('div', 'chcard show', `<div class="ct">${t('endless.over' as Key)} ${wave}</div><div class="cs">${t('endless.best' as Key)} ${bestWave(save())}</div>`)
+    const box = el('div', 'chcard', `<div class="ct">${t('endless.over' as Key)} ${wave}</div><div class="cs">${t('endless.best' as Key)} ${bestWave(save())}</div>`)
     const again = el('button', 'btn', ICON.restart + t('menu.restart')); const home = el('button', 'ib lg', ICON.home); home.setAttribute('aria-label', t('menu.home'))
-    again.onclick = () => wipe(1, () => location.reload()); home.onclick = () => wipe(1, () => { location.href = `${location.pathname}?menu` })
-    box.append(again, home); ui.root.append(box)
+    again.onclick = () => wipe(1, () => location.reload()); home.onclick = () => wipe(-1, () => { location.href = `${location.pathname}?menu` })
+    const acts = el('div', 'acts'); acts.append(again, home); box.append(acts); ui.root.append(box); requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('show')))
   }
   addEventListener('resize', () => { cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); renderer.resize(tier) })
 

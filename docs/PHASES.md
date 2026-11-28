@@ -193,7 +193,7 @@ Done when: [ ] a test weapon using all materials renders distinct and readable a
 Model: Sonnet 5.5 · medium
 Deploy: yes · Screenshots: ≤3
 
-## P20 · UI kiểu game (thiết kế lại) [TODO]
+## P20 · UI kiểu game (thiết kế lại) [DONE]
 Feedback: UI looks like generic AI web UI; must look like a game.
 Read: docs/DESIGN.md#ui (v2 — whole section) and #bans, src/ui/*, src/scenes/menu*.ts
 Do: implement the v2 concept on: tokens/base components (slab, skewed button, paper strip, voxel selector), "chém màn" transition, main screen, chapter map, HUD (HP, Lực, boss bar, contextual buttons), end/game-over cards, settings, Thuật ngữ. Keep layout anchoring and safe areas. Xưởng is P20b.

@@ -13,6 +13,7 @@ import { benchmark } from './core/quality'
 import { Renderer } from './render/pipeline'
 import { Audio } from './audio/engine'
 import { UI } from './ui/ui'
+import { reveal } from './ui/wipe'
 import { startMenu } from './scenes/menu'
 import { startChapter } from './scenes/chapter'
 import { startEndless } from './scenes/endless'
@@ -27,6 +28,7 @@ import { Forge } from './forge/forge'
 import { BLUEPRINTS } from './weapon/blueprints/registry'
 
 async function boot() {
+  reveal()
   await loadSave()
   const canvas = document.getElementById('c') as HTMLCanvasElement
   const renderer = new Renderer(canvas)

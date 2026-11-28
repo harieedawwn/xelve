@@ -13,11 +13,11 @@
 .f-bps button.locked svg { width: 16px; height: 16px; }
 .f-bps button.locked small { font-size: .8em; font-weight: 400; white-space: nowrap; }
 .f-save { justify-self: end; }
-.btn.done { background: var(--paper); color: var(--ink); box-shadow: 3px 3px 0 var(--ink); outline: 2px solid var(--ink); outline-offset: -2px; }
+.btn.done { --slab: var(--paper-2); --on-slab: var(--ink); }
 .f-tools { grid-area: tools; display: grid; grid-template-columns: repeat(2, 44px); grid-auto-rows: 44px; gap: calc(var(--u) * .7); align-content: start; padding: 0 3px 3px 0; }
-.forge .ib { color: var(--ink); }
-.forge .ib.on { background: var(--ink); color: var(--paper); }
-.forge .ib[disabled] { color: var(--stone); box-shadow: 3px 3px 0 var(--stone); border-color: var(--stone); }
+.forge .ib { --slab: var(--paper-2); --on-slab: var(--ink); }
+.forge .ib.on { --slab: var(--ink); --on-slab: var(--paper); }
+.forge .ib[disabled] { --on-slab: var(--stone); }
 .f-parts { grid-area: parts; justify-self: start; }
 .lw { grid-area: grid; position: relative; min-height: 0; min-width: 0; overflow: hidden; border: 2px solid var(--ink); background: var(--paper); touch-action: none; }
 .lw canvas { position: absolute; left: 0; top: 0; display: block; touch-action: none; }

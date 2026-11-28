@@ -1,0 +1,61 @@
+/* HUD v2: HP bars, Lực, boss bar, contextual slabs, captions, voice, pickup, tutorial. Transforms/opacity only. */
+/* HP: 6 short skewed ink bars, each with a paper hairline */
+.hp { position: fixed; top: calc(var(--safe-t) + var(--u)); left: calc(var(--safe-l) + var(--u) * 1.8); display: flex; gap: 5px; pointer-events: none !important; }
+.hp i { display: block; width: clamp(9px, 2vmin, 14px); height: clamp(18px, 4.4vmin, 28px); background: var(--ink); outline: 1px solid var(--paper); transform: skewX(var(--skew)); transform-origin: bottom; transition: transform 140ms var(--ease-in), background 140ms; }
+.hp i.off { background: transparent; outline-color: var(--paper-2); transform: skewX(var(--skew)) scaleY(.45); }
+.bossbar ~ .hp { top: calc(var(--safe-t) + var(--u) * 1.6 + clamp(30px, 7.5vmin, 46px)); }
+
+/* top-right HUD slabs */
+.bar { position: fixed; top: calc(var(--safe-t) + var(--u)); right: calc(var(--safe-r) + var(--u) * 1.5); display: flex; gap: calc(var(--u) * 1.1); align-items: stretch; }
+
+/* Lực: skewed bar under the weapon, fills from the weapon side (right) */
+.luc { position: fixed; right: calc(var(--safe-r) + var(--u) * 2); bottom: calc(var(--safe-b) + var(--u) * 1.6); width: clamp(90px, 24vmin, 180px); height: clamp(8px, 1.8vmin, 12px); background: transparent; outline: 1px solid var(--paper); transform: skewX(var(--skew)); pointer-events: none !important; overflow: hidden; }
+.luc i { position: absolute; inset: 0; background: var(--ink); transform-origin: right; transform: scaleX(0); }
+.luc.full { outline: 2px solid var(--ink); }
+.luc.full i { background: var(--ve); }
+
+/* boss bar: full-width ink slab at the top, boss name small at its left end, fill = scaleX */
+.bossbar { position: fixed; top: calc(var(--safe-t) + var(--u) * .6); left: calc(var(--safe-l) + var(--u)); right: calc(var(--safe-r) + var(--u)); height: clamp(30px, 7.5vmin, 46px); display: flex; align-items: center; gap: var(--u); padding: 0 calc(var(--cut) + var(--u)) 0 calc(var(--cut) + 4px); background: var(--ink); color: var(--paper); clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); pointer-events: none !important; }
+.bossbar b { flex: none; font: 600 clamp(10px, 1.9vmin, 13px)/1.1 var(--f); letter-spacing: .04em; color: var(--paper-2); max-width: 22vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bossbar .track { position: relative; flex: 1; height: clamp(8px, 2vmin, 14px); outline: 1px solid var(--paper-2); transform: skewX(var(--skew)); overflow: hidden; }
+.bossbar .fill { height: 100%; background: var(--paper); transform-origin: left; transition: transform 160ms var(--ease-in); }
+.bossbar .ticks { position: absolute; inset: 0; } .bossbar .ticks i { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); }
+
+/* contextual buttons (Đỡ, ‹ › ↑): ink slabs, white glyphs, press = drop 3px + 1 white frame; never over the right 60% */
+.pad { position: fixed; left: calc(var(--safe-l) + var(--u) * 1.8); bottom: calc(var(--safe-b) + var(--u) * 1.5); display: grid; grid-template-columns: repeat(3, clamp(64px, 11vmin, 84px)); grid-template-rows: repeat(2, clamp(64px, 11vmin, 84px)); gap: calc(var(--u) * 1.1); max-width: 40vw; }
+.pb { --sk: 14px; display: grid; place-items: center; touch-action: none; transition: opacity 160ms; }
+.pb svg { width: 30px; height: 30px; stroke-width: 2.5; }
+.pb span { font: 900 clamp(17px, 3.4vmin, 23px)/1 var(--f); }
+.pb.up { grid-column: 2; grid-row: 1; } .pb.l { grid-column: 1; grid-row: 2; } .pb.blk { grid-column: 2; grid-row: 2; } .pb.r { grid-column: 3; grid-row: 2; }
+.pb.hide { visibility: hidden; opacity: 0; }
+.pb.hitp::before { animation: hitp 220ms var(--ease-in); }
+@keyframes hitp { 0% { background: var(--ve); transform: translateY(3px); } }
+
+/* captions + pickup: ink slab cut on both ends, bottom-centre */
+.caption, .pickcap { position: fixed; left: 50%; max-width: 70vw; background: var(--ink); color: var(--paper); font: 600 clamp(13px, 2.7vmin, 19px)/1.35 var(--f); padding: 1.1vmin calc(var(--cut) + 1.6vmin); text-align: center; clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); pointer-events: none; opacity: 0; transition: opacity 200ms, transform 300ms var(--ease-in); }
+.caption { bottom: calc(var(--safe-b) + 6vmin); transform: translateX(-50%); }
+.caption.show { opacity: 1; }
+.pickcap { bottom: calc(var(--safe-b) + 8vmin); transform: translate(-50%, 8px); }
+.pickcap.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* voice message: ink slab with a diagonal cut, waveform + source/time, typed line */
+.voice { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 6vmin); transform: translate(-50%, 8px); width: min(72vw, 640px); background: var(--ink); color: var(--paper); padding: 1.3vmin calc(var(--cut) + 2vmin) 1.6vmin calc(var(--cut) + 1.2vmin); clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); opacity: 0; transition: opacity 200ms, transform 300ms var(--ease-in); pointer-events: auto; }
+.voice.show { opacity: 1; transform: translate(-50%, 0); }
+.voice .vh { display: flex; align-items: center; gap: 1vmin; font: 600 clamp(10px, 1.9vmin, 13px)/1.1 var(--f); letter-spacing: .04em; color: var(--paper-2); margin-bottom: .8vmin; min-width: 0; }
+.voice .vh span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.voice .vh svg { flex: none; width: 18px; height: 18px; stroke: var(--ve); stroke-width: 2; fill: none; }
+.voice.static .vh svg { stroke: var(--paper-2); transform: scaleY(.25); }
+.voice p { font: 600 clamp(14px, 2.8vmin, 20px)/1.4 var(--f); min-height: 1.4em; max-height: 2.8em; overflow: hidden; }
+.voice .ring { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--ve); transform: scaleX(0); transform-origin: left; }
+.whiteout { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none !important; transition: opacity 1.2s linear; }
+.whiteout.show { opacity: 1; }
+
+/* Vô tận wave counter: ink slab, top-centre */
+.endhud { position: fixed; left: 50%; top: calc(var(--safe-t) + 1.2vmin); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: .7vmin calc(var(--cut) + 1.6vmin); clip-path: polygon(var(--cut) 0, 100% 0, calc(100% - var(--cut)) 100%, 0 100%); font: 900 clamp(13px, 2.8vmin, 20px)/1.15 var(--f); text-align: center; pointer-events: none; }
+.endhud small { display: block; font: 600 clamp(10px, 1.8vmin, 13px)/1.2 var(--f); color: var(--paper-2); }
+
+/* tutorial prompt: one line, skewed ink slab, bottom-centre */
+.tut { position: fixed; left: 50%; bottom: calc(var(--safe-b) + 7vmin); display: flex; align-items: center; gap: 1.6vmin; max-width: min(78vw, 560px); padding: 1.2vmin 2.6vmin; background: var(--ink); color: var(--paper); outline: 1px solid var(--paper); transform: translate(-50%, 10px) skewX(var(--skew)); opacity: 0; transition: opacity 160ms, transform 300ms var(--ease-in); pointer-events: none !important; z-index: 5; }
+.tut.show { opacity: 1; transform: translate(-50%, 0) skewX(var(--skew)); }
+.tut svg { color: var(--ve); flex: none; width: clamp(18px, 4vmin, 26px); height: clamp(18px, 4vmin, 26px); stroke: var(--ve); stroke-width: 2; fill: none; transform: skewX(var(--unskew)); }
+.tut span { font: 900 clamp(13px, 2.8vmin, 19px)/1.25 var(--f); transform: skewX(var(--unskew)); }
