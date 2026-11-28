@@ -288,9 +288,12 @@ Next: P20b
 
 Next: P21
 
-## P21 · Icon app 3D — PARTIAL (waiting for the user's pick)
-- scripts/icons/render.ts (+ render.html, render.mjs): three.js scenes composited over hard 2D shapes, 1024 px, two layers per concept (bg = paper/ink shapes, fg = 3D subject + blood pixels) so the pick maps onto adaptive icon layers. 1 · Vũ khí: voxel cleaver from `weaponMesh` (Chì blade with hole, Voxel thô handle), 3/4 low camera, ink slab across paper, purple pixels. 2 · Voxel cam: RoundedBox orange voxel with ink hull on the ink/paper diagonal seam, hard ink shadow shape. 3 · Bóng: low-poly charcoal bust cut by clipping planes (BackSide purple shows the cut), paper slash line, blood pixels, small orange voxel.
-- `node scripts/icons/render.mjs` → public/icons/c1..3.png (full) + scripts/icons/out/c*-bg/fg.png (gitignored layers). public/icons-preview.html = contact sheet (512/192/96/48, round + squircle adaptive-crop masks on light/dark).
-- Checked: tsc, 157 vitest, build (dist has icons-preview.html + icons/). 4 comps viewed; main subjects sit inside the 66/108 safe circle.
-- Left (step 4, after the pick): run render.mjs; from c{N}-bg/fg build android/app/src/main/res/mipmap-*/ic_launcher{,_round,_foreground}.png (mdpi 48/108 fg, hdpi 72/162, xhdpi 96/216, xhdpi 144/324, xxxhdpi 192/432; fg/bg layers at the 108 dp sizes) + ic_launcher_background (png or colour), Play 512 from full, favicon/PWA icons (16/32/180/192/512) in public + `<link rel=icon>` in index.html; app name already "XELVE" (capacitor.config.json; check android strings.xml); commit with [deploy] [apk]; check launcher.
-- Gotchas: concept geometry is hand-placed numbers in render.ts; the dev page is served by vite at /scripts/icons/render.html (not part of the build).
+## P21 · Icon app 3D — DONE (launcher not yet seen on a real phone)
+- scripts/icons/render.ts (+ render.html, render.mjs): three.js scenes composited over hard 2D shapes, 1024 px, two layers per concept (bg = paper/ink shapes, fg = 3D subject + blood pixels). Concepts: 1 Vũ khí (voxel cleaver via `weaponMesh`), 2 Voxel cam (RoundedBox), 3 Bóng. public/icons-preview.html = contact sheet (512/192/96/48, round + squircle adaptive-crop masks, light/dark).
+- User picked 3 · Bóng, asked for a more human shape and bigger. Rebuilt the bust from lathe profiles (head + jaw, neck, sloped shoulders, deltoids), cut by two clipping planes (BackSide purple = cut face), upper part slid along the cut; the paper slash line and blood follow the projected cut; head fills the 66/108 safe circle.
+- scripts/icons/export.py (PIL, run locally): mipmap-*/ic_launcher_foreground + ic_launcher_background PNG layers (108 dp), legacy ic_launcher (rounded) / ic_launcher_round from the adaptive crop; adaptive XMLs now use @mipmap/ic_launcher_background; assets/play-icon-512.png; public favicon-16/32, apple-touch-icon, icon-192/512, icon-maskable-512, manifest.webmanifest (linked in index.html). App name was already XELVE (strings.xml, capacitor.config.json).
+- Checked: tsc, 157 vitest, build (dist has icons + manifest); simulated round mask at 192/96/48 viewed. APK built by CI ([apk]).
+- Left: install the APK and look at the launcher (round/squircle/teardrop masks; Android 13 themed icons not provided — would need a monochrome layer); concepts 1 and 2 kept in public/icons for reference.
+- Gotchas: re-run `node scripts/icons/render.mjs && python3 scripts/icons/export.py 3` after any change to render.ts; out/ layers are gitignored.
+
+Next: P22 (not written yet in PHASES.md — needs planning)

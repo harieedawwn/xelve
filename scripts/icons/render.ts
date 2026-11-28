@@ -80,6 +80,7 @@ function concept2() {
 }
 
 // ---- 3 · Bóng: charcoal low-poly head + shoulders, cut on a diagonal, purple inside, blood pixels, small voxel
+const lathe = (pts: number[][], seg: number) => new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), seg)
 function bongBody(clip: THREE.Plane[]): THREE.Group {
   const out = new THREE.MeshLambertMaterial({ color: 0x2c2c33, flatShading: true, clippingPlanes: clip })
   const ins = new THREE.MeshBasicMaterial({ color: 0x4a0e6b, side: THREE.BackSide, clippingPlanes: clip })
@@ -87,27 +88,35 @@ function bongBody(clip: THREE.Plane[]): THREE.Group {
   const part = (geo: THREE.BufferGeometry, x: number, y: number, z: number, sx = 1, sy = 1, sz = 1) => {
     for (const m of [out, ins]) { const k = new THREE.Mesh(geo, m); k.position.set(x, y, z); k.scale.set(sx, sy, sz); g.add(k) }
   }
-  part(new THREE.IcosahedronGeometry(0.62, 1), 0, 0.95, 0, 0.86, 1.08, 0.92)
-  part(new THREE.CylinderGeometry(0.2, 0.26, 0.5, 6), 0, 0.2, 0)
-  part(new THREE.CylinderGeometry(0.62, 1.45, 1.1, 7), 0, -0.55, 0, 1, 1, 0.62)
+  // human bust from lathe profiles (radius, height), few segments = low-poly facets
+  part(lathe([[0, 0.92], [0.2, 0.96], [0.36, 1.07], [0.46, 1.29], [0.5, 1.55], [0.45, 1.8], [0.3, 1.97], [0, 2.02]], 8), 0, 0, 0.05, 0.9, 1, 1.05) // head + jaw
+  part(lathe([[0.22, 0.5], [0.19, 0.8], [0.17, 1.02]], 6), 0, 0, -0.02) // neck
+  part(lathe([[0, -1.5], [0.7, -1.5], [0.82, -0.6], [0.98, 0.02], [0.96, 0.24], [0.74, 0.42], [0.42, 0.55], [0.22, 0.62], [0, 0.63]], 9), 0, 0, 0, 1, 1, 0.52) // shoulders, chest
+  part(new THREE.IcosahedronGeometry(0.28, 0), -0.88, 0.08, 0, 0.9, 1.15, 0.95); part(new THREE.IcosahedronGeometry(0.28, 0), 0.88, 0.08, 0, 0.9, 1.15, 0.95) // deltoids
   return g
 }
 function concept3() {
   const [bg, b] = can()
   b.fillStyle = C.paper; b.fillRect(0, 0, S, S)
-  poly(b, C.paper2, [[0, 0.88], [1, 0.74], [1, 1], [0, 1]])
+  poly(b, C.paper2, [[0, 0.9], [1, 0.78], [1, 1], [0, 1]])
   const scene = new THREE.Scene(); lights(scene, new THREE.Vector3(-4, 5, 5), 0.8, 1.8)
-  const n = new THREE.Vector3(0.5, 1, 0).normalize(), c = 0.82 // cut plane through the neck/jaw
+  const n = new THREE.Vector3(-0.42, 1, 0).normalize(), p0 = new THREE.Vector3(0, 1.42, 0), c = n.dot(p0) // cut rises to the right, through the head
   const upper = bongBody([new THREE.Plane(n.clone().negate(), c)]), lower = bongBody([new THREE.Plane(n.clone(), -c)])
-  const slide = new THREE.Vector3(1, -0.55, 0).normalize().multiplyScalar(0.26)
-  upper.position.copy(slide).add(new THREE.Vector3(0, 0.1, 0)); upper.rotation.z = -0.1
-  const fig = new THREE.Group(); fig.add(upper, lower); fig.rotation.y = -0.45; fig.position.set(-0.3, 0.05, 0); scene.add(fig)
-  const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 100); cam.position.set(0, 3.2, 8.2); cam.lookAt(0, 0.3, 0)
+  const along = new THREE.Vector3(1, 0.42, 0).normalize()
+  upper.position.copy(along).multiplyScalar(0.22).add(n.clone().multiplyScalar(0.1)); upper.rotation.z = 0.06
+  const fig = new THREE.Group(); fig.add(upper, lower); fig.rotation.y = -0.4; fig.position.set(-0.08, 0, 0); scene.add(fig)
+  const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 100); cam.position.set(0, 2.6, 5.0); cam.lookAt(0, 1.3, 0); cam.updateMatrixWorld()
+  // the paper slash follows the projected cut line
+  scene.updateMatrixWorld(true)
+  const proj = (v: THREE.Vector3) => { const q = lower.localToWorld(v.clone()).project(cam); return [(q.x + 1) / 2, (1 - q.y) / 2] }
+  const [ax, ay] = proj(p0.clone().addScaledVector(along, -1)), [bx, by] = proj(p0.clone().addScaledVector(along, 1))
+  const L = (t: number) => [ax + (bx - ax) * t, ay + (by - ay) * t], A = L(-0.9), B = L(1.9), w = 0.007
   const [fg, f] = can(); f.drawImage(shoot(scene, cam), 0, 0)
-  poly(f, C.paper, [[0.10, 0.56], [0.92, 0.30], [0.92, 0.311], [0.10, 0.574]]) // the slash line
-  blood(f, 11, 0.60, 0.40, 1, -0.5, 14, 0.9, 0.045); blood(f, 5, 0.42, 0.47, -1, 0.3, 7, 0.6, 0.035)
+  poly(f, C.paper, [[A[0], A[1] - w], [B[0], B[1] - w], [B[0], B[1] + w], [A[0], A[1] + w]]) // the slash line
+  const e1 = L(0.85), e0 = L(0.15)
+  blood(f, 11, e1[0], e1[1], 1, -0.35, 14, 0.9, 0.05); blood(f, 5, e0[0], e0[1], -1, 0.25, 8, 0.6, 0.04)
   // small orange voxel, top-left corner inside the safe zone (3 flat faces, ink edges)
-  const x = 0.27, y = 0.37, r = 0.05
+  const x = 0.25, y = 0.43, r = 0.045
   const top = [[x, y - r], [x + r * 0.87, y - r / 2], [x, y], [x - r * 0.87, y - r / 2]]
   const lf = [[x - r * 0.87, y - r / 2], [x, y], [x, y + r], [x - r * 0.87, y + r / 2]]
   const rt = [[x, y], [x + r * 0.87, y - r / 2], [x + r * 0.87, y + r / 2], [x, y + r]]
