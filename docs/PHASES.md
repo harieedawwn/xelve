@@ -210,7 +210,7 @@ Done when: [ ] shots pass · [ ] no leftover v1 styles (grep old class names)
 Model: Sonnet 5.5 · medium
 Deploy: yes · Screenshots: ≤3
 
-## P21 · Icon app 3D (người chơi chọn 1 trong 3) [TODO]
+## P21 · Icon app 3D (người chơi chọn 1 trong 3) [PARTIAL: chờ chọn]
 Read: docs/DESIGN.md (palette, concept, bans), src/weapon/mesh.ts (reuse voxel mesh)
 Do:
 1. `scripts/icons/render.ts` (headless three.js via the existing playwright-core setup): render 3 icon concepts at 1024×1024, real 3D, good composition, readable at 48 px:

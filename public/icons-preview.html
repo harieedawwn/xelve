@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XELVE · Icon</title>
+<style>
+:root { --paper: #ECEBE6; --paper-2: #CFCDC6; --ink: #16161A; --ve: #E8590C; }
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 600 15px/1.4 system-ui, sans-serif; padding: 24px 16px 48px; }
+h1 { font-size: 44px; letter-spacing: .04em; margin-bottom: 24px; }
+section { margin-bottom: 40px; }
+h2 { display: inline-block; background: var(--ink); color: var(--paper); padding: 8px 20px; font-size: 20px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); margin-bottom: 16px; }
+h2 b { color: var(--ve); margin-right: 8px; }
+.row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+.big { width: 512px; max-width: 100%; height: auto; display: block; }
+.pad { display: flex; gap: 20px; align-items: center; padding: 20px; }
+.light { background: #F4F4F4; } .dark { background: #1C1C20; }
+.m { display: block; overflow: hidden; position: relative; }
+.m img { position: absolute; left: -25%; top: -25%; width: 150%; height: 150%; }
+.round { border-radius: 50%; }
+.sq { border-radius: 22%; }
+.lab { font-size: 12px; color: #6a6a6a; margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>XELVE · Chọn icon</h1>
+<div id="list"></div>
+<script>
+const names = ['Vũ khí', 'Voxel cam', 'Bóng']
+const sizes = [192, 96, 48]
+const list = document.getElementById('list')
+names.forEach((n, i) => {
+  const src = `icons/c${i + 1}.png`
+  const masked = (cls, s) => `<span class="m ${cls}" style="width:${s}px;height:${s}px"><img src="${src}" alt=""></span>`
+  const strip = (bg) => `<div class="pad ${bg}">${sizes.map(s => masked('round', s)).join('')}${sizes.map(s => masked('sq', s)).join('')}</div>`
+  const plain = sizes.map(s => `<img src="${src}" width="${s}" height="${s}" alt="">`).join('')
+  list.insertAdjacentHTML('beforeend', `<section><h2><b>${i + 1}</b>${n}</h2>
+    <div class="row"><img class="big" src="${src}" alt="Icon ${i + 1}"><div>${plain}</div></div>
+    <div class="lab">Nền sáng</div>${strip('light')}<div class="lab">Nền tối</div>${strip('dark')}</section>`)
+})
+</script>
+</body>
+</html>
