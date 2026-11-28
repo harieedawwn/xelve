@@ -88,22 +88,23 @@ describe('design + analyze', () => {
 })
 
 describe('mesh from ugly drawings', () => {
-  it('random designs give finite, closed-looking geometry with merged faces', () => {
+  it('random designs give finite, closed-looking geometry with textured faces', () => {
     for (const bp of Object.keys(BLUEPRINTS)) for (let s = 1; s < 15; s++) {
       const d = randomDesign(bp, s * 7), st = analyze(d), a = assemble(d)
       if (!st.connected.length) continue
       const g = voxelGeometry(st.connected, a.grip, a.voxel), pos = g.attributes.position.array as Float32Array
       expect(pos.length % 9).toBe(0)
       for (const v of pos) expect(Number.isFinite(v)).toBe(true)
-      // greedy merge: never more front quads than voxels
+      // one front quad per voxel
       const front = [...(g.attributes.normal.array as Float32Array)].filter((_, i) => i % 3 === 2).filter(z => z === 1).length / 6
       expect(front).toBeLessThanOrEqual(st.connected.length)
     }
   })
-  it('a full 8×8 Khối becomes one front quad and no inner side faces', () => {
+  it('a full 8×8 Khối has one textured quad per voxel face and no inner side faces', () => {
     const d = makeDesign('khoi', 8); for (let i = 0; i < 64; i++) d.parts.khoi.cells[i] = { mat: 'tho' }
     const st = analyze(d), a = assemble(d), g = voxelGeometry(st.connected, a.grip, a.voxel)
-    expect(g.attributes.position.count).toBe(6 * 2 + 6 * 32) // front + back, 32 boundary edges
+    expect(g.attributes.position.count).toBe(6 * 2 * 64 + 6 * 32) // 64 front + 64 back quads, 32 boundary edges
+    expect(g.attributes.uv.count).toBe(g.attributes.position.count)
   })
   it('side faces point outward', () => {
     const d = makeDesign('khoi', 1), st = analyze(d), a = assemble(d), g = voxelGeometry(st.connected, a.grip, a.voxel)

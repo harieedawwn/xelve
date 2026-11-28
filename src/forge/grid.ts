@@ -3,6 +3,7 @@
 import type { Part } from '../weapon/model'
 import { getCell } from '../weapon/model'
 import { mat } from '../weapon/materials/registry'
+import { tileSrc, TILE } from '../weapon/materials/textures'
 
 export const CELL_MIN = 18, CELL_MAX = 56
 const css = (n: number) => '#' + n.toString(16).padStart(6, '0')
@@ -110,7 +111,7 @@ export class GridView {
       if (sx > W || sy > H || sx + cs < 0 || sy + cs < 0) continue
       const c = getCell(p, x, y)
       if (c) {
-        g.fillStyle = css(mat(c.mat).color); g.fillRect(sx, sy, cs, cs)
+        const ti = tileSrc(mat(c.mat).tex); g.imageSmoothingEnabled = false; g.drawImage(ti[0], ti[1], ti[2], TILE, TILE, sx, sy, cs, cs)
         if (st.loose.has(y * p.w + x)) { // loose: red frame + hatch, falls off on equip
           g.strokeStyle = '#ECEBE6'; g.lineWidth = 1; g.strokeRect(sx + 4.5, sy + 4.5, cs - 9, cs - 9)
           g.strokeStyle = '#6E0B14'; g.lineWidth = 2; g.strokeRect(sx + 2, sy + 2, cs - 4, cs - 4)

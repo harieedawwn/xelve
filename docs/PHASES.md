@@ -183,7 +183,7 @@ Done when: [ ] every prompt appears once at the right moment in a headless run �
 Model: Sonnet 5.5 · medium
 Deploy: no · Screenshots: ≤3
 
-## P19 · Texture cho từng loại Voxel [TODO]
+## P19 · Texture cho từng loại Voxel [DONE]
 Read: docs/spec/weapon.md#6 #8, src/weapon/mesh.ts, src/weapon/materials/*
 Do: each material gets its own texture (procedural canvas, 16–32 px, nearest, generated once and cached), mapped per voxel face. Two families:
 - **2D phẳng** (flat graphic, 2–3 tones, hard pixel shapes): Voxel thô (orange with one darker pixel corner), Cao su (black with tread chevrons), Lõi Người gác (ink with blue crack lines).

@@ -17,4 +17,4 @@ export interface MatEffect {
   /** weapon bounces back faster (shorter recovery) */ bounce?: number
   /** fire jumps to touching enemies */ spread?: boolean
 }
-export interface MaterialDef { id: string; name: Key; density: number; color: number; alpha?: number; effect?: MatEffect; /** share of the swing speed (nhôm) */ speed?: number }
+export interface MaterialDef { id: string; name: Key; density: number; color: number; /** texture id in textures.ts (P19) */ tex: string; alpha?: number; effect?: MatEffect; /** share of the swing speed (nhôm) */ speed?: number }

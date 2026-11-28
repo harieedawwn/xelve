@@ -3,6 +3,7 @@ import './forge.css'
 import { t, Key } from '../i18n'
 import { BLUEPRINTS, BlueprintDef, SOON } from '../weapon/blueprints/registry'
 import { MATERIALS } from '../weapon/materials/registry'
+import { tileDataUrl } from '../weapon/materials/textures'
 import { WeaponDesign, assemble, cloneDesign, gripOf, makeDesign, makePart, partDef, getCell, setCell } from '../weapon/model'
 import { analyze, Stats } from '../weapon/analyze'
 import { designProfile } from '../weapon/runtime'
@@ -80,7 +81,7 @@ export class Forge {
     const mats = el('div', 'f-mats'); mats.setAttribute('role', 'group'); mats.setAttribute('aria-label', t('forge.material'))
     for (const m of Object.values(MATERIALS)) {
       const b = this.btn('f-mat', '', m.name, () => { this.matId = m.id; if (this.tool === 'eraser') this.tool = 'pen'; this.syncTools() })
-      b.style.setProperty('--m', '#' + m.color.toString(16).padStart(6, '0')); b.dataset.mat = m.id; mats.appendChild(b)
+      b.style.setProperty('--m', '#' + m.color.toString(16).padStart(6, '0')); b.style.setProperty('--t', tileDataUrl(m.tex)); b.dataset.mat = m.id; mats.appendChild(b)
     }
 
     const side = el('div', 'f-side')

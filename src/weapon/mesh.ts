@@ -1,42 +1,32 @@
-// Voxel mesh from a design: greedy-merged front/back faces per material, culled sides, ink outline hull.
+// Voxel mesh from a design: one textured quad per voxel face (atlas, P19), culled sides, ink outline hull.
 // Only voxels connected to the grip are meshed (loose ones fall off; analyze.ts).
 import * as THREE from 'three'
 import type { Voxel } from './model'
 import { mat } from './materials/registry'
+import { atlasTexture, tileUV } from './materials/textures'
 
 const SIDES = [[1, 0, 1, 0], [-1, 0, -1, 0], [0, -1, 0, 1], [0, 1, 0, -1]] as const // grid dx, dy → world nx, ny
 
 export function voxelGeometry(voxels: Voxel[], grip: [number, number], s: number): THREE.BufferGeometry {
-  const pos: number[] = [], nor: number[] = [], col: number[] = []
+  const pos: number[] = [], nor: number[] = [], col: number[] = [], uv: number[] = []
   const c = new THREE.Color()
   const X = (gx: number) => (gx - grip[0]) * s, Y = (gy: number) => (grip[1] - gy) * s
-  const quad = (p: number[][], n: number[], hex: number, shade: number) => {
-    c.setHex(hex).multiplyScalar(shade)
-    for (const i of [0, 1, 2, 0, 2, 3]) { pos.push(...p[i]); nor.push(...n); col.push(c.r, c.g, c.b) }
+  // texture carries the colour; vertex colour is only the face shade. Corners map to the tile's 4 corners.
+  const quad = (p: number[][], n: number[], matId: string, shade: number) => {
+    c.setScalar(shade); const [u0, v0, u1, v1] = tileUV(mat(matId).tex), U = [u0, u1, u1, u0], V = [v1, v1, v0, v0]
+    for (const i of [0, 1, 2, 0, 2, 3]) { pos.push(...p[i]); nor.push(...n); col.push(c.r, c.g, c.b); uv.push(U[i], V[i]) }
   }
   const depth = new Map<number, number>(), K = (x: number, y: number) => y * 4096 + x
   for (const v of voxels) depth.set(K(v.x, v.y), v.depth)
-  // front/back: greedy rectangles per (material, depth)
-  const groups = new Map<string, Voxel[]>()
-  for (const v of voxels) { const g = v.mat + ':' + v.depth; (groups.get(g) ?? groups.set(g, []).get(g)!).push(v) }
-  for (const vs of groups.values()) {
-    const hex = mat(vs[0].mat).color, d = vs[0].depth, z = (d * s) / 2
-    const left = new Set(vs.map(v => K(v.x, v.y)))
-    const sorted = vs.slice().sort((a, b) => a.y - b.y || a.x - b.x)
-    for (const v of sorted) {
-      if (!left.has(K(v.x, v.y))) continue
-      let w = 1; while (left.has(K(v.x + w, v.y))) w++
-      let h = 1
-      grow: for (;;) { for (let i = 0; i < w; i++) if (!left.has(K(v.x + i, v.y + h))) break grow; h++ }
-      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) left.delete(K(v.x + i, v.y + j))
-      const x0 = X(v.x - 0.5), x1 = X(v.x + w - 0.5), y0 = Y(v.y - 0.5), y1 = Y(v.y + h - 0.5)
-      quad([[x0, y1, z], [x1, y1, z], [x1, y0, z], [x0, y0, z]], [0, 0, 1], hex, 1)
-      quad([[x1, y1, -z], [x0, y1, -z], [x0, y0, -z], [x1, y0, -z]], [0, 0, -1], hex, 0.8)
-    }
+  // front/back: one quad per voxel so every voxel shows a whole texture tile
+  for (const v of voxels) {
+    const z = (v.depth * s) / 2, x0 = X(v.x - 0.5), x1 = X(v.x + 0.5), y0 = Y(v.y - 0.5), y1 = Y(v.y + 0.5)
+    quad([[x0, y1, z], [x1, y1, z], [x1, y0, z], [x0, y0, z]], [0, 0, 1], v.mat, 1)
+    quad([[x1, y1, -z], [x0, y1, -z], [x0, y0, -z], [x1, y0, -z]], [0, 0, -1], v.mat, 0.8)
   }
   // sides: the part of each side not covered by the neighbour's depth
   for (const v of voxels) {
-    const hex = mat(v.mat).color, z = (v.depth * s) / 2
+    const z = (v.depth * s) / 2
     for (const [dx, dy, nx, ny] of SIDES) {
       const nd = depth.get(K(v.x + dx, v.y + dy)) ?? 0
       if (nd >= v.depth) continue
@@ -49,7 +39,7 @@ export function voxelGeometry(voxels: Voxel[], grip: [number, number], s: number
         // order so the face points along (nx, ny)
         const flip = nx * (p2[1] - p1[1]) - ny * (p2[0] - p1[0]) < 0
         const [a, b] = flip ? [p2, p1] : [p1, p2]
-        quad([[a[0], a[1], za], [b[0], b[1], za], [b[0], b[1], zb], [a[0], a[1], zb]], [nx, ny, 0], hex, ny > 0 ? 0.95 : ny < 0 ? 0.72 : 0.85)
+        quad([[a[0], a[1], za], [b[0], b[1], za], [b[0], b[1], zb], [a[0], a[1], zb]], [nx, ny, 0], v.mat, ny > 0 ? 0.95 : ny < 0 ? 0.72 : 0.85)
       }
     }
   }
@@ -57,6 +47,7 @@ export function voxelGeometry(voxels: Voxel[], grip: [number, number], s: number
   geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
   geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3))
   geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3))
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
   geo.computeBoundingSphere()
   return geo
 }
@@ -76,6 +67,6 @@ export function outlineGeometry(src: THREE.BufferGeometry, w: number): THREE.Buf
 export function weaponMesh(voxels: Voxel[], grip: [number, number], s: number, ink: number): THREE.Group {
   const geo = voxelGeometry(voxels, grip, s), g = new THREE.Group()
   g.add(new THREE.Mesh(outlineGeometry(geo, s * 0.12), new THREE.MeshBasicMaterial({ color: ink, side: THREE.BackSide })))
-  g.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true })))
+  g.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: atlasTexture() ?? null, vertexColors: true, flatShading: true })))
   return g
 }

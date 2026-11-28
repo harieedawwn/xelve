@@ -256,3 +256,13 @@ Next: P18
 - Gotchas: `window.__tut.log` lists shown prompts (test helper). A prompt that was shown but not done re-appears next session.
 
 Next: P19
+
+## P19 · Texture cho từng loại Voxel — DONE
+- src/weapon/materials/textures.ts: 10 procedural 32 px recipes (flat: tho, caosu, gac; real: chi, nhom, thuytinh, magie, dakho, dong, dong_core) drawn once into one nearest-filtered atlas (`atlasTexture()`, cached; `tileDataUrl()` for swatches, `tileSrc()` for the grid). `MaterialDef.tex` = texture id (set in each material file). Seeded RNG → same look every run.
+- mesh.ts: one quad per voxel face with tile UVs (greedy merge dropped so every voxel shows a whole tile); vertex colour is now only face shade, the texture carries colour. Falls back to no map in node tests.
+- Xưởng: palette swatches and the grid cells show the texture (grid draws the tile with smoothing off).
+- Checked: tsc, 157 vitest (new textures.test.ts; forge mesh test updated), build; headless 640×360 Xưởng with all 7 materials painted: distinct, no page errors. 1 screenshot viewed.
+- Left: dong, gac, dong_core textures exist but those materials are not registered yet (they come with Chương 2 / boss rewards → add 1 file + 1 line each with `tex`); Thuỷ tinh has no real transparency (pale cyan with glints only); in-game 3D at Cao tier not eyeballed beyond the Xưởng preview.
+- Gotchas: the atlas needs `document`; node tests get `null`. Adding a recipe changes tile slots (order of keys) — append new ones at the end.
+
+Next: P20
