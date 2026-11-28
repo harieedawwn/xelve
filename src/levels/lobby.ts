@@ -1,4 +1,4 @@
-// Sảnh toà nhà (L5): wide white lobby, reception desk with a thermos, a radio and Ve's drawing of Chú Bảy taped up. Procedural only.
+// Sảnh toà nhà (L5): wide white lobby, reception desk with a thermos, a radio and VE's round-diagram taped up. Procedural only.
 import * as THREE from 'three'
 import { PAL } from '../render/palette'
 import { gritTex } from './corridor'
@@ -31,10 +31,11 @@ export function buildLobby(scene: THREE.Scene) {
   box(0.12, 0.3, 0.12, -1.6, 1.3, zFar + 2.2, PAL.ink)                        // thermos
   const radio = box(0.4, 0.26, 0.14, 1.5, 1.28, zFar + 2.2, PAL.stone); radio.name = 'radio'
   box(0.26, 0.12, 0.02, 1.5, 1.28, zFar + 2.12, PAL.ink, false)               // speaker slot
-  // Ve's drawing of Chú Bảy: paper + a crude figure with a baton, taped on the wall behind the desk
+  // VE's page on the wall: the guard's round as an orange loop of arrows (VE mark)
   const cv = document.createElement('canvas'); cv.width = 32; cv.height = 40; const g = cv.getContext('2d')!
-  g.fillStyle = '#ECEBE6'; g.fillRect(0, 0, 32, 40); g.fillStyle = '#16161A'
-  g.fillRect(13, 6, 6, 6); g.fillRect(15, 12, 2, 14); g.fillRect(11, 26, 3, 9); g.fillRect(18, 26, 3, 9); g.fillRect(17, 14, 9, 2); g.fillStyle = '#E8590C'; g.fillRect(25, 6, 2, 10)
+  g.fillStyle = '#ECEBE6'; g.fillRect(0, 0, 32, 40); g.fillStyle = '#E8590C'
+  g.fillRect(6, 8, 20, 2); g.fillRect(24, 8, 2, 18); g.fillRect(6, 24, 20, 2); g.fillRect(6, 8, 2, 18); g.fillRect(21, 5, 2, 8)
+  g.fillStyle = '#16161A'; g.font = "700 7px 'Be Vietnam Pro', system-ui, sans-serif"; g.fillText('VE', 12, 36)
   const tex = new THREE.CanvasTexture(cv); tex.magFilter = tex.minFilter = THREE.NearestFilter; tex.generateMipmaps = false; tex.colorSpace = THREE.SRGBColorSpace
   plane(0.64, 0.8, new THREE.MeshBasicMaterial({ map: tex }), -0.8, 1.9, zFar + 0.02)
   box(0.5, 0.05, 0.02, -0.8, 2.32, zFar + 0.03, PAL.stone, false)              // tape

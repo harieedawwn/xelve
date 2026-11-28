@@ -35,7 +35,7 @@ export function gritTex(size: number, base: number, vari: number, seed: number, 
 }
 
 function doodleTex() {
-  // Ve's 3-frame marker doodle: a stick figure swiping an orange blade. Teaches the swipe.
+  // VE's 3-frame marker doodle: a stick figure swiping an orange blade. Teaches the swipe.
   return canvasTex(96, 32, (g) => {
     g.fillStyle = '#ECEBE6'; g.fillRect(0, 0, 96, 32)
     const px = (x: number, y: number, c: string) => { g.fillStyle = c; g.fillRect(x, y, 1, 1) }
@@ -119,7 +119,7 @@ export function buildCorridor(scene: THREE.Scene) {
   box(0.3, 0.5, 0.3, -HALF_W + 0.3, 0.25, -7.2, new THREE.MeshLambertMaterial({ color: PAL.stone }))
   // lift doors at the end
   box(1.1, 2.2, 0.05, 0, 1.1, Z_END + 0.03, new THREE.MeshLambertMaterial({ color: 0xb8b7b1 }))
-  // Ve's doodle + stopped clock
+  // VE's doodle + stopped clock
   plane(0.96, 0.32, new THREE.MeshBasicMaterial({ map: doodleTex() }), new THREE.Vector3(-HALF_W + 0.01, 1.55, -4.6), new THREE.Euler(0, Math.PI / 2, 0))
   plane(0.32, 0.32, new THREE.MeshBasicMaterial({ map: clockTex(), transparent: true }), new THREE.Vector3(HALF_W - 0.01, 2.35, -1.6), new THREE.Euler(0, -Math.PI / 2, 0))
 

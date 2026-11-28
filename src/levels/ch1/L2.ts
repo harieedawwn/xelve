@@ -1,5 +1,5 @@
 import type { LevelData } from './types'
-// L2 Văn phòng: Ve's desk, faces rubbed out, sketchbook page → Xưởng 3×3. Glass partitions. Message 2.
+// L2 Văn phòng: VE's desk, sketchbook page → Xưởng 3×3. Glass partitions. Message 2.
 export const L2: LevelData = {
   id: 2, name: 'level.2', room: 'office', length: 40, speed: 2.6,
   encounters: [

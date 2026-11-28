@@ -1,6 +1,6 @@
 // L8 boss arena — Đống (combat.md#7). Dev route: ?dong (&weapon=nhe|vua|nang, &tier=thap|tb|cao, &loi=1).
 // Cover arc + coverDash (‹ ›), throws / sweep / slam, arm-down opening → ↑ armRun to the seams, sóng chém from cover,
-// phase 3 roof rip, collapse → family car, sticky note, message 6, hospital, chapter card. Level flow is wired in P12.
+// phase 3 roof rip, collapse → tally wall, message 6, tower, chapter card. Level flow is wired in P12.
 import * as THREE from 'three'
 import { Renderer } from '../render/pipeline'
 import { FX } from '../render/fx'
@@ -8,7 +8,7 @@ import { PAL } from '../render/palette'
 import { buildCarPark, coverFeet, ARENA } from '../levels/carpark'
 import { CameraRig, EYE } from '../camera/rig'
 import { Rail } from '../camera/rail'
-import { coverDash, armRun, pickup, cinematicCut } from '../camera/moves'
+import { coverDash, armRun, cinematicCut } from '../camera/moves'
 import { Weapon } from '../combat/weapon'
 import { PROFILES } from '../combat/profiles'
 import { PlayerHP } from '../combat/player'
@@ -31,7 +31,7 @@ import { grant } from '../story/drops'
 import { completeLevel } from '../story/progress'
 import { level } from '../levels/ch1'
 import { lerp, clamp } from '../camera/springs'
-import { bossHud, endingUi, noteMesh } from './boss2ui'
+import { bossHud, endingUi } from './boss2ui'
 
 export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio: Audio) {
   const q = new URLSearchParams(location.search)
@@ -59,7 +59,7 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
     takeHit(dmg, at, dir, f, weak) { brain.damage(dmg * DONG.seamMult); f.blood(at, dir, PAL.bloodDo, weak ? 44 : 26); this.hitCooldown = 0.12; stats.hits++; return !brain.alive },
   })
   // P16 contact: every car of the body is a hard box (blade stops at the surface: sparks + scratch); the roof panel until it is off
-  const cols = body.pieces.filter(o => o !== body.family).map(o => boxOf(o, o !== body.panel, o === body.panel ? () => !body.panelOff && won < 0 : () => won < 0))
+  const cols = body.pieces.filter(o => o !== body.tally).map(o => boxOf(o, o !== body.panel, o === body.panel ? () => !body.panelOff && won < 0 : () => won < 0))
   if (q.has('debug')) showColliders(cols)
   const contact = new BladeContact(weapon, fx.withSparks(rig.cam), () => { audio.play('hit.metal'); time.freeze(0.04); rig.slashKick(weapon.slashDir.x, weapon.slashDir.y, 0.5) })
   const seams = (['faceL', 'faceR', 'shoulder', 'chest'] as Seam[]).map(seamTarget)
@@ -167,13 +167,12 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
     stats.gained = grant(save(), 'dong'); completeLevel(save(), level(8)!); persist()
     hud.hide(); def.release(); weapon.guarding = false; weapon.touching = false; context()
   }
-  const family = () => body.family.position
-  const note = noteMesh(); rig.cam.add(note); note.visible = false
+  const wall = () => body.tally.position
   let beat = 0
   const ending = (rt: number) => { // real-time beats after the collapse
-    if (beat === 0 && rt > 3.2 && !rig.busy) { beat = 1; const f = family().clone(), to = f.clone().add(new THREE.Vector3(0.6, 0, 3.1)); to.y = 0; rig.rail = new Rail([to.clone(), to.clone().add(new THREE.Vector3(0, 0, -0.5))]); rig.play(coverDash(rig.bodyPos.clone(), to, f)) }
-    if (beat === 1 && rt > 6 && !rig.busy) { beat = 2; note.visible = true; rig.play(pickup((k) => { note.position.y = lerp(-0.7, -0.06, k); note.rotation.x = lerp(-0.9, -0.15, k) })) }
-    if (beat === 2 && rt > 9.4) { beat = 3; note.visible = false; end.voice(() => audio.play('radio.crackle')) }
+    if (beat === 0 && rt > 3.2 && !rig.busy) { beat = 1; const f = wall().clone(), to = f.clone().add(new THREE.Vector3(0.6, 0, 3.1)); to.y = 0; rig.rail = new Rail([to.clone(), to.clone().add(new THREE.Vector3(0, 0, -0.5))]); rig.play(coverDash(rig.bodyPos.clone(), to, f)) }
+    if (beat === 1 && rt > 6 && !rig.busy) { beat = 2 }
+    if (beat === 2 && rt > 9.4) { beat = 3; end.voice(() => audio.play('radio.crackle')) }
     if (beat === 3 && rt > 15.5) { beat = 4 }
     if (beat === 4 && rt > 19) { beat = 5; end.whiteout(1.4); setTimeout(() => end.card(), 1500) }
   }
@@ -202,8 +201,8 @@ export function startBoss2(canvas: HTMLCanvasElement, renderer: Renderer, audio:
         if (flight) lookAt.lerp(flight.car.position, 0.45)
         else if (brain.open) lookAt.lerp(body.handPos(1), 0.35)
       } else if (beat < 1) lookAt.lerp(new THREE.Vector3(0, 2.5, ARENA.boss.z + 2), 1 - Math.exp(-2 * dt))
-      else if (beat < 4) lookAt.copy(family()).setY(0.9)
-      else lookAt.lerp(park.hospital, 1 - Math.exp(-0.9 * h))
+      else if (beat < 4) lookAt.copy(wall()).setY(0.9)
+      else lookAt.lerp(park.tower, 1 - Math.exp(-0.9 * h))
       rig.lookWant.copy(lookAt)
       rig.update(dt, h)
       weapon.update(time.hitstop > 0 ? 0 : h, now)

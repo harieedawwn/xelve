@@ -1,5 +1,5 @@
 import type { LevelData } from './types'
-// L1 Hành lang: wake, Ve's swipe doodle, first Bóng. Message 1 after the fight. (corridor.ts has the doors/doodle/clock)
+// L1 Hành lang: wake, VE's swipe doodle, first Bóng. Message 1 after the fight. (corridor.ts has the doors/doodle/clock)
 export const L1: LevelData = {
   id: 1, name: 'level.1', room: 'corridor', length: 31, speed: 2.6,
   encounters: [

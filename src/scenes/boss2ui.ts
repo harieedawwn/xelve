@@ -1,5 +1,4 @@
-// Đống arena DOM + the sticky note: boss bar, HP pips, voice message 6 (typed subtitle + waveform), white-out, chapter card.
-import * as THREE from 'three'
+// Đống arena DOM: boss bar, HP pips, voice message 6 (typed subtitle + waveform), white-out, chapter card.
 import { DONG } from '../bosses/dong'
 import { el, ICON } from '../ui/dom'
 import { t } from '../i18n'
@@ -36,24 +35,9 @@ export function endingUi() {
       v.addEventListener('pointerdown', () => { i = full.length - 1 })
     },
     card() {
-      const c = el('div', 'chcard'), h = el('h2', '', t('chapter.2')), s = el('p', '', t('locked.soon'))
+      const c = el('div', 'chcard'), sig = el('div', 'sig', `<b>${t('card.xel')}</b><i></i><b>${t('card.ve')}</b>`), h = el('h2', '', t('chapter.2')), s = el('p', '', t('locked.soon'))
       const again = el('button', 'btn', ICON.restart + t('menu.restart')); again.onclick = () => location.reload()
-      c.append(h, s, again); ui.append(c); requestAnimationFrame(() => c.classList.add('show'))
+      c.append(sig, h, s, again); ui.append(c); requestAnimationFrame(() => c.classList.add('show'))
     },
   }
-}
-
-/** Ve's sticky note from the dashboard: orange square, her handwriting in ink (text from i18n) */
-export function noteMesh() {
-  const cv = document.createElement('canvas'); cv.width = cv.height = 128
-  const g = cv.getContext('2d')!
-  g.fillStyle = '#E8590C'; g.fillRect(0, 0, 128, 128); g.fillStyle = '#C94E0A'; g.fillRect(0, 0, 128, 14)
-  g.fillStyle = '#16161A'; g.font = "600 15px 'Be Vietnam Pro', system-ui, sans-serif"; g.textBaseline = 'top'
-  const words = t('note.l8').split(' '); let line = '', y = 30
-  for (const w of words) { const tryL = line ? line + ' ' + w : w; if (g.measureText(tryL).width > 104) { g.fillText(line, 12, y); line = w; y += 22 } else line = tryL }
-  g.fillText(line, 12, y)
-  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(0.16, 0.16), new THREE.MeshBasicMaterial({ map: tex }))
-  m.position.set(0, -0.7, -0.42); m.renderOrder = 10
-  return m
 }

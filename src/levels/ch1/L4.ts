@@ -1,5 +1,5 @@
 import type { LevelData } from './types'
-// L4 Con hẻm: TV repair shop (static), Bóng nhiễu flicker out of screens, welding shop → Magie, Ve's sticker. Grid 5×5. Message 4.
+// L4 Con hẻm: TV repair shop (static), Bóng nhiễu flicker out of screens, welding shop → Magie, VE's sticker. Grid 5×5. Message 4.
 export const L4: LevelData = {
   id: 4, name: 'level.4', room: 'alley', length: 44, speed: 2.6,
   encounters: [

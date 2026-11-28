@@ -20,7 +20,7 @@ export const DONG = {
   recover: 0.7,
   armDown: 2.0,       // opening after a throw (↑ leap)
   phaseStagger: 1.6,
-  reveal: 3.4,        // phase 3: rips off its roof panel → silver car in the chest
+  reveal: 3.4,        // phase 3: rips off its roof panel → tally wall in the chest
   seamMult: 1.5,      // seams count as weak points
   wave: { dmg: 9, cooldown: 1.8, flight: 0.55 }, // sóng chém from cover (Lõi Người gác, Lực 1)
   phases: [

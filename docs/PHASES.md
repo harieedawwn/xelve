@@ -169,7 +169,7 @@ Done when:
 Model: Opus 5.5 · medium — touch feel
 Deploy: yes · Screenshots: ≤3
 
-## P17 · Cốt truyện v2 (bí ẩn) [TODO]
+## P17 · Cốt truyện v2 (bí ẩn) [DONE]
 Read: docs/spec/story.md (v2, whole file — the "Removed from v1" list is mandatory)
 Do: replace all story content in code: signals msg.1–6 (header = source · time instead of only time), L2 wristbands prop, L4 watching TV frame, L5 radio line, L6 billboards countdown, L7 broadcast tower (replace hospital), L8 phase 3 tally wall + chapter end card with XEL · VE signatures, Chương 2 title "Đài phát". Remove every v1 family item and word (grep: Ve as sister, mẹ, chị, em, bệnh viện, xe gia đình, Chú Bảy). VE marks = orange doodles/arrows signed VE along every level.
 Done when: [ ] grep for removed words in src/ returns nothing · [ ] every setup/payoff row exists in its level

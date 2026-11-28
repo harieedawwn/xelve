@@ -237,3 +237,13 @@ Next: P16
 - Gotchas: `Sparks` runs its own clock (scrape continuity), scenes must call fx.update. `BladeContact.stats.residual` is the debug "inside the body" measure. Samples 1–3 only are pushed (sample 0 sits at the hand).
 
 Next: P17
+
+## P17 · Cốt truyện v2 (bí ẩn) — DONE
+- vi.ts: msg.1–6 rewritten (header `msg.N.time` now = "nguồn · giờ"), radio.l5 = "Số 07 đã qua sảnh.", chapter.2 = "Chương 2 · Đài phát", note.l2 = "VE", card.xel/card.ve added; note.l8 removed.
+- Props: L2 stack of 6 blank wristbands on VE's desk (faces and framed family car gone); L4 frozen high-angle alley TV frame; L5 lobby: VE round-diagram replaces Chú Bảy drawing; L6 three billboards "05:47" stopped; L7 tower seen through a gap; car park top deck: hospital → Đài phát tower (`park.tower`). VE orange arrow marks (`veArrowTex`, rooms.ts) added in L2/L3/L4/L6/L7.
+- L8: family car → tally wall (src/levels/tally.ts, last group has 6 strokes struck out) inside Đống, settles upright after the collapse; sticky note removed (noteMesh deleted); end card shows XEL — VE signatures above "Chương 2 · Đài phát / Sắp ra mắt".
+- Checked: tsc, 152 vitest, build, headless L2/L4/L6/L8 at 640×360 no page errors. grep for removed words in src returns nothing (except CSS `font-family`). No screenshots viewed.
+- Left: tally wall/billboard/wristband visuals not eyeballed; boss2ui voice still local (not story/voice.ts); tower in rail L7 is a flat picture; VE doodles only as static marks (no Doodle data used).
+- Gotchas: msg.N.time holds source + time; voice header may be long on 640 px (ellipsis not added).
+
+Next: P18

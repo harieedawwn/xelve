@@ -29,7 +29,7 @@ const mats = new Map<number, THREE.Material>()
 const mat = (c: number) => { let m = mats.get(c); if (!m) mats.set(c, m = new THREE.MeshLambertMaterial({ color: c, flatShading: true })); return m }
 export const edgeMat = new THREE.LineBasicMaterial({ color: PAL.ink, transparent: true, opacity: 0.55 })
 
-/** a car group (mesh + edges). colour defaults to the swallowed white; the family car is the old silver one */
+/** a car group (mesh + edges). colour defaults to the swallowed white; 'old' is the older silver model */
 export function makeCar(kind: CarKind = 'car', color: number = PAL.paper) {
   let k = geoms.get(kind); if (!k) geoms.set(kind, k = build(kind))
   const grp = new THREE.Group()

@@ -1,7 +1,8 @@
 // Đống's body (~12 m): cars stood up as legs, stacked as torso, a crushed car for a head, two arms of two long cars each.
-// The silver family car sits in the chest behind a roof panel (ripped off in phase 3). Poses are eased transforms only.
+// A wall of orange VE tally marks sits in the chest behind a roof panel (ripped off in phase 3). Poses are eased transforms only.
 import * as THREE from 'three'
 import { makeCar } from '../levels/car'
+import { tallyWall } from '../levels/tally'
 import { PAL } from '../render/palette'
 import type { DongBrain, Seam } from './dong'
 import { smooth, clamp } from '../camera/springs'
@@ -15,7 +16,7 @@ interface Arm { sh: THREE.Group; el: THREE.Group; hand: THREE.Object3D; side: -1
 export class DongBody {
   root = new THREE.Group(); torso = new THREE.Group(); head: THREE.Group
   arms: Record<-1 | 1, Arm>
-  family: THREE.Group; panel: THREE.Group
+  tally: THREE.Group; panel: THREE.Group
   seams: Record<Seam, THREE.Group> = {} as Record<Seam, THREE.Group>
   held: THREE.Group | null = null
   pieces: THREE.Object3D[] = []
@@ -34,7 +35,7 @@ export class DongBody {
     put(makeCar(), this.torso, 0.2, 5.8, -0.9, 0, 0.1, -0.05, 1.1)
     put(makeCar(), this.torso, -0.2, 7.0, -1.0, 0, -0.12, 0.06, 1.15)
     put(makeCar('van'), this.torso, 0, 8.2, -0.6, 0, 0.05, 0, 1.25)                         // shoulders
-    this.family = put(makeCar('old', PAL.stone), this.torso, 0, 6.0, 0.7, 0, -Math.PI / 2, 0, 0.82) as THREE.Group
+    this.tally = put(tallyWall(), this.torso, 0, 4.9, 0.7, 0, 0, 0, 0.82) as THREE.Group
     this.panel = new THREE.Group()
     const pg = new THREE.BoxGeometry(3.4, 2.6, 0.2)
     this.panel.add(new THREE.Mesh(pg, new THREE.MeshLambertMaterial({ color: PAL.paper2, flatShading: true })), new THREE.LineSegments(new THREE.EdgesGeometry(pg), new THREE.LineBasicMaterial({ color: PAL.ink })))
@@ -125,24 +126,24 @@ export class DongBody {
   }
   get panelOff() { return this.panelGone }
 
-  /** death: every car comes loose and falls; the family car settles upright in front, facing the player */
-  collapse(familyRest: THREE.Vector3) {
+  /** death: every car comes loose and falls; the tally wall settles upright in front, facing the player */
+  collapse(rest: THREE.Vector3) {
     this.showSeams([])
     for (const o of this.pieces) {
       if (o === this.panel && this.panelGone) continue
       this.scene.attach(o)
-      if (o === this.family) continue
+      if (o === this.tally) continue
       const out = this.tmp.copy(o.position).sub(this.root.position).setY(0).normalize()
-      this.fall.push({ o, v: new THREE.Vector3(out.x * 4 + Math.sign(out.x || 1) * 1.5, Math.random() * 2, -Math.abs(out.z) * 3 - 1.5 - Math.random()), /* away from the player and the family car */ w: new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1), rest: 0.5 })
+      this.fall.push({ o, v: new THREE.Vector3(out.x * 4 + Math.sign(out.x || 1) * 1.5, Math.random() * 2, -Math.abs(out.z) * 3 - 1.5 - Math.random()), /* away from the player and the tally wall */ w: new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1), rest: 0.5 })
     }
-    const f = this.family, from = f.position.clone(), q0 = f.quaternion.clone(), q1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -Math.PI / 2 + 0.2, 0)), s0 = f.scale.x
+    const f = this.tally, rest0 = rest, from = f.position.clone(), q0 = f.quaternion.clone(), q1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0.12, 0)), s0 = f.scale.x
     let k = 0
     this.fall.push({ o: f, v: new THREE.Vector3(), w: new THREE.Vector3(), rest: -1 })
-    this.familyStep = (dt) => { k = Math.min(1, k + dt / 1.8); const e = k * k; f.position.lerpVectors(from, familyRest, e); f.position.y = from.y * (1 - e) + familyRest.y; f.quaternion.slerpQuaternions(q0, q1, smooth(k)); f.scale.setScalar(s0 + (1 - s0) * k) }
+    this.tallyStep = (dt) => { k = Math.min(1, k + dt / 1.8); const e = k * k; f.position.lerpVectors(from, rest0, e); f.position.y = from.y * (1 - e) + rest0.y; f.quaternion.slerpQuaternions(q0, q1, smooth(k)); f.scale.setScalar(s0 + (1 - s0) * k) }
   }
-  private familyStep: ((dt: number) => void) | null = null
+  private tallyStep: ((dt: number) => void) | null = null
   private updateFall(dt: number) {
-    this.familyStep?.(dt)
+    this.tallyStep?.(dt)
     for (const d of this.fall) {
       if (d.rest < 0) continue
       d.v.y -= 9.8 * dt; d.o.position.addScaledVector(d.v, dt)

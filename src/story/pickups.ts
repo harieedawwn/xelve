@@ -1,4 +1,4 @@
-// 3D pickup objects shown in front of the eyes for 2 s: a page with Ve's handwriting, or a lump of the material.
+// 3D pickup objects shown in front of the eyes for 2 s: a page with VE's handwriting, or a lump of the material.
 import * as THREE from 'three'
 import { t } from '../i18n'
 

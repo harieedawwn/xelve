@@ -1,5 +1,5 @@
-// Bãi đỗ xe bệnh viện, top deck (L8 boss arena): open concrete deck, parked white cars, 6 covers on an arc facing Đống,
-// the hospital across the road (slow white pulse). Procedural only. Covers break permanently into rubble.
+// Bãi đỗ xe, top deck (L8 boss arena): open concrete deck, parked white cars, 6 covers on an arc facing Đống,
+// the broadcast tower beyond the car park (slow white pulse). Procedural only. Covers break permanently into rubble.
 import * as THREE from 'three'
 import { PAL } from '../render/palette'
 import { gritTex } from './corridor'
@@ -40,13 +40,13 @@ export function buildCarPark(scene: THREE.Scene) {
     const c = makeCar(i % 5 === 0 ? 'van' : 'car'), row = i < 8 ? -1 : 1, x = row * (20 + Math.abs(rnd(i)) * 6), z = -34 + (i % 8) * 6.5
     c.position.set(x, 0, z); c.rotation.y = Math.PI / 2 + rnd(i + 3) * 0.6; scene.add(c)
   }
-  // hospital across the road: tall white block, window grid, slow white pulse (colour, not glow)
+  // Đài phát: tall thin white tower with a lattice of panels, slow white pulse (colour, not glow)
   const wc = document.createElement('canvas'); wc.width = 16; wc.height = 16
   const wg = wc.getContext('2d')!; wg.fillStyle = '#ffffff'; wg.fillRect(0, 0, 16, 16); wg.fillStyle = '#cfcdc6'; wg.fillRect(3, 4, 10, 7)
-  const wt = new THREE.CanvasTexture(wc); wt.wrapS = wt.wrapT = THREE.RepeatWrapping; wt.magFilter = THREE.NearestFilter; wt.repeat.set(18, 12); wt.colorSpace = THREE.SRGBColorSpace
-  const hospMat = new THREE.MeshBasicMaterial({ map: wt, color: 0xe4e3de })
-  const hosp = new THREE.Mesh(new THREE.BoxGeometry(56, 38, 10), hospMat); hosp.position.set(4, 19 - 6, -78); scene.add(hosp)
-  box(8, 3, 8, PAL.paper, scene, 4, 33.5, -78)
+  const wt = new THREE.CanvasTexture(wc); wt.wrapS = wt.wrapT = THREE.RepeatWrapping; wt.magFilter = THREE.NearestFilter; wt.repeat.set(3, 24); wt.colorSpace = THREE.SRGBColorSpace
+  const towerMat = new THREE.MeshBasicMaterial({ map: wt, color: 0xe4e3de })
+  const tw = new THREE.Mesh(new THREE.BoxGeometry(7, 56, 7), towerMat); tw.position.set(4, 22, -78); scene.add(tw)
+  box(2.4, 14, 2.4, PAL.paper, scene, 4, 57, -78); box(0.5, 9, 0.5, PAL.stone, scene, 4, 68.5, -78)
   // covers on the arc
   const covers: Cover[] = KINDS.map((kind, i) => {
     const feet = coverFeet(i), grp = new THREE.Group()
@@ -74,8 +74,8 @@ export function buildCarPark(scene: THREE.Scene) {
   scene.add(new THREE.HemisphereLight(0xffffff, 0x8e8c86, 1.5))
   const key = new THREE.DirectionalLight(0xffffff, 1.3); key.position.set(-4, 10, 6); scene.add(key)
   scene.background = new THREE.Color(PAL.paper); scene.fog = new THREE.Fog(PAL.paper, 30, 95)
-  const hospital = new THREE.Vector3(4, 22, -78)
-  /** the hospital breathes white: called each frame with real time */
-  const pulse = (t: number) => { const k = 0.5 + 0.5 * Math.sin(t * 0.9); hospMat.color.setScalar(0.88 + 0.12 * k) }
-  return { covers, destroy, hospital, pulse }
+  const tower = new THREE.Vector3(4, 40, -78)
+  /** the tower breathes white: called each frame with real time */
+  const pulse = (t: number) => { const k = 0.5 + 0.5 * Math.sin(t * 0.9); towerMat.color.setScalar(0.88 + 0.12 * k) }
+  return { covers, destroy, tower, pulse }
 }

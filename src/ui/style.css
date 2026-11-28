@@ -158,3 +158,6 @@ body { font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: var(--ink); 
 .terms dt { font-weight: 900; }
 .endhud { position: fixed; left: 50%; top: calc(var(--safe-t) + 1.5vmin); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 0.8vmin 2.4vmin; font: 700 clamp(13px, 2.8vmin, 20px)/1.2 'Be Vietnam Pro', system-ui, sans-serif; text-align: center; pointer-events: none; }
 .endhud small { display: block; font-weight: 500; opacity: 0.8; }
+.chcard .sig { display: flex; align-items: center; gap: 2vmin; font: 900 clamp(14px, 3vmin, 22px)/1 'Be Vietnam Pro', system-ui, sans-serif; letter-spacing: 0.12em; }
+.chcard .sig b:last-child { color: var(--ve); }
+.chcard .sig i { width: 6vmin; height: 2px; background: var(--ink); }
